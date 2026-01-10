@@ -1,10 +1,10 @@
-# Budget Application
+# `makecents` personal budgeting software
 
 This app is intended to help you manage your personal finances by importing, categorizing your bank transactions and creating budgets to assist you in managing your money.
 
-![Budget](screenshot.jpg?raw=true)
+![makecents personal budgeting software](https://github.com/gijoehosaphat/makecents/blob/main/screenshot.png "makecents personal budgeting software")
 
-Please do not deploy your instance to the public. Maybe that goes without saying, but this is intended to be run for your own personal use.
+**WARNING**: Please do not deploy your instance to the public. Maybe that goes without saying, but this is intended to be run for your own personal use.
 
 ## Prerequisites
 - Ensure you have a PostgreSQL database set up and running. See Postgraphile recommendations for PostgreSQL versions. https://postgraphile.org/postgraphile/requirements#postgresql-use-latest
