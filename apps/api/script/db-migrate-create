@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+set -ex
+
+NAME=$1
+
+npx knex migrate:make $NAME -x ts

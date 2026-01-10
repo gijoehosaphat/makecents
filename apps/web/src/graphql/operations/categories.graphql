@@ -1,0 +1,29 @@
+query GetCategories($userId: Int) {
+  allCategories(filter: { userId: { equalTo: $userId } }) {
+    nodes {
+      ...CategoryFragment
+    }
+  }
+}
+
+mutation CreateCategory($userId: Int!, $name: String, $regex: String) {
+  createCategory(input: { category: { userId: $userId, name: $name, regex: $regex } }) {
+    category {
+      ...CategoryFragment
+    }
+  }
+}
+
+mutation UpdateCategory($nodeId: ID!, $name: String, $regex: String) {
+  updateCategory(input: { nodeId: $nodeId, categoryPatch: { name: $name, regex: $regex } }) {
+    category {
+      ...CategoryFragment
+    }
+  }
+}
+
+mutation DeleteCategoryById($id: Int!) {
+  deleteCategoryById(input: { id: $id }) {
+    deletedCategoryId
+  }
+}

@@ -1,0 +1,70 @@
+query GetCategoryGroups($accountId: Int!) {
+  allCategoryGroups(filter: { accountId: { equalTo: $accountId } }) {
+    nodes {
+      ...CategoryGroupFragment
+      customCategoryGroupByCustomCategoryGroupId {
+        ...CustomCategoryGroupFragment
+      }
+      categoryByCategoryId {
+        ...CategoryFragment
+      }
+      accountByAccountId {
+        ...AccountFragment
+      }
+    }
+  }
+}
+
+query GetCustomCategoryGroups($accountId: Int!) {
+  allCustomCategoryGroups(filter: { accountId: { equalTo: $accountId } }) {
+    nodes {
+      accountByAccountId {
+        ...AccountFragment
+      }
+      accountId
+      categoryGroupsByCustomCategoryGroupId {
+        nodes {
+          ...CategoryGroupFragment
+        }
+      }
+      ...CustomCategoryGroupFragment
+    }
+  }
+}
+
+mutation UpsertCategoryGroup($id: Int, $accountId: Int!, $categoryId: Int!, $customCategoryGroupId: Int!) {
+  upsertCategoryGroup(
+    input: {
+      categoryGroup: {
+        id: $id
+        accountId: $accountId
+        categoryId: $categoryId
+        customCategoryGroupId: $customCategoryGroupId
+      }
+    }
+  ) {
+    categoryGroup {
+      ...CategoryGroupFragment
+    }
+  }
+}
+
+mutation UpsertCustomCategoryGroup($id: Int, $accountId: Int!, $name: String!) {
+  upsertCustomCategoryGroup(input: { customCategoryGroup: { id: $id, accountId: $accountId, name: $name } }) {
+    customCategoryGroup {
+      ...CustomCategoryGroupFragment
+    }
+  }
+}
+
+mutation DeleteCategoryGroup($nodeId: ID!) {
+  deleteCategoryGroup(input: { nodeId: $nodeId }) {
+    deletedCategoryGroupId
+  }
+}
+
+mutation DeleteCustomCategoryGroup($nodeId: ID!) {
+  deleteCustomCategoryGroup(input: { nodeId: $nodeId }) {
+    deletedCustomCategoryGroupId
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "makecents-api",
+  "version": "0.1.0",
+  "private": true,
+  "license": "ISC",
+  "author": "Joe Leonard <joeleonard@gmail.com>",
+  "dependencies": {
+    "@graphile/pg-aggregates": "^0.1.1",
+    "@types/express": "^5.0.6",
+    "cookie": "^1.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-jwt": "^8.5.1",
+    "graphql": "15.10.1",
+    "knex": "^3.1.0",
+    "next-auth": "^4.24.13",
+    "nodemon": "^3.1.11",
+    "pg": "^8.13.3",
+    "postgraphile": "^4.13.0",
+    "postgraphile-plugin-connection-filter": "^2.3.0",
+    "postgraphile-plugin-many-create-update-delete": "^1.0.7",
+    "postgraphile-upsert-plugin": "^3.3.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

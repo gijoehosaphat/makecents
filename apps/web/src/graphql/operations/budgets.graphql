@@ -1,0 +1,145 @@
+mutation CreateBudget(
+  $userId: Int!
+  $amount: BigInt!
+  $name: String!
+  $startingAmount: BigInt
+  $effectiveDate: Datetime
+) {
+  createBudget(
+    input: {
+      budget: {
+        userId: $userId
+        amount: $amount
+        name: $name
+        startingAmount: $startingAmount
+        effectiveDate: $effectiveDate
+      }
+    }
+  ) {
+    budget {
+      ...BudgetFragment
+    }
+  }
+}
+
+mutation UpdateBudget(
+  $nodeId: ID!
+  $amount: BigInt!
+  $name: String!
+  $startingAmount: BigInt
+  $effectiveDate: Datetime
+) {
+  updateBudget(
+    input: {
+      nodeId: $nodeId
+      budgetPatch: { amount: $amount, name: $name, startingAmount: $startingAmount, effectiveDate: $effectiveDate }
+    }
+  ) {
+    budget {
+      ...BudgetFragment
+      budgetCategoriesByBudgetId {
+        nodes {
+          ...BudgetCategoryFragment
+          categoryByCategoryId {
+            ...CategoryFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation CreateBudgetCategory($userId: Int!, $budgetId: Int!, $categoryId: Int!) {
+  createBudgetCategory(input: { budgetCategory: { userId: $userId, budgetId: $budgetId, categoryId: $categoryId } }) {
+    budgetCategory {
+      ...BudgetCategoryFragment
+    }
+  }
+}
+
+mutation DeleteBudget($nodeId: ID!) {
+  deleteBudget(input: { nodeId: $nodeId }) {
+    budget {
+      ...BudgetFragment
+    }
+  }
+}
+
+mutation DeleteBudgetCategory($nodeId: ID!) {
+  deleteBudgetCategory(input: { nodeId: $nodeId }) {
+    budgetCategory {
+      ...BudgetCategoryFragment
+    }
+  }
+}
+
+query GetBudgetsByUserId($userId: Int!) {
+  allBudgets(filter: { userId: { equalTo: $userId } }) {
+    nodes {
+      ...BudgetFragment
+      budgetCategoriesByBudgetId {
+        nodes {
+          ...BudgetCategoryFragment
+          categoryByCategoryId {
+            ...CategoryFragment
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetBudgetCategoriesByUserId($equalTo: Int!) {
+  allBudgetCategories(filter: { userId: { equalTo: $equalTo } }) {
+    nodes {
+      ...BudgetCategoryFragment
+      categoryByCategoryId {
+        ...CategoryFragment
+      }
+    }
+  }
+}
+
+query GetTransactionsGroupedByBudget($userId: Int!) {
+  allBudgets(filter: { userId: { equalTo: $userId } }) {
+    nodes {
+      ...BudgetFragment
+      budgetCategoriesByBudgetId {
+        nodes {
+          ...BudgetCategoryFragment
+          categoryByCategoryId {
+            ...CategoryFragment
+            transactionsByCategoryId {
+              nodes {
+                ...TransactionFragment
+                categoryByCategoryId {
+                  ...CategoryFragment
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetAllBudgetReconsiliations($budgetIds: [Int!]!, $month: Int!, $year: Int!) {
+  allBudgetReconsiliations(
+    filter: { budgetId: { in: $budgetIds }, month: { equalTo: $month }, year: { equalTo: $year } }
+  ) {
+    nodes {
+      ...BudgetReconsiliationFragment
+    }
+  }
+}
+
+mutation UpsertBudgetReconsiliation($budgetId: Int!, $amount: BigInt!, $month: Int!, $year: Int!, $id: Int) {
+  upsertBudgetReconsiliation(
+    input: { budgetReconsiliation: { budgetId: $budgetId, amount: $amount, month: $month, year: $year, id: $id } }
+  ) {
+    budgetReconsiliation {
+      ...BudgetReconsiliationFragment
+    }
+  }
+}

@@ -1,0 +1,272 @@
+query GetTransaction($nodeId: ID!) {
+  transaction(nodeId: $nodeId) {
+    ...TransactionFragment
+  }
+}
+
+query GetTransactionWithSplitTransactions($nodeId: ID!) {
+  transaction(nodeId: $nodeId) {
+    ...TransactionFragment
+    transactionsBySplitSourceId {
+      nodes {
+        ...TransactionFragment
+      }
+    }
+  }
+}
+
+query GetTransactionsByBankAccounts(
+  $first: Int
+  $offset: Int
+  $filter: TransactionFilter!
+  $orderBy: [TransactionsOrderBy!]
+) {
+  allTransactions(first: $first, offset: $offset, filter: $filter, orderBy: $orderBy) {
+    nodes {
+      ...TransactionFragment
+      transactionsBySplitSourceId {
+        nodes {
+          ...TransactionFragment
+        }
+      }
+      transferByTransactionSourceId {
+        ...TransferFragment
+      }
+      transferByTransactionTargetId {
+        ...TransferFragment
+      }
+    }
+    totalCount
+  }
+}
+
+query GetFilteredTransactionsByBankAccounts(
+  $first: Int
+  $offset: Int
+  $filter: TransactionFilter!
+  $orderBy: [TransactionsOrderBy!]
+) {
+  allTransactions(first: $first, offset: $offset, filter: $filter, orderBy: $orderBy) {
+    nodes {
+      ...TransactionFragment
+      transactionsBySplitSourceId {
+        nodes {
+          ...TransactionFragment
+        }
+      }
+      transferByTransactionSourceId {
+        ...TransferFragment
+      }
+      transferByTransactionTargetId {
+        ...TransferFragment
+      }
+    }
+    totalCount
+  }
+}
+
+mutation UpsertTransaction(
+  $type: String!
+  $posted: Datetime!
+  $name: String!
+  $memo: String
+  $bankTransactionId: String!
+  $bankAccountId: Int!
+  $amount: BigInt!
+) {
+  upsertTransaction(
+    input: {
+      transaction: {
+        bankAccountId: $bankAccountId
+        amount: $amount
+        bankTransactionId: $bankTransactionId
+        name: $name
+        memo: $memo
+        posted: $posted
+        type: $type
+      }
+    }
+  ) {
+    transaction {
+      ...TransactionFragment
+    }
+  }
+}
+
+mutation CreateTransaction(
+  $amount: BigInt
+  $bankAccountId: Int!
+  $bankTransactionId: String
+  $memo: String
+  $name: String
+  $originalAmount: BigInt
+  $originalPosted: Datetime
+  $posted: Datetime
+  $splitSourceId: Int
+  $type: String
+) {
+  createTransaction(
+    input: {
+      transaction: {
+        bankAccountId: $bankAccountId
+        amount: $amount
+        splitSourceId: $splitSourceId
+        bankTransactionId: $bankTransactionId
+        memo: $memo
+        name: $name
+        originalAmount: $originalAmount
+        originalPosted: $originalPosted
+        posted: $posted
+        type: $type
+      }
+    }
+  ) {
+    transaction {
+      ...TransactionFragment
+    }
+  }
+}
+
+mutation UpdateTransaction(
+  $nodeId: ID!
+  $amount: BigInt
+  $bankAccountId: Int
+  $bankTransactionId: String
+  $categoryId: Int
+  $memo: String
+  $name: String
+  $originalAmount: BigInt
+  $posted: Datetime
+  $splitSourceId: Int
+  $type: String
+) {
+  updateTransaction(
+    input: {
+      nodeId: $nodeId
+      transactionPatch: {
+        amount: $amount
+        bankAccountId: $bankAccountId
+        bankTransactionId: $bankTransactionId
+        categoryId: $categoryId
+        memo: $memo
+        name: $name
+        originalAmount: $originalAmount
+        posted: $posted
+        splitSourceId: $splitSourceId
+        type: $type
+      }
+    }
+  ) {
+    transaction {
+      ...TransactionFragment
+    }
+  }
+}
+
+mutation DeleteTransaction($nodeId: ID!) {
+  deleteTransaction(input: { nodeId: $nodeId }) {
+    deletedTransactionId
+  }
+}
+
+query TransactionSearch($match: String) {
+  transactionSearch(match: $match) {
+    nodes {
+      ...TransactionFragment
+      categoryByCategoryId {
+        ...CategoryFragment
+      }
+    }
+  }
+}
+
+query TransactionByAmount($amount: BigInt!) {
+  allTransactions(filter: { amount: { equalTo: $amount } }, orderBy: POSTED_DESC) {
+    nodes {
+      ...TransactionFragment
+    }
+  }
+}
+
+mutation CreateTransfer($transactionSourceId: Int!, $transactionTargetId: Int!) {
+  createTransfer(
+    input: { transfer: { transactionSourceId: $transactionSourceId, transactionTargetId: $transactionTargetId } }
+  ) {
+    transfer {
+      ...TransferFragment
+    }
+  }
+}
+
+mutation DeleteTransfer($nodeId: ID!) {
+  deleteTransfer(input: { nodeId: $nodeId }) {
+    transfer {
+      ...TransferFragment
+    }
+  }
+}
+
+query GetTransfer($nodeId: ID!) {
+  transfer(nodeId: $nodeId) {
+    ...TransferFragment
+    transactionByTransactionTargetId {
+      ...TransactionFragment
+    }
+    transactionByTransactionSourceId {
+      ...TransactionFragment
+    }
+  }
+}
+
+query GetTransactionAggregatesByBankAccount($bankAccountIds: [Int!], $dateFrom: Datetime, $dateTo: Datetime) {
+  deposits: allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      categoryId: { isNull: false }
+      amount: { greaterThan: "0" }
+    }
+  ) {
+    aggregates {
+      sum {
+        amount
+      }
+    }
+  }
+  withdrawals: allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      categoryId: { isNull: false }
+      amount: { lessThan: "0" }
+    }
+  ) {
+    aggregates {
+      sum {
+        amount
+      }
+    }
+  }
+}
+
+mutation UpsertSplitTransactions(
+  $toUpdate: [TransactionPatch!]
+  $toCreate: [TransactionInput!]
+  $toDelete: [TransactionPatch!]
+) {
+  mnUpdateTransactionById(input: { mnTransactionPatch: $toUpdate }) {
+    transaction {
+      ...TransactionFragment
+    }
+  }
+  mnCreateTransaction(input: { mnTransaction: $toCreate }) {
+    transaction {
+      ...TransactionFragment
+    }
+  }
+  mnDeleteTransactionById(input: { mnTransactionPatch: $toDelete }) {
+    transaction {
+      ...TransactionFragment
+    }
+  }
+}

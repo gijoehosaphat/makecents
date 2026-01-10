@@ -1,0 +1,11 @@
+mutation CreateSession($userId: Int!, $sessionToken: String!, $expires: Datetime!) {
+  createSession(input: { session: { userId: $userId, sessionToken: $sessionToken, expires: $expires } }) {
+    session {
+      expires
+      id
+      nodeId
+      sessionToken
+      userId
+    }
+  }
+}

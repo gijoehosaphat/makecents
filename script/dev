@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+set -ex
+
+./script/prepare-env
+
+npx concurrently "cd ./apps/api/ && ./script/dev" "npx wait-on tcp:3002 && cd ./apps/web/ && ./script/dev"

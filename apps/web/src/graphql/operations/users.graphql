@@ -1,0 +1,44 @@
+query GetUserById($id: Int!) {
+  userById(id: $id) {
+    ...UserFragment
+  }
+}
+
+query GetUserByEmail($email: String!) {
+  userByEmail(email: $email) {
+    ...UserFragment
+  }
+}
+
+query GetAccountByAccountProvider($provider: String!, $providerAccountId: String!) {
+  accountByProviderAndProviderAccountId(provider: $provider, providerAccountId: $providerAccountId) {
+    userByUserId {
+      ...UserFragment
+    }
+    ...AccountFragment
+  }
+}
+
+query GetUserAndAccountsAndBankAccountsByEmail($email: String!) {
+  userByEmail(email: $email) {
+    ...UserFragment
+    bankAccountsByUserId {
+      nodes {
+        ...BankAccountFragment
+      }
+    }
+    accountsByUserId {
+      nodes {
+        ...AccountFragment
+      }
+    }
+  }
+}
+
+mutation CreateUser($email: String!, $image: String!, $name: String!) {
+  createUser(input: { user: { email: $email, image: $image, name: $name } }) {
+    user {
+      ...UserFragment
+    }
+  }
+}

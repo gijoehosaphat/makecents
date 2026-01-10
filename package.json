@@ -1,0 +1,26 @@
+{
+  "name": "makecents",
+  "version": "0.1.0",
+  "description": "NextJS + Postgraphile personal budget app",
+  "homepage": "https://github.com/gijoehosaphat/makecents#readme",
+  "bugs": {
+    "url": "https://github.com/gijoehosaphat/makecents/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gijoehosaphat/makecents.git"
+  },
+  "license": "ISC",
+  "author": "Joe Leonard <joeleonard@gmail.com>",
+  "type": "commonjs",
+  "main": "index.js",
+  "dependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^25.0.5",
+    "concurrently": "^9.2.1",
+    "ejs": "^3.1.10",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "wait-on": "^9.0.3"
+  }
+}

@@ -1,0 +1,246 @@
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <DTSERVER><%- formatDate(endDate) %>120000[-5]
+      <LANGUAGE>ENG
+    </SONRS>
+  </SIGNONMSGSRSV1>
+  <%
+  // Generate 3 months of transactions for Checking Account
+  const checkingTransactions = [];
+  for (let i = 0; i < 90; i++) {
+    const txnDate = new Date(startDate);
+    txnDate.setDate(txnDate.getDate() + i);
+
+    // 20-30 transactions per month = roughly 0.7-1 per day
+    if (Math.random() < 0.85) {
+      const merchants = [
+        { name: 'GROCERY STORE #123', amount: -75.42 },
+        { name: 'COFFEE SHOP', amount: -5.50 },
+        { name: 'GAS STATION', amount: -45.00 },
+        { name: 'PHARMACY', amount: -23.15 },
+        { name: 'RESTAURANT', amount: -42.30 },
+        { name: 'ONLINE MARKETPLACE', amount: -87.99 },
+        { name: 'DEPARTMENT STORE', amount: -125.00 },
+        { name: 'FAST FOOD', amount: -12.75 },
+        { name: 'MOVIE THEATER', amount: -35.00 },
+        { name: 'BOOKSTORE', amount: -28.50 },
+        { name: 'PAYROLL DEPOSIT', amount: 2500.00 },
+        { name: 'ELECTRIC COMPANY', amount: -120.00 },
+        { name: 'WATER UTILITY', amount: -55.00 },
+        { name: 'INTERNET SERVICE', amount: -79.99 },
+        { name: 'MOBILE PHONE', amount: -85.00 },
+        { name: 'INSURANCE PAYMENT', amount: -150.00 },
+        { name: 'GYM MEMBERSHIP', amount: -45.00 },
+        { name: 'STREAMING SERVICE', amount: -15.99 },
+        { name: 'PET STORE', amount: -65.00 },
+        { name: 'HARDWARE STORE', amount: -92.50 }
+      ];
+
+      const merchant = merchants[Math.floor(Math.random() * merchants.length)];
+      const variation = (Math.random() - 0.5) * 20;
+      const amount = (merchant.amount + variation).toFixed(2);
+
+      checkingTransactions.push({
+        date: txnDate,
+        merchant: merchant.name,
+        amount: amount,
+        fitid: `CHK${txnDate.getTime()}${Math.floor(Math.random() * 1000)}`
+      });
+    }
+  }
+
+  // Generate 3 months of transactions for Savings Account
+  const savingsTransactions = [];
+  for (let i = 0; i < 90; i++) {
+    const txnDate = new Date(startDate);
+    txnDate.setDate(txnDate.getDate() + i);
+
+    // Fewer transactions for savings (5-10 per month)
+    if (Math.random() < 0.15) {
+      const types = [
+        { name: 'TRANSFER FROM CHECKING', amount: 500.00 },
+        { name: 'INTEREST PAYMENT', amount: 12.50 },
+        { name: 'TRANSFER TO CHECKING', amount: -300.00 },
+        { name: 'DIVIDEND PAYMENT', amount: 25.00 },
+        { name: 'MONTHLY AUTO SAVE', amount: 200.00 }
+      ];
+
+      const type = types[Math.floor(Math.random() * types.length)];
+      const variation = (Math.random() - 0.5) * 50;
+      const amount = (type.amount + variation).toFixed(2);
+
+      savingsTransactions.push({
+        date: txnDate,
+        merchant: type.name,
+        amount: amount,
+        fitid: `SAV${txnDate.getTime()}${Math.floor(Math.random() * 1000)}`
+      });
+    }
+  }
+
+  // Generate 3 months of transactions for Credit Card
+  const creditCardTransactions = [];
+  for (let i = 0; i < 90; i++) {
+    const txnDate = new Date(startDate);
+    txnDate.setDate(txnDate.getDate() + i);
+
+    // 20-30 transactions per month
+    if (Math.random() < 0.85) {
+      const merchants = [
+        { name: 'AMAZON.COM', amount: -65.99 },
+        { name: 'TARGET STORE', amount: -89.50 },
+        { name: 'WALMART', amount: -105.23 },
+        { name: 'STARBUCKS', amount: -6.75 },
+        { name: 'UBER RIDE', amount: -18.50 },
+        { name: 'DOORDASH', amount: -32.40 },
+        { name: 'NETFLIX', amount: -17.99 },
+        { name: 'SPOTIFY', amount: -10.99 },
+        { name: 'HOTEL BOOKING', amount: -189.00 },
+        { name: 'AIRLINE TICKETS', amount: -350.00 },
+        { name: 'RESTAURANT AND BAR', amount: -78.50 },
+        { name: 'CLOTHING STORE', amount: -125.00 },
+        { name: 'ELECTRONICS STORE', amount: -249.99 },
+        { name: 'HOME IMPROVEMENT', amount: -156.75 },
+        { name: 'AUTO PARTS', amount: -87.25 },
+        { name: 'OFFICE SUPPLIES', amount: -42.50 },
+        { name: 'SUBSCRIPTION SERVICE', amount: -9.99 },
+        { name: 'PAYMENT - THANK YOU', amount: 500.00 },
+        { name: 'FLORIST', amount: -55.00 },
+        { name: 'DENTAL OFFICE', amount: -125.00 }
+      ];
+
+      const merchant = merchants[Math.floor(Math.random() * merchants.length)];
+      const variation = (Math.random() - 0.5) * 30;
+      const amount = (merchant.amount + variation).toFixed(2);
+
+      creditCardTransactions.push({
+        date: txnDate,
+        merchant: merchant.name,
+        amount: amount,
+        fitid: `CC${txnDate.getTime()}${Math.floor(Math.random() * 1000)}`
+      });
+    }
+  }
+
+  // Helper function to format date as YYYYMMDD
+  function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
+  }
+  %>
+  <BANKMSGSRSV1>
+    <STMTTRNRS>
+      <TRNUID>1001
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <STMTRS>
+        <CURDEF>USD
+        <BANKACCTFROM>
+          <BANKID>123456789
+          <ACCTID>1111222233334444
+          <ACCTTYPE>CHECKING
+        </BANKACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART><%- formatDate(startDate) %>120000[-5]
+          <DTEND><%- formatDate(endDate) %>120000[-5]
+          <% checkingTransactions.forEach(function(txn) { %>
+          <STMTTRN>
+          <TRNTYPE><%- txn.amount > 0 ? 'CREDIT' : 'DEBIT' %>
+          <DTPOSTED><%- formatDate(txn.date) %>120000[-5]
+          <TRNAMT><%- txn.amount %>
+          <FITID><%- txn.fitid %>
+          <NAME><%- txn.merchant %>
+          </STMTTRN>
+          <% }); %>
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT><%- checkingBalance %>
+          <DTASOF><%- formatDate(endDate) %>120000[-5]
+        </LEDGERBAL>
+      </STMTRS>
+    </STMTTRNRS>
+    <STMTTRNRS>
+      <TRNUID>1002
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <STMTRS>
+        <CURDEF>USD
+        <BANKACCTFROM>
+          <BANKID>123456789
+          <ACCTID>5555666677778888
+          <ACCTTYPE>SAVINGS
+        </BANKACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART><%- formatDate(startDate) %>120000[-5]
+          <DTEND><%- formatDate(endDate) %>120000[-5]
+          <% savingsTransactions.forEach(function(txn) { %>
+          <STMTTRN>
+          <TRNTYPE><%- txn.amount > 0 ? 'CREDIT' : 'DEBIT' %>
+          <DTPOSTED><%- formatDate(txn.date) %>120000[-5]
+          <TRNAMT><%- txn.amount %>
+          <FITID><%- txn.fitid %>
+          <NAME><%- txn.merchant %>
+          </STMTTRN>
+          <% }); %>
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT><%- savingsBalance %>
+          <DTASOF><%- formatDate(endDate) %>120000[-5]
+        </LEDGERBAL>
+      </STMTRS>
+    </STMTTRNRS>
+  </BANKMSGSRSV1>
+  <CREDITCARDMSGSRSV1>
+    <CCSTMTTRNRS>
+      <TRNUID>1003
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <CCSTMTRS>
+        <CURDEF>USD
+        <CCACCTFROM>
+          <ACCTID>9999888877776666
+        </CCACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART><%- formatDate(startDate) %>120000[-5]
+          <DTEND><%- formatDate(endDate) %>120000[-5]
+          <% creditCardTransactions.forEach(function(txn) { %>
+          <STMTTRN>
+          <TRNTYPE><%- txn.amount > 0 ? 'CREDIT' : 'DEBIT' %>
+          <DTPOSTED><%- formatDate(txn.date) %>120000[-5]
+          <TRNAMT><%- txn.amount %>
+          <FITID><%- txn.fitid %>
+          <NAME><%- txn.merchant %>
+          </STMTTRN>
+          <% }); %>
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT><%- creditCardBalance %>
+          <DTASOF><%- formatDate(endDate) %>120000[-5]
+        </LEDGERBAL>
+      </CCSTMTRS>
+    </CCSTMTTRNRS>
+  </CREDITCARDMSGSRSV1>
+</OFX>

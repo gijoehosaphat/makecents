@@ -1,0 +1,122 @@
+fragment UserFragment on User {
+  createdAt
+  email
+  emailVerified
+  id
+  image
+  name
+  nodeId
+  updatedAt
+}
+
+fragment AccountFragment on Account {
+  accessToken
+  expiresAt
+  id
+  idToken
+  nodeId
+  provider
+  providerAccountId
+  refreshToken
+  scope
+  sessionState
+  tokenType
+  type
+  userId
+}
+
+fragment BankAccountFragment on BankAccount {
+  balance
+  bankAccountId
+  createdAt
+  currency
+  id
+  name
+  nodeId
+  type
+  updatedAt
+  userId
+}
+
+fragment TransactionFragment on Transaction {
+  amount
+  originalAmount
+  bankAccountId
+  bankTransactionId
+  categoryId
+  createdAt
+  id
+  splitSourceId
+  memo
+  name
+  nodeId
+  posted
+  originalPosted
+  type
+  updatedAt
+  weightedTsv
+}
+
+fragment CategoryFragment on Category {
+  createdAt
+  id
+  name
+  nodeId
+  updatedAt
+  userId
+  regex
+}
+
+fragment TransferFragment on Transfer {
+  createdAt
+  id
+  nodeId
+  transactionSourceId
+  transactionTargetId
+  updatedAt
+}
+
+fragment BudgetFragment on Budget {
+  userId
+  amount
+  createdAt
+  id
+  name
+  nodeId
+  updatedAt
+  effectiveDate
+  startingAmount
+}
+
+fragment BudgetCategoryFragment on BudgetCategory {
+  userId
+  budgetId
+  categoryId
+  nodeId
+  id
+}
+
+fragment CustomCategoryGroupFragment on CustomCategoryGroup {
+  id
+  name
+  nodeId
+}
+
+fragment CategoryGroupFragment on CategoryGroup {
+  accountId
+  categoryId
+  customCategoryGroupId
+  id
+  nodeId
+}
+
+fragment BudgetReconsiliationFragment on BudgetReconsiliation {
+  nodeId
+  id
+  budgetId
+  createdAt
+  updatedAt
+  month
+  year
+  amount
+}

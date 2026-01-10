@@ -1,0 +1,31 @@
+mutation UpsertBankAccount(
+  $userId: Int!
+  $type: String!
+  $currency: String!
+  $bankAccountId: String!
+  $balance: BigInt!
+) {
+  upsertBankAccount(
+    input: {
+      bankAccount: {
+        userId: $userId
+        type: $type
+        currency: $currency
+        bankAccountId: $bankAccountId
+        balance: $balance
+      }
+    }
+  ) {
+    bankAccount {
+      ...BankAccountFragment
+    }
+  }
+}
+
+mutation UpdateBankAccountName($id: Int!, $userId: Int!, $name: String!) {
+  upsertBankAccount(input: { bankAccount: { name: $name, userId: $userId } }, where: { id: $id }) {
+    bankAccount {
+      ...BankAccountFragment
+    }
+  }
+}

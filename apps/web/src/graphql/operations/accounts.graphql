@@ -1,0 +1,31 @@
+mutation CreateAccount(
+  $userId: Int!
+  $provider: String!
+  $type: String!
+  $providerAccountId: String!
+  $accessToken: String
+  $expiresAt: String
+  $scope: String
+  $tokenType: String
+  $idToken: String
+) {
+  createAccount(
+    input: {
+      account: {
+        userId: $userId
+        provider: $provider
+        type: $type
+        providerAccountId: $providerAccountId
+        accessToken: $accessToken
+        expiresAt: $expiresAt
+        scope: $scope
+        tokenType: $tokenType
+        idToken: $idToken
+      }
+    }
+  ) {
+    account {
+      ...AccountFragment
+    }
+  }
+}

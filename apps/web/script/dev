@@ -1,0 +1,11 @@
+
+#!/usr/bin/env sh
+set -ex
+
+./script/prepare-env
+
+npx graphql-codegen
+
+source .env
+
+PORT=$WEB_PORT npx next dev

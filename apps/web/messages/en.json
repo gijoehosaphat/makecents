@@ -1,0 +1,108 @@
+{
+  "common": {
+    "shared": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "name": "Name",
+      "date": "Date",
+      "created": "Created date",
+      "regex": "Regex",
+      "actions": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "total": "Total",
+      "minimum": "Minimum",
+      "maximum": "Maximum",
+      "amount": "Amount",
+      "dismiss": "Dismiss",
+      "net": "Net",
+      "balance": "Balance",
+      "group": "Group",
+      "ungrouped": "Ungrouped",
+      "noGroup": "No group",
+      "filter": "Filter",
+      "any": "Any",
+      "category": "Category",
+      "categorized": "Categorized",
+      "uncategorized": "Uncategorized"
+    },
+    "auth": {
+      "signInWith": "Sign in with {name}",
+      "signout": "Signout"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "noBankAccounts": "No Bank Accounts",
+      "bankAccounts": "Bank Accounts",
+      "accountName": "Account name",
+      "bankAccountGroup": "{count, plural, =1 {Transactions from 1 bank account} other {Transactions from # bank accounts}}",
+      "search": "Search"
+    },
+    "upload": {
+      "instructions": "Drop files to import...",
+      "processing": "Processing transactions...",
+      "error": "There was an error importing these file(s).",
+      "successMixed": "Successfully imported {numCreated} transactions for {numAccounts} accounts. {numDuplicates} transactions have already been imported.",
+      "successCreated": "Successfully imported {numCreated} transactions for {numAccounts} accounts.",
+      "successDuplicates": "All {numDuplicates} transactions for {numAccounts} accounts have already been imported."
+    },
+    "transactions": {
+      "transactions": "Transactions",
+      "none": "No transactions found",
+      "category": "Category",
+      "withdrawals": "Withdrawals",
+      "deposits": "Deposits",
+      "noCategory": "Uncategorized"
+    },
+    "transfer": {
+      "matchTransaction": "Link to the selected matching transaction?",
+      "deleteTransfer": "Delete this linked transfer?"
+    },
+    "settings": {
+      "title": "Settings"
+    },
+    "reporting": {
+      "title": "Reporting",
+      "dailySpendingTitle": "Daily Cash Flow",
+      "categorySpendingTitle": "By Category",
+      "budgetsTitle": "By Budget"
+    },
+    "categories": {
+      "title": "Categories",
+      "namePlaceholder": "Add a name",
+      "noRegex": "none",
+      "regex": "Transaction Match",
+      "addCategory": "Add Category",
+      "findTransactions": "Find matching transactions",
+      "selectCategory": "Select category",
+      "splitTransaction": "Split Transaction",
+      "totalOf": "{total} of {maximum}"
+    },
+    "forms": {
+      "addName": "Name",
+      "addAmount": "Amount",
+      "namePlaceholder": "Add a name",
+      "amountPlaceholder": "Add an amount",
+      "regexPlaceholder": "Add a regex expression",
+      "addRegex": "Add Transaction Match"
+    },
+    "budgets": {
+      "title": "Budgets",
+      "addBudget": "Add Budget",
+      "effectiveDate": "Effective Date",
+      "startingAmount": "Starting Amount",
+      "viewTransactions": "View transactions",
+      "reconsile": "Reconsile",
+      "accrue": "Should totals accrue?",
+      "details": "Budget details",
+      "viewBudgetDetails": "View budget details",
+      "accruedTotal": "Accrued",
+      "accruingBudgets": "Accruing budgets",
+      "budgetItems": "Budget items"
+    },
+    "groups": {
+      "title": "Groups",
+      "addGroup": "Add Group"
+    }
+  }
+}
