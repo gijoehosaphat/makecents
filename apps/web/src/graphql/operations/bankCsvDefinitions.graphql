@@ -1,0 +1,33 @@
+query GetBankCsvDefinitions($userId: Int) {
+  allBankCsvDefinitions(filter: { userId: { equalTo: $userId } }) {
+    nodes {
+      ...BankCsvDefinitionFragment
+    }
+  }
+}
+
+mutation CreateBankCsvDefinition($userId: Int!, $name: String!, $mapping: JSON!, $bankAccountId: Int) {
+  createBankCsvDefinition(
+    input: { bankCsvDefinition: { userId: $userId, name: $name, mapping: $mapping, bankAccountId: $bankAccountId } }
+  ) {
+    bankCsvDefinition {
+      ...BankCsvDefinitionFragment
+    }
+  }
+}
+
+mutation UpdateBankCsvDefinition($nodeId: ID!, $name: String, $mapping: JSON, $bankAccountId: Int) {
+  updateBankCsvDefinition(
+    input: { nodeId: $nodeId, bankCsvDefinitionPatch: { name: $name, mapping: $mapping, bankAccountId: $bankAccountId } }
+  ) {
+    bankCsvDefinition {
+      ...BankCsvDefinitionFragment
+    }
+  }
+}
+
+mutation DeleteBankCsvDefinitionById($id: Int!) {
+  deleteBankCsvDefinitionById(input: { id: $id }) {
+    deletedBankCsvDefinitionId
+  }
+}

@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 set -ex
 
-npx knex migrate:down
+pnpm dlx knex migrate:down

@@ -2,8 +2,12 @@ interface InputAccount {
   bankAccountId: string
   type: string
   currency: string
-  balance: number
   userId: number
+}
+
+interface InputReconciliation {
+  balance: number
+  asOf: Date
 }
 
 type InputTransaction = {
@@ -18,5 +22,6 @@ type InputTransaction = {
 
 interface AccountGroup {
   account: InputAccount
+  reconciliation?: InputReconciliation
   transactions: InputTransaction[]
 }

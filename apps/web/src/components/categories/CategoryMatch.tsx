@@ -24,6 +24,7 @@ import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { formatMoney } from '@/lib/formatMoney'
+import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { CategoryMatchAdd } from './CategoryMatchAdd'
 import { GetTransactionDocument, TransactionSearchDocument } from '@/graphql/operations'
 
@@ -40,6 +41,7 @@ export default function CategoryMatch({
 }) {
   //TODO: Use Apollo query tool!
   // const [getTransaction] = useLazyQuery(GetTransactionDocument)
+  const { hidden } = useAmountVisibility()
   const [getTransactions, getTransactionsResults] = useLazyQuery(TransactionSearchDocument)
   const [fields, setFields] = useState({ regex: category?.regex })
   const t = useTranslations('common')
@@ -134,10 +136,10 @@ export default function CategoryMatch({
                     <CategoryMatchAdd category={category} transaction={transaction} />
                   </TableCell>
                   <TableCell align="right">
-                    {transaction.amount < 0 ? formatMoney(transaction.amount / 100, 'CAD') : null}
+                    {transaction.amount < 0 ? formatMoney(transaction.amount / 100, 'CAD', hidden) : null}
                   </TableCell>
                   <TableCell align="right">
-                    {transaction.amount > 0 ? formatMoney(transaction.amount / 100, 'CAD') : null}
+                    {transaction.amount > 0 ? formatMoney(transaction.amount / 100, 'CAD', hidden) : null}
                   </TableCell>
                 </TableRow>
               ))}

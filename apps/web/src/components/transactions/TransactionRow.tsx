@@ -2,6 +2,7 @@ import { Box, TableCell, TableRow, Typography } from '@mui/material'
 import CategoryEditor from './CategoryEditor'
 import { Transaction } from '@/graphql/types'
 import { formatMoney } from '@/lib/formatMoney'
+import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { useMemo } from 'react'
 import { TransactionLink } from './TransactionLink'
 import { CallSplit } from '@mui/icons-material'
@@ -9,11 +10,26 @@ import { TransactionSplit } from './TransactionSplit'
 import { DateIcon } from '../shared/DateIcon'
 import { TransactionDateEditor } from '../shared/TransactionDateEditor'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
+import { TransactionMemoEditor } from '../shared/TransactionMemoEditor'
 
-function TransactionAmount({ transaction, type }: { transaction: Transaction; type: 'withdrawal' | 'deposit' }) {
+function TransactionAmount({
+  transaction,
+  type,
+}: {
+  transaction: Transaction
+  type: 'withdrawal' | 'deposit'
+}) {
+  const { hidden } = useAmountVisibility()
   const amount = transaction.amount || 0
-  if ((type === 'withdrawal' && amount < 0) || (type === 'deposit' && amount > 0)) {
-    return <Typography sx={{ minHeight: 24 }}>{formatMoney(amount / 100, 'CAD')}</Typography>
+  if (
+    (type === 'withdrawal' && amount < 0) ||
+    (type === 'deposit' && amount > 0)
+  ) {
+    return (
+      <Typography sx={{ minHeight: 24 }}>
+        {formatMoney(amount / 100, 'CAD', hidden)}
+      </Typography>
+    )
   } else {
     return null
   }
@@ -31,8 +47,14 @@ export default function TransactionRow({
   }, [transaction.transactionsBySplitSourceId?.nodes])
 
   const hasTransfer = useMemo(() => {
-    return !!transaction.transferByTransactionSourceId || !!transaction.transferByTransactionTargetId
-  }, [transaction.transferByTransactionSourceId, transaction.transferByTransactionTargetId])
+    return (
+      !!transaction.transferByTransactionSourceId ||
+      !!transaction.transferByTransactionTargetId
+    )
+  }, [
+    transaction.transferByTransactionSourceId,
+    transaction.transferByTransactionTargetId,
+  ])
 
   return (
     <>
@@ -48,7 +70,10 @@ export default function TransactionRow({
         <TableCell sx={{ width: '9%' }}>
           {/* {format(new Date(transaction.posted || ''), 'MMM dd, yyyy')} */}
           {!transaction.splitSourceId ? (
-            <TransactionDateEditor transaction={transaction} refetchQuery={refetchQuery}>
+            <TransactionDateEditor
+              transaction={transaction}
+              refetchQuery={refetchQuery}
+            >
               <DateIcon date={new Date(transaction.posted || '')} />
             </TransactionDateEditor>
           ) : (
@@ -56,15 +81,39 @@ export default function TransactionRow({
           )}
         </TableCell>
         <TableCell>
-          <Typography variant={'body2'}>{transaction.name}</Typography>
-          <Typography variant={'caption'}>{transaction.memo}</Typography>
+          <TransactionMemoEditor
+            transaction={transaction}
+            refetchQuery={refetchQuery}
+          >
+            <Typography variant={'body2'}>
+              {transaction.customName || transaction.name}
+            </Typography>
+            <Typography variant={'caption'}>
+              {transaction.customMemo || transaction.memo}
+            </Typography>
+          </TransactionMemoEditor>
         </TableCell>
         <TableCell sx={{ width: '25%' }}>
           <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-            {!hasTransfer && <CategoryEditor transaction={transaction} refetchQuery={refetchQuery} />}
-            {!transaction.categoryId && <TransactionLink transaction={transaction} refetchQuery={refetchQuery} />}
+            {!hasTransfer && (
+              <CategoryEditor
+                transaction={transaction}
+                refetchQuery={refetchQuery}
+              />
+            )}
+            {!transaction.categoryId && (
+              <TransactionLink
+                transaction={transaction}
+                refetchQuery={refetchQuery}
+              />
+            )}
             {/* TODO: Split transaction... */}
-            {!hasTransfer && <TransactionSplit transaction={transaction} refetchQuery={refetchQuery} />}
+            {!hasTransfer && (
+              <TransactionSplit
+                transaction={transaction}
+                refetchQuery={refetchQuery}
+              />
+            )}
           </Box>
         </TableCell>
         <TableCell align={'right'} sx={{ width: '10%' }}>
@@ -82,7 +131,7 @@ export default function TransactionRow({
               '&:hover': {
                 '.transaction-row-hover': { visibility: 'visible' },
               },
-              backgroundColor: '#00000011',
+              'backgroundColor': '#00000011',
             })}
             hover={true}
           >
@@ -95,14 +144,23 @@ export default function TransactionRow({
             </TableCell>
             <TableCell sx={{ width: '25%' }}>
               <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-                <CategoryEditor transaction={splitTransaction} refetchQuery={refetchQuery} />
+                <CategoryEditor
+                  transaction={splitTransaction}
+                  refetchQuery={refetchQuery}
+                />
               </Box>
             </TableCell>
             <TableCell align={'right'} sx={{ width: '10%' }}>
-              <TransactionAmount transaction={splitTransaction} type={'withdrawal'} />
+              <TransactionAmount
+                transaction={splitTransaction}
+                type={'withdrawal'}
+              />
             </TableCell>
             <TableCell align={'right'} sx={{ width: '10%' }}>
-              <TransactionAmount transaction={splitTransaction} type={'deposit'} />
+              <TransactionAmount
+                transaction={splitTransaction}
+                type={'deposit'}
+              />
             </TableCell>
           </TableRow>
         )

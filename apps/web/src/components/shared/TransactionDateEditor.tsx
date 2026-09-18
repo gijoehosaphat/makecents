@@ -1,4 +1,10 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton } from '@mui/material'
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+} from '@mui/material'
 import { useState } from 'react'
 import SaveCancel from '../forms/SaveCancel'
 import { DateTimePicker } from '@mui/x-date-pickers'
@@ -6,6 +12,7 @@ import { Transaction } from '@/graphql/types'
 import { UpdateTransactionDocument } from '@/graphql/operations'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
+import { useTranslations } from 'next-intl'
 
 export function TransactionDateEditor({
   children,
@@ -19,6 +26,7 @@ export function TransactionDateEditor({
   const [updateTransaction] = useMutation(UpdateTransactionDocument, {
     refetchQueries: [refetchQuery],
   })
+  const t = useTranslations('common')
   const [dateEditorOpen, setDateEditorOpen] = useState(false)
   const [date, setDate] = useState<Date>(new Date(transaction.posted))
 
@@ -52,7 +60,7 @@ export function TransactionDateEditor({
         {children}
       </IconButton>
       <Dialog open={dateEditorOpen} onClose={closeDateEditor}>
-        <DialogTitle>Title</DialogTitle>
+        <DialogTitle>{t('dateEditor.title')}</DialogTitle>
         <DialogContent>
           <DateTimePicker value={new Date(date)} onChange={handleDateChange} />
         </DialogContent>

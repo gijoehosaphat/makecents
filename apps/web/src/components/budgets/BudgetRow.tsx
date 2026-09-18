@@ -24,6 +24,7 @@ import CategoryMatch from '@/components/categories/CategoryMatch'
 import SaveCancel from '@/components/forms/SaveCancel'
 import CurrencyTextField from '../shared/CurrencyTextField'
 import { formatMoney, formatMoneyCents } from '@/lib/formatMoney'
+import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import CategoryEditor from './CategoryEditor'
 import { DeleteBudgetDocument, GetBudgetsByUserIdDocument, UpdateBudgetDocument } from '@/graphql/operations'
 import { DatePicker } from '@mui/x-date-pickers'
@@ -59,6 +60,7 @@ export default function BudgetRow({ budget, user }: { budget: Budget; user: User
     ],
   })
   const t = useTranslations('common')
+  const { hidden } = useAmountVisibility()
   const [isSavingsBudget, setIsSavingsBudget] = useState(!!budget.effectiveDate)
   const [fields, setFields] = useState<Fields>({
     name: '',
@@ -169,7 +171,7 @@ export default function BudgetRow({ budget, user }: { budget: Budget; user: User
               sx={{ mr: 2 }}
             />
           ) : (
-            <Typography variant={'body2'}>{formatMoneyCents(budget.amount, 'CAD')}</Typography>
+            <Typography variant={'body2'}>{formatMoneyCents(budget.amount, 'CAD', hidden)}</Typography>
           )}
         </TableCell>
         <TableCell size={'small'} align={'left'}>
@@ -188,7 +190,7 @@ export default function BudgetRow({ budget, user }: { budget: Budget; user: User
             />
           )}
           {!isEditting && isSavingsBudget && (
-            <Typography variant={'body2'}>{formatMoneyCents(budget.startingAmount, 'CAD')}</Typography>
+            <Typography variant={'body2'}>{formatMoneyCents(budget.startingAmount, 'CAD', hidden)}</Typography>
           )}
         </TableCell>
         <TableCell size={'small'} align={'right'} sx={{ width: '15%' }}>

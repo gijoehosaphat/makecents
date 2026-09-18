@@ -1,9 +1,12 @@
-export function formatMoney(number: number, currency: string) {
+export const HIDDEN_AMOUNT_PLACEHOLDER = '••••••'
+
+export function formatMoney(number: number, currency: string, hidden = false) {
+  if (hidden) return HIDDEN_AMOUNT_PLACEHOLDER
   //TODO: Language/locale should be user defined setting.
   return isNaN(number) ? '0' : number.toLocaleString(navigator.language || 'en-CA', { style: 'currency', currency })
 }
 
-export function formatMoneyCents(number: number, currency: string) {
+export function formatMoneyCents(number: number, currency: string, hidden = false) {
   const amount = Number((number / 100).toFixed(2))
-  return formatMoney(amount, currency)
+  return formatMoney(amount, currency, hidden)
 }

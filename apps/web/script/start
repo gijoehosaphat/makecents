@@ -3,10 +3,11 @@ set -ex
 
 ./script/prepare-env
 
-npx graphql-codegen
+pnpm graphql-codegen
 
 source .env
 
-npx next build
+rm -rf .next
+pnpm next build
 
-PORT=$WEB_PORT npx next start
+PORT=$WEB_PORT pnpm next start

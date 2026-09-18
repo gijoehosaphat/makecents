@@ -19,6 +19,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { format } from 'date-fns'
 import { formatMoney } from '@/lib/formatMoney'
+import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import CategoryEditor from '../transactions/CategoryEditor'
 
 export default function TransactionsPreview({
@@ -31,6 +32,7 @@ export default function TransactionsPreview({
   handleComplete: () => void
 }) {
   const t = useTranslations('common')
+  const { hidden } = useAmountVisibility()
 
   //TODO: May need fake pagination to avoid rendering speed issues.
 
@@ -81,10 +83,10 @@ export default function TransactionsPreview({
                     <CategoryEditor transaction={transaction} />
                   </TableCell>
                   <TableCell align="right">
-                    {transaction.amount < 0 ? formatMoney(transaction.amount / 100, 'CAD') : null}
+                    {transaction.amount < 0 ? formatMoney(transaction.amount / 100, 'CAD', hidden) : null}
                   </TableCell>
                   <TableCell align="right">
-                    {transaction.amount > 0 ? formatMoney(transaction.amount / 100, 'CAD') : null}
+                    {transaction.amount > 0 ? formatMoney(transaction.amount / 100, 'CAD', hidden) : null}
                   </TableCell>
                 </TableRow>
               ))}

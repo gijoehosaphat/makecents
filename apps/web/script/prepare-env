@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 set -ex
 
-npm install
+pnpm install
 
-npx graphql-codegen
+pnpm graphql-codegen

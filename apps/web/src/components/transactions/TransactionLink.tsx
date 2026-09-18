@@ -19,6 +19,7 @@ import { useTranslations } from 'next-intl'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
 import { useLazyQuery, useMutation } from '@apollo/client/react'
 import { formatMoney } from '@/lib/formatMoney'
+import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import {
   CreateTransferDocument,
   DeleteTransferDocument,
@@ -34,6 +35,7 @@ export function TransactionLink({
   refetchQuery: InternalRefetchQueryDescriptor
 }) {
   const t = useTranslations('common')
+  const { hidden } = useAmountVisibility()
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [addOpen, setAddOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -164,7 +166,7 @@ export function TransactionLink({
                       {index === selectedIndex ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
                     </ListItemIcon>
                     <ListItemText primary={t.name} secondary={t.memo} sx={{ mr: 4 }} />
-                    <ListItemText primary={formatMoney(t.amount / 100, 'CAD')} />
+                    <ListItemText primary={formatMoney(t.amount / 100, 'CAD', hidden)} />
                   </ListItemButton>
                 </ListItem>
               </List>
@@ -195,7 +197,7 @@ export function TransactionLink({
                     secondary={transferTransaction.memo}
                     sx={{ mr: 4 }}
                   />
-                  <ListItemText primary={formatMoney(transferTransaction.amount / 100, 'CAD')} />
+                  <ListItemText primary={formatMoney(transferTransaction.amount / 100, 'CAD', hidden)} />
                 </ListItemButton>
               </ListItem>
             </List>

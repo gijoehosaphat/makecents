@@ -2,13 +2,24 @@
 
 import * as React from 'react'
 import { useTheme, Theme, CSSObject } from '@mui/material/styles'
-import { AppBar, Box, Drawer, Toolbar, List, Typography, Divider, IconButton, CssBaseline } from '@mui/material'
+import { AppBar, Box, Drawer, Toolbar, List, Typography, Divider, IconButton, CssBaseline, Tooltip } from '@mui/material'
 import { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { DrawerProps as MuiDrawerProps } from '@mui/material/Drawer'
-import { Menu as MenuIcon, Settings, ChevronLeft, ChevronRight, BarChart, Home, Search } from '@mui/icons-material'
+import {
+  Menu as MenuIcon,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  BarChart,
+  Home,
+  Search,
+  Visibility,
+  VisibilityOff,
+} from '@mui/icons-material'
 import { ProfileMenu } from '@/components/ProfileMenu'
 import { BankAccountList } from '@/components/nav/BankAccountList'
 import { useAppContext } from '@/components/context/AppContextProvider'
+import { useAmountVisibility } from '@/components/context/AmountVisibilityContext'
 import { useTranslations } from 'next-intl'
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Dropzone } from '@/components/shared/Dropzone'
@@ -121,6 +132,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
   const router = useRouter()
   const t = useTranslations('common')
   const { user, currentAccountId } = useAppContext()
+  const { hidden, toggleHidden } = useAmountVisibility()
   const theme = useTheme()
   const [open, setOpen] = React.useState(true)
 
@@ -158,6 +170,11 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
                 <MenuIcon />
               </IconButton>
               <Typography variant={'h3'} noWrap component={'div'} sx={{ flexGrow: 1 }}></Typography>
+              <Tooltip title={hidden ? t('shared.showAmounts') : t('shared.hideAmounts')}>
+                <IconButton color={'inherit'} onClick={toggleHidden} aria-label={t('shared.hideAmounts')}>
+                  {hidden ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </Tooltip>
               <ProfileMenu />
             </Toolbar>
           </CustomAppBar>

@@ -24,7 +24,10 @@
       "any": "Any",
       "category": "Category",
       "categorized": "Categorized",
-      "uncategorized": "Uncategorized"
+      "uncategorized": "Uncategorized",
+      "revert": "Revert",
+      "hideAmounts": "Hide amounts",
+      "showAmounts": "Show amounts"
     },
     "auth": {
       "signInWith": "Sign in with {name}",
@@ -36,7 +39,15 @@
       "bankAccounts": "Bank Accounts",
       "accountName": "Account name",
       "bankAccountGroup": "{count, plural, =1 {Transactions from 1 bank account} other {Transactions from # bank accounts}}",
-      "search": "Search"
+      "search": "Search",
+      "closed": "Closed",
+      "closeAccount": "Close account",
+      "reopenAccount": "Reopen account",
+      "showClosedAccounts": "Show closed accounts",
+      "hideClosedAccounts": "Hide closed accounts",
+      "reconcileBalance": "Reconcile balance",
+      "reconcileBalanceDescription": "Enter the account's actual balance and the date it's accurate as of. Any transactions after that date will be added automatically.",
+      "asOfDate": "As of"
     },
     "upload": {
       "instructions": "Drop files to import...",
@@ -103,6 +114,55 @@
     "groups": {
       "title": "Groups",
       "addGroup": "Add Group"
+    },
+    "dateEditor": {
+      "title": "Edit transaction date"
+    },
+    "memoEditor": {
+      "title": "Edit transaction memo",
+      "name": "Name",
+      "memo": "Memo"
+    },
+    "csvImport": {
+      "title": "Import CSV",
+      "stepAccount": "Account",
+      "stepDefinition": "Column mapping",
+      "stepConfirm": "Confirm",
+      "useExistingAccount": "Use an existing account",
+      "createNewAccount": "Create a new account",
+      "account": "Account",
+      "accountName": "Account name",
+      "accountType": "Account type",
+      "currency": "Currency",
+      "useExistingDefinition": "Use a saved bank definition",
+      "createNewDefinition": "Create a new bank definition",
+      "definition": "Bank definition",
+      "definitionName": "Definition name",
+      "delimiter": "Delimiter",
+      "hasHeaderRow": "First row is a header",
+      "skipRows": "Rows to skip before data",
+      "dateColumn": "Date column",
+      "dateFormat": "Date format",
+      "descriptionColumn": "Description column",
+      "memoColumn": "Memo column (optional)",
+      "none": "None",
+      "amountMode": "Amount format",
+      "amountModeSingle": "Single signed amount column",
+      "amountModeDebitCredit": "Separate debit/credit columns",
+      "amountColumn": "Amount column",
+      "debitColumn": "Debit column",
+      "creditColumn": "Credit column",
+      "amountSign": "Amount sign",
+      "amountSignAsIs": "As shown in the file",
+      "amountSignFlipped": "Flip the sign",
+      "preview": "Preview",
+      "autoDetected": "We recognized this file's format and matched it to \"{account}\". Go back if this isn't right.",
+      "autoDetectedAccount": "This file references account \"{account}\", which we matched automatically. Go back if this isn't right.",
+      "autoDetectedMultiAccount": "This file references {count} different accounts. Each will be matched to an existing account, or created, automatically.",
+      "confirmSummary": "{count} transactions will be imported.",
+      "back": "Back",
+      "next": "Next",
+      "import": "Import"
     }
   }
 }

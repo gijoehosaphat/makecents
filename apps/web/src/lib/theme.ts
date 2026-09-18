@@ -1,6 +1,6 @@
 import { ThemeOptions, createTheme, lighten } from '@mui/material/styles'
 
-declare module '@mui/material/styles/createPalette' {
+declare module '@mui/material/styles' {
   interface Palette {
     money: { positive: string; negative: string }
     hover: { paper: string }

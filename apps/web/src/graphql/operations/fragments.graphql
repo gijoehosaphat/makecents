@@ -28,6 +28,7 @@ fragment AccountFragment on Account {
 fragment BankAccountFragment on BankAccount {
   balance
   bankAccountId
+  closed
   createdAt
   currency
   id
@@ -55,6 +56,29 @@ fragment TransactionFragment on Transaction {
   type
   updatedAt
   weightedTsv
+  customName
+  customMemo
+}
+
+fragment BankAccountReconciliationFragment on BankAccountReconciliation {
+  asOf
+  balance
+  bankAccountId
+  createdAt
+  id
+  nodeId
+  updatedAt
+}
+
+fragment BankCsvDefinitionFragment on BankCsvDefinition {
+  bankAccountId
+  createdAt
+  id
+  mapping
+  name
+  nodeId
+  updatedAt
+  userId
 }
 
 fragment CategoryFragment on Category {

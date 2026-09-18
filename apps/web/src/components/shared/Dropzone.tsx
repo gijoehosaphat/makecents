@@ -15,9 +15,16 @@ import { useAppContext } from '@/components/context/AppContextProvider'
 import { useTranslations } from 'next-intl'
 import { useUploadHandler } from '@/lib/useUploadHandler'
 import { useSnackbar } from 'notistack'
+import { CsvImportDialog } from './CsvImportDialog'
 
 function parseDate(dateString: string) {
   const dateParts = String(dateString).split('[')
+
+  if (!dateParts[1]) {
+    const paddedDatePart = dateParts[0].padEnd(14, '0').slice(0, 14)
+    return parse(paddedDatePart, 'yyyyMMddHHmmss', new Date())
+  }
+
   const timezone = Number(dateParts[1].replace(']', '')).toLocaleString('en-US', {
     minimumIntegerDigits: 2,
   })
@@ -31,6 +38,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
   const theme = useTheme()
   const { uploadHandler } = useUploadHandler()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [csvQueue, setCsvQueue] = useState<{ fileName: string; text: string }[]>([])
 
   const processOfxData = useCallback(
     (parsedFiles: OpenFinancialExchangeFormat[]) => {
@@ -78,8 +86,11 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
                 bankAccountId: bankAccount.STMTRS.BANKACCTFROM.ACCTID,
                 type: bankAccount.STMTRS.BANKACCTFROM.ACCTTYPE,
                 currency: bankAccount.STMTRS.CURDEF,
-                balance: Number((Number(bankAccount.STMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
                 userId,
+              },
+              reconciliation: {
+                balance: Number((Number(bankAccount.STMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
+                asOf: parseDate(bankAccount.STMTRS.LEDGERBAL.DTASOF),
               },
               transactions: [],
             }
@@ -97,8 +108,11 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
                 bankAccountId: creditCardAccount.CCSTMTRS.CCACCTFROM.ACCTID,
                 type: 'CREDIT_CARD',
                 currency: creditCardAccount.CCSTMTRS.CURDEF,
-                balance: Number((Number(creditCardAccount.CCSTMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
                 userId,
+              },
+              reconciliation: {
+                balance: Number((Number(creditCardAccount.CCSTMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
+                asOf: parseDate(creditCardAccount.CCSTMTRS.LEDGERBAL.DTASOF),
               },
               transactions: [],
             }
@@ -158,11 +172,37 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
+      const csvFiles = acceptedFiles.filter((file) => file.name.toLowerCase().endsWith('.csv'))
+      const ofxFiles = acceptedFiles.filter((file) => !csvFiles.includes(file))
+
+      csvFiles.forEach((file) => {
+        const reader = new FileReader()
+        reader.readAsText(file)
+
+        reader.onload = () => {
+          const text = String(reader.result || '')
+          if (text) {
+            setCsvQueue((queue) => [...queue, { fileName: file.name, text }])
+          }
+        }
+
+        reader.onerror = () => {
+          console.error(reader.error)
+          enqueueSnackbar(t('upload.error'), {
+            variant: 'error',
+          })
+        }
+      })
+
+      if (!ofxFiles.length) {
+        return
+      }
+
       setIsProcessing(true)
       const parsedFiles: OpenFinancialExchangeFormat[] = []
 
       //Large files may be slow to read/process? Webworkers might help?
-      acceptedFiles.forEach(async (file: File) => {
+      ofxFiles.forEach(async (file: File) => {
         const reader = new FileReader()
         reader.readAsText(file)
 
@@ -172,7 +212,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
             parseFile(result).then((ofxData) => {
               parsedFiles.push(ofxData)
 
-              if (acceptedFiles.length === parsedFiles.length) {
+              if (ofxFiles.length === parsedFiles.length) {
                 processParsedFiles(parsedFiles)
               }
             })
@@ -234,6 +274,13 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
           </Box>
         </Paper>
       </Backdrop>
+      {csvQueue[0] && (
+        <CsvImportDialog
+          fileName={csvQueue[0].fileName}
+          csvText={csvQueue[0].text}
+          onClose={() => setCsvQueue((queue) => queue.slice(1))}
+        />
+      )}
     </Box>
   )
 }
