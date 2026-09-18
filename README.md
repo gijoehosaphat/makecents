@@ -6,6 +6,13 @@ This app is intended to help you manage your personal finances by importing, cat
 
 **WARNING**: Please do not deploy your instance to the public. Maybe that goes without saying, but this is intended to be run for your own personal use.
 
+## Features
+
+- Import and categorize bank transactions
+- Create and manage budgets
+- Generate reports and insights on spending
+- Support for QFX files (QuickBooks) & arbitrary CSVs with included template mapper.
+
 ## Prerequisites
 
 - Ensure you have a PostgreSQL database set up and running. See Postgraphile recommendations for PostgreSQL versions. https://postgraphile.org/postgraphile/requirements#postgresql-use-latest
@@ -82,7 +89,6 @@ There are two applications in this repository: the API and the Client (frontend)
 - _External loans_: Add ability to create loans that are just manually updated. This is for things like mortgages, where the payment amount is fixed but the interest and principal amounts vary each month. It would be nice to be able to track the loan balance over time and see how much interest vs principal is being paid each month. Also relevant to home renovation loans, where the amount can vary each month but there is still a fixed payment amount.
 - _Filtering un/categorized transactions_: When filtering transactions by whether they are categorized or not, the split transactions are not handled correctly. If a transaction is split into multiple categories, only when the original transaction is categorized does it get filtered out of the "uncategorized" view. Ideally, if any part of the transaction is uncategorized, it should show up in the uncategorized view.
 - Tests?
-- Only Quickbookx QFX files are currently supported. Includes an exmaple file. However there are amny more formats and file types to support.
 - Better initial seeding of non transaction data like categories, groups and other types used to organize your transactions. Really only useful for first time installations.
 - User auth exists in order to create a user and for basic identity, but there are very little guardrails around user data and ownership. I experimented w/ postgresql row level security, but backed off. Need to revisit and ensure that users can only see their own data.
 - Better graphs and budgeting features.
