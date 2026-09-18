@@ -1,54 +1,62 @@
 'use client'
 
-import { getProviders, signIn } from 'next-auth/react'
-import { Google, HelpOutline } from '@mui/icons-material'
-import { Button } from '@mui/material'
+import { signIn } from 'next-auth/react'
+import { Alert, Box, Button, Link as MuiLink, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import { useState, useMemo, useEffect } from 'react'
+import { useState } from 'react'
+import Link from 'next/link'
 
 export default function SignIn() {
-  const [providers, setProviders] = useState<Awaited<
-    ReturnType<typeof getProviders>
-  > | null>(null)
   const t = useTranslations('common')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  // const providers = useMemo(async () => {
-  //   return await getProviders()
-  // }, [])
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+    setSubmitting(true)
+    setError(false)
 
-  // console.log('Providers:', providers)
+    const result = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    })
 
-  useEffect(() => {
-    async function fetchProviders() {
-      const res = await getProviders()
-      setProviders(res)
+    setSubmitting(false)
+
+    if (result?.error) {
+      setError(true)
+    } else {
+      window.location.href = '/'
     }
-    fetchProviders()
-  }, [])
+  }
 
   return (
-    <>
-      {providers &&
-        Object.values(providers).map((provider) => {
-          let ProviderIcon = HelpOutline
-          switch (provider.name.toLowerCase()) {
-            case 'google':
-              ProviderIcon = Google
-              break
-          }
-          return (
-            <div key={provider.name}>
-              <Button
-                variant={'contained'}
-                color={'primary'}
-                onClick={() => signIn(provider.id)}
-                startIcon={<ProviderIcon />}
-              >
-                {t('auth.signInWith', { name: provider.name })}
-              </Button>
-            </div>
-          )
-        })}
-    </>
+    <Box component={'form'} onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 320 }}>
+      {error && <Alert severity={'error'}>{t('auth.invalidCredentials')}</Alert>}
+      <TextField
+        label={t('auth.email')}
+        type={'email'}
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        required
+        autoFocus
+      />
+      <TextField
+        label={t('auth.password')}
+        type={'password'}
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        required
+      />
+      <Button type={'submit'} variant={'contained'} color={'primary'} disabled={submitting}>
+        {t('auth.signIn')}
+      </Button>
+      <MuiLink component={Link} href={'/account/signUp'}>
+        {t('auth.noAccount')}
+      </MuiLink>
+    </Box>
   )
 }

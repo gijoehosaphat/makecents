@@ -1,0 +1,21 @@
+mutation Authenticate($email: String!, $password: String!) {
+  authenticate(input: { email: $email, password: $password }) {
+    user {
+      ...UserFragment
+    }
+  }
+}
+
+mutation RegisterUser($email: String!, $password: String!, $name: String) {
+  registerUser(input: { email: $email, password: $password, name: $name }) {
+    user {
+      ...UserFragment
+    }
+  }
+}
+
+mutation ChangeUserPassword($userId: Int!, $currentPassword: String!, $newPassword: String!) {
+  changeUserPassword(input: { userId: $userId, currentPassword: $currentPassword, newPassword: $newPassword }) {
+    boolean
+  }
+}

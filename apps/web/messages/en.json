@@ -31,7 +31,23 @@
     },
     "auth": {
       "signInWith": "Sign in with {name}",
-      "signout": "Signout"
+      "signout": "Signout",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "signIn": "Sign in",
+      "signUp": "Sign up",
+      "invalidCredentials": "Invalid email or password",
+      "noAccount": "Don't have an account? Sign up",
+      "haveAccount": "Already have an account? Sign in",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "registrationFailed": "Could not create account. That email may already be registered.",
+      "changePassword": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmNewPassword": "Confirm new password",
+      "incorrectCurrentPassword": "Current password is incorrect",
+      "passwordChanged": "Password changed"
     },
     "dashboard": {
       "title": "Dashboard",
