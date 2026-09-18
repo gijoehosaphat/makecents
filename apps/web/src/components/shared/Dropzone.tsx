@@ -19,6 +19,12 @@ import { CsvImportDialog } from './CsvImportDialog'
 
 function parseDate(dateString: string) {
   const dateParts = String(dateString).split('[')
+
+  if (!dateParts[1]) {
+    const paddedDatePart = dateParts[0].padEnd(14, '0').slice(0, 14)
+    return parse(paddedDatePart, 'yyyyMMddHHmmss', new Date())
+  }
+
   const timezone = Number(dateParts[1].replace(']', '')).toLocaleString('en-US', {
     minimumIntegerDigits: 2,
   })
