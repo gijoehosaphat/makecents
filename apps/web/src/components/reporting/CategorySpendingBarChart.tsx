@@ -5,6 +5,7 @@ import { Box, Divider, Typography, useTheme } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { useAppContext } from '../context/AppContextProvider'
+import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
 import { useTransactions } from '@/lib/useTransactions'
 import { Category, CategoryGroup, Transaction } from '@/graphql/types'
@@ -48,6 +49,7 @@ function CustomizedAxisTick({
 function CategoryBarChart({ title, data }: { title: string; data: ChartData[] }) {
   const t = useTranslations('common')
   const theme = useTheme()
+  const { hidden } = useAmountVisibility()
 
   return (
     <>
@@ -89,7 +91,7 @@ function CategoryBarChart({ title, data }: { title: string; data: ChartData[] })
             <Tooltip
               cursor={{ fill: theme.palette.background.paper }}
               formatter={(value, name, props) => {
-                return [formatMoney(Math.abs(Number(value)) / 100, 'CAD'), t('shared.total')]
+                return [formatMoney(Math.abs(Number(value)) / 100, 'CAD', hidden), t('shared.total')]
               }}
               contentStyle={{ backgroundColor: theme.palette.background.paper }}
               labelStyle={theme.typography.h3}
@@ -109,7 +111,7 @@ function CategoryBarChart({ title, data }: { title: string; data: ChartData[] })
               type={'number'}
               tick={{ stroke: theme.palette.text.primary, strokeWidth: 1 }}
               tickFormatter={(tick) => {
-                return formatMoney(Math.abs(tick) / 100, 'CAD')
+                return formatMoney(Math.abs(tick) / 100, 'CAD', hidden)
               }}
             />
           </BarChart>

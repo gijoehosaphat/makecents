@@ -5,6 +5,7 @@ import { Account, BankAccount, User } from '@/graphql/types'
 import { Button, ThemeProvider } from '@mui/material'
 import { SessionProvider } from 'next-auth/react'
 import { AppContextProvider } from '@/components/context/AppContextProvider'
+import { AmountVisibilityProvider } from '@/components/context/AmountVisibilityContext'
 import { ApolloProvider } from '@/components/ApolloProvider'
 import { SnackbarProvider, closeSnackbar } from 'notistack'
 import { useTranslations } from 'next-intl'
@@ -41,9 +42,11 @@ export function ClientProviders({
       <SessionProvider>
         <ApolloProvider>
           <AppContextProvider user={user} accounts={accounts} bankAccounts={bankAccounts}>
-            <ThemeProvider theme={lightTheme}>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>{children}</LocalizationProvider>
-            </ThemeProvider>
+            <AmountVisibilityProvider>
+              <ThemeProvider theme={lightTheme}>
+                <LocalizationProvider dateAdapter={AdapterDateFns}>{children}</LocalizationProvider>
+              </ThemeProvider>
+            </AmountVisibilityProvider>
           </AppContextProvider>
         </ApolloProvider>
       </SessionProvider>

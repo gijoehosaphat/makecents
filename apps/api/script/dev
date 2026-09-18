@@ -3,4 +3,4 @@ set -ex
 
 ./script/prepare-env
 
-npx nodemon
+pnpm dlx nodemon

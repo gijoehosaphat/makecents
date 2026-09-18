@@ -3,4 +3,4 @@ set -ex
 
 ./script/prepare-env
 
-npx concurrently "cd ./apps/api/ && ./script/dev" "npx wait-on tcp:3002 && cd ./apps/web/ && ./script/dev"
+pnpm dlx concurrently "cd ./apps/api/ && ./script/dev" "pnpm dlx wait-on tcp:3002 && cd ./apps/web/ && ./script/dev"

@@ -1,7 +1,6 @@
 'use client'
 
 import { getProviders, signIn } from 'next-auth/react'
-import type { ProviderId } from '@auth/core/providers'
 import type { ClientSafeProvider } from 'next-auth/lib/client.js'
 import { Google, HelpOutline } from '@mui/icons-material'
 import { Button } from '@mui/material'
@@ -9,7 +8,10 @@ import { useTranslations } from 'next-intl'
 import { useState, useMemo, useEffect } from 'react'
 
 export default function SignIn() {
-  const [providers, setProviders] = useState<Record<ProviderId, ClientSafeProvider> | null>(null)
+  const [providers, setProviders] = useState<Record<
+    string,
+    ClientSafeProvider
+  > | null>(null)
   const t = useTranslations('common')
 
   // const providers = useMemo(async () => {

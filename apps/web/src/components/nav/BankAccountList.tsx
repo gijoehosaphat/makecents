@@ -1,22 +1,29 @@
 import React, { useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ListSubheader, Collapse, List } from '@mui/material'
-import { AccountBalance, Wallet, Savings, CreditCard, ExpandLess, ExpandMore } from '@mui/icons-material'
+import { AccountBalance, Wallet, Savings, CreditCard, ExpandLess, ExpandMore, VisibilityOff, Visibility } from '@mui/icons-material'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { formatMoney } from '@/lib/formatMoney'
+import { useAmountVisibility } from '@/components/context/AmountVisibilityContext'
 import { useTranslations } from 'next-intl'
 import { MainMenuItem } from '../shared/MainMenuItem'
 
 export function BankAccountList() {
   const pathname = usePathname()
   const { bankAccounts, currentAccountId } = useAppContext()
+  const { hidden } = useAmountVisibility()
   const t = useTranslations('common')
   const router = useRouter()
   const searchParams = useSearchParams()
   const [listOpen, setListOpen] = useState(true)
+  const [showClosed, setShowClosed] = useState(false)
+
+  const openBankAccounts = bankAccounts.filter((bankAccount) => !bankAccount.closed)
+  const closedBankAccounts = bankAccounts.filter((bankAccount) => bankAccount.closed)
+  const visibleBankAccounts = showClosed ? bankAccounts : openBankAccounts
 
   let totals: { [key: string]: number } = {}
-  bankAccounts.forEach((bankAccount) => {
+  openBankAccounts.forEach((bankAccount) => {
     if (bankAccount.currency && bankAccount.balance) {
       if (!totals[bankAccount.currency]) {
         totals[bankAccount.currency] = Number(bankAccount.balance)
@@ -27,7 +34,7 @@ export function BankAccountList() {
   })
   let total: string[] = []
   Object.keys(totals).forEach((currency) => {
-    total.push(formatMoney(totals[currency] / 100, currency || 'CAD'))
+    total.push(formatMoney(totals[currency] / 100, currency || 'CAD', hidden))
   })
 
   let queryString = searchParams?.toString()
@@ -51,7 +58,7 @@ export function BankAccountList() {
       </MainMenuItem>
       <List dense={true} disablePadding={true}>
         <Collapse in={listOpen} timeout={'auto'} unmountOnExit sx={{ pl: 3 }}>
-          {bankAccounts.map((bankAccount) => {
+          {visibleBankAccounts.map((bankAccount) => {
             let icon = <Wallet fontSize={'large'} />
             switch (bankAccount.type) {
               case 'CHECKING':
@@ -70,15 +77,25 @@ export function BankAccountList() {
                 onClick={() => {
                   router.push(`/${currentAccountId}/dashboard/bank-account/${bankAccount.id}${queryString}`)
                 }}
-                primary={bankAccount?.name || bankAccount?.type || ''}
-                secondary={formatMoney(bankAccount.balance / 100, bankAccount?.currency || 'CAD')}
+                primary={bankAccount.closed ? `${bankAccount?.name || bankAccount?.type || ''} (${t('dashboard.closed')})` : bankAccount?.name || bankAccount?.type || ''}
+                secondary={formatMoney(bankAccount.balance / 100, bankAccount?.currency || 'CAD', hidden)}
                 icon={icon}
                 selected={pathname === `/${currentAccountId}/dashboard/bank-account/${bankAccount.id}`}
                 dense={true}
+                sx={bankAccount.closed ? { opacity: 0.6 } : undefined}
               />
             )
           })}
-          {bankAccounts.length === 0 && <ListSubheader>{t('dashboard.noBankAccounts')}</ListSubheader>}
+          {visibleBankAccounts.length === 0 && <ListSubheader>{t('dashboard.noBankAccounts')}</ListSubheader>}
+          {closedBankAccounts.length > 0 && (
+            <MainMenuItem
+              onClick={() => setShowClosed(!showClosed)}
+              primary={showClosed ? t('dashboard.hideClosedAccounts') : t('dashboard.showClosedAccounts')}
+              icon={showClosed ? <VisibilityOff fontSize={'small'} /> : <Visibility fontSize={'small'} />}
+              selected={false}
+              dense={true}
+            />
+          )}
         </Collapse>
       </List>
     </>

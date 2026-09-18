@@ -6,14 +6,24 @@ import { Transaction } from '@/graphql/types'
 import { Box, Divider, Typography, useTheme } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import { differenceInCalendarDays } from 'date-fns'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
 import { useTransactions } from '@/lib/useTransactions'
 import { useAppContext } from '../context/AppContextProvider'
+import { useAmountVisibility } from '../context/AmountVisibilityContext'
 
 export function DailySpendingLineChart() {
   const { bankAccounts } = useAppContext()
+  const { hidden } = useAmountVisibility()
   const { dateFrom, dateTo } = useDateFilterParams()
   const { transactionsSansTransfers } = useTransactions({
     dateFrom,
@@ -28,24 +38,36 @@ export function DailySpendingLineChart() {
   const colorGradient = getColors(numDays)
 
   const negativeTransactions = useMemo(() => {
-    return transactionsSansTransfers.filter((transaction) => transaction.amount <= 0)
+    return transactionsSansTransfers.filter(
+      (transaction) => transaction.amount <= 0,
+    )
   }, [transactionsSansTransfers])
 
   const positiveTransactions = useMemo(() => {
-    return transactionsSansTransfers.filter((transaction) => transaction.amount > 0)
+    return transactionsSansTransfers.filter(
+      (transaction) => transaction.amount > 0,
+    )
   }, [transactionsSansTransfers])
 
   const transactionsByDay = useMemo(() => {
     return Array.from({ length: numDays }, (e, i: number) => {
       const day = i + 1
       const positiveDailyTransactions = positiveTransactions.filter(
-        (transaction: Transaction) => new Date(transaction.posted).getDate() === day
+        (transaction: Transaction) =>
+          new Date(transaction.posted).getDate() === day,
       )
       const negativeDailyTransactions = negativeTransactions.filter(
-        (transaction: Transaction) => new Date(transaction.posted).getDate() === day
+        (transaction: Transaction) =>
+          new Date(transaction.posted).getDate() === day,
       )
-      const negativeValue = negativeDailyTransactions.reduce((partialSum, t) => partialSum + Number(t.amount), 0)
-      const positiveValue = positiveDailyTransactions.reduce((partialSum, t) => partialSum + Number(t.amount), 0)
+      const negativeValue = negativeDailyTransactions.reduce(
+        (partialSum, t) => partialSum + Number(t.amount),
+        0,
+      )
+      const positiveValue = positiveDailyTransactions.reduce(
+        (partialSum, t) => partialSum + Number(t.amount),
+        0,
+      )
       return {
         label: `${day}`,
         negativeValue,
@@ -74,27 +96,53 @@ export function DailySpendingLineChart() {
           >
             <defs>
               <linearGradient id="colorPositive" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.4} />
-                <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={1} />
+                <stop
+                  offset="5%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={0.4}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={theme.palette.primary.main}
+                  stopOpacity={1}
+                />
               </linearGradient>
               <linearGradient id="colorNegative" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={theme.palette.secondary.main} stopOpacity={1} />
-                <stop offset="95%" stopColor={theme.palette.secondary.main} stopOpacity={0.4} />
+                <stop
+                  offset="5%"
+                  stopColor={theme.palette.secondary.main}
+                  stopOpacity={1}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={theme.palette.secondary.main}
+                  stopOpacity={0.4}
+                />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray={'3 3'} stroke={theme.palette.text.primary} strokeOpacity={0.2} />
-            <XAxis dataKey={'label'} tick={{ stroke: theme.palette.text.primary, strokeWidth: 1 }} />
+            <CartesianGrid
+              strokeDasharray={'3 3'}
+              stroke={theme.palette.text.primary}
+              strokeOpacity={0.2}
+            />
+            <XAxis
+              dataKey={'label'}
+              tick={{ stroke: theme.palette.text.primary, strokeWidth: 1 }}
+            />
             <YAxis
               tick={{ stroke: theme.palette.text.primary, strokeWidth: 1 }}
               tickFormatter={(tick) => {
-                return String(formatMoney(tick / 100, 'CAD'))
+                return String(formatMoney(tick / 100, 'CAD', hidden))
               }}
             />
             <Tooltip
               formatter={(value, name, props) => {
-                return [formatMoney(Number(value) / 100, 'CAD'), t('shared.total')]
+                return [
+                  formatMoney(Number(value) / 100, 'CAD', hidden),
+                  t('shared.total'),
+                ]
               }}
-              labelFormatter={(label: string) => `Day: ${label}`}
+              // labelFormatter={(label: string) => `Day: ${label}`}
               contentStyle={{ backgroundColor: theme.palette.background.paper }}
               labelStyle={theme.typography.h3}
               itemStyle={{ color: theme.palette.text.primary }}
