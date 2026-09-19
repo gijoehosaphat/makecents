@@ -4,7 +4,9 @@ import { useSuspenseQuery } from '@apollo/client/react'
 import {
   GetTransactionsByBankAccountsVariables,
   GetFilteredTransactionsByBankAccountsDocument,
+  GetFilteredTransactionsBySearchDocument,
 } from '@/graphql/operations'
+import { buildTransactionSearchQuery } from './buildTransactionSearchQuery'
 
 export function useFilteredTransactions({
   limit,
@@ -14,7 +16,8 @@ export function useFilteredTransactions({
   bankAccountIds,
   excludeSplitTransactions,
   categorized,
-  category,
+  categoryIds,
+  search,
 }: {
   limit?: number
   offset?: number
@@ -23,8 +26,12 @@ export function useFilteredTransactions({
   bankAccountIds: number[]
   excludeSplitTransactions?: boolean
   categorized?: boolean
-  category?: number
+  categoryIds?: number[]
+  search?: string
 }) {
+  const hasCategoryIds = !!categoryIds && categoryIds.length > 0
+  const match = useMemo(() => buildTransactionSearchQuery(search || ''), [search])
+
   const variables = useMemo(() => {
     let tempVariables: GetTransactionsByBankAccountsVariables = {
       filter: {
@@ -40,14 +47,17 @@ export function useFilteredTransactions({
       tempVariables.offset = offset
     }
 
-    if (categorized !== undefined) {
-      tempVariables.filter.categoryId = { isNull: !categorized }
+    if (categorized === false) {
+      tempVariables.filter.categoryId = { isNull: true }
       tempVariables.filter.transferCount = { equalTo: 0 }
-    } else if (category !== undefined) {
-      tempVariables.filter.categoryId = { in: [category] }
+    } else if (hasCategoryIds) {
+      tempVariables.filter.categoryId = { in: categoryIds }
+    } else if (categorized === true) {
+      tempVariables.filter.categoryId = { isNull: false }
+      tempVariables.filter.transferCount = { equalTo: 0 }
     }
 
-    if (category === undefined) {
+    if (!hasCategoryIds) {
       if (excludeSplitTransactions !== undefined) {
         tempVariables.filter.splitSourceId = { isNull: excludeSplitTransactions }
       }
@@ -60,29 +70,41 @@ export function useFilteredTransactions({
       }
     }
 
-    tempVariables.orderBy = 'POSTED_DESC'
+    if (!match) {
+      tempVariables.orderBy = 'POSTED_DESC'
+    }
 
     return tempVariables
-  }, [bankAccountIds, limit, offset, excludeSplitTransactions, categorized, category, dateFrom, dateTo])
+  }, [bankAccountIds, limit, offset, excludeSplitTransactions, categorized, categoryIds, hasCategoryIds, dateFrom, dateTo, match])
 
-  const query = useSuspenseQuery(GetFilteredTransactionsByBankAccountsDocument, {
-    variables,
+  const document = match ? GetFilteredTransactionsBySearchDocument : GetFilteredTransactionsByBankAccountsDocument
+  const documentVariables = match ? { ...variables, match } : variables
+
+  const query = useSuspenseQuery(document as any, {
+    variables: documentVariables as any,
   })
 
+  const data = query?.data as {
+    transactionSearch?: { nodes: Transaction[]; totalCount: number } | null
+    allTransactions?: { nodes: Transaction[]; totalCount: number } | null
+  }
+
+  const connection = match ? data?.transactionSearch : data?.allTransactions
+
   const transactions: Transaction[] = useMemo(() => {
-    return (query?.data?.allTransactions?.nodes as Transaction[]) || []
-  }, [query?.data?.allTransactions?.nodes])
+    return (connection?.nodes as Transaction[]) || []
+  }, [connection?.nodes])
 
   const totalCount = useMemo(() => {
-    return query?.data?.allTransactions?.totalCount || 0
-  }, [query?.data?.allTransactions?.totalCount])
+    return connection?.totalCount || 0
+  }, [connection?.totalCount])
 
   return {
     transactions,
     totalCount,
     refetchQuery: {
-      query: GetFilteredTransactionsByBankAccountsDocument,
-      variables,
+      query: document,
+      variables: documentVariables,
     },
   }
 }

@@ -11,6 +11,7 @@ import { DateIcon } from '../shared/DateIcon'
 import { TransactionDateEditor } from '../shared/TransactionDateEditor'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
 import { TransactionMemoEditor } from '../shared/TransactionMemoEditor'
+import { useAppContext } from '../context/AppContextProvider'
 
 function TransactionAmount({
   transaction,
@@ -38,10 +39,19 @@ function TransactionAmount({
 export default function TransactionRow({
   transaction,
   refetchQuery,
+  showBankAccount,
 }: {
   transaction: Transaction
   refetchQuery: InternalRefetchQueryDescriptor
+  showBankAccount?: boolean
 }) {
+  const { bankAccounts } = useAppContext()
+
+  function bankAccountLabel(bankAccountId?: number | null) {
+    const bankAccount = bankAccounts.find((account) => account.id === bankAccountId)
+    return bankAccount?.name || bankAccount?.type
+  }
+
   const splitTransactions = useMemo(() => {
     return transaction.transactionsBySplitSourceId?.nodes || []
   }, [transaction.transactionsBySplitSourceId?.nodes])
@@ -80,6 +90,13 @@ export default function TransactionRow({
             <CallSplit color={'primary'} sx={{ ml: 2 }} />
           )}
         </TableCell>
+        {showBankAccount && (
+          <TableCell sx={{ width: '15%' }}>
+            <Typography variant={'body2'}>
+              {bankAccountLabel(transaction.bankAccountId)}
+            </Typography>
+          </TableCell>
+        )}
         <TableCell>
           <TransactionMemoEditor
             transaction={transaction}
@@ -138,6 +155,13 @@ export default function TransactionRow({
             <TableCell sx={{ width: '9%' }}>
               <CallSplit color={'primary'} sx={{ ml: 2 }} />
             </TableCell>
+            {showBankAccount && (
+              <TableCell sx={{ width: '15%' }}>
+                <Typography variant={'body2'}>
+                  {bankAccountLabel(splitTransaction.bankAccountId)}
+                </Typography>
+              </TableCell>
+            )}
             <TableCell>
               <Typography variant={'body2'}>{transaction.name}</Typography>
               <Typography variant={'caption'}>{transaction.memo}</Typography>

@@ -8,13 +8,10 @@ export async function seed(knex: Knex): Promise<void> {
   await knex('app_private.user').insert([
     {
       id: 1,
-      email: 'joeleonard@gmail.com',
-      password: knex.raw("public.crypt('devpassword123', public.gen_salt('bf'))"),
-    },
-    {
-      id: 2,
-      email: 'joeleonard+test@gmail.com',
-      password: knex.raw("public.crypt('devpassword123', public.gen_salt('bf'))"),
+      email: 'admin@somewhere.com',
+      password: knex.raw(
+        "public.crypt('devpassword123', public.gen_salt('bf'))",
+      ),
     },
   ])
 }

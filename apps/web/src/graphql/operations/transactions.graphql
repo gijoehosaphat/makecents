@@ -75,6 +75,36 @@ query GetFilteredTransactionsByBankAccounts(
   }
 }
 
+query GetFilteredTransactionsBySearch(
+  $first: Int
+  $offset: Int
+  $filter: TransactionFilter!
+  $match: String!
+) {
+  transactionSearch(
+    first: $first
+    offset: $offset
+    filter: $filter
+    match: $match
+  ) {
+    nodes {
+      ...TransactionFragment
+      transactionsBySplitSourceId {
+        nodes {
+          ...TransactionFragment
+        }
+      }
+      transferByTransactionSourceId {
+        ...TransferFragment
+      }
+      transferByTransactionTargetId {
+        ...TransferFragment
+      }
+    }
+    totalCount
+  }
+}
+
 mutation UpsertTransaction(
   $type: String!
   $posted: Datetime!

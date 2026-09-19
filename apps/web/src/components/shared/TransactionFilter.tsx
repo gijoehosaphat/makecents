@@ -1,34 +1,44 @@
 'use client'
 
 import { useCategories } from '@/lib/useCategories'
-import { Box, Divider, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material'
+import {
+  Box,
+  Checkbox,
+  Divider,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
-export function TransactionFilter() {
+export function TransactionFilter({ children }: { children?: React.ReactNode }) {
   const t = useTranslations('common')
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [fields, setFields] = useState({
-    categorized: searchParams?.get('categorized') || 'any',
-    category: '-1',
-  })
+  const [categorized, setCategorized] = useState(searchParams?.get('categorized') || 'any')
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+    searchParams?.get('categoryIds')?.split(',').filter(Boolean) || [],
+  )
   const { categories } = useCategories()
+  const [, startTransition] = useTransition()
 
   useEffect(() => {
-    setFields({
-      categorized: searchParams?.get('categorized') || 'any',
-      category: searchParams?.get('category') || '-1',
-    })
-  }, [setFields, searchParams])
+    setCategorized(searchParams?.get('categorized') || 'any')
+    setSelectedCategoryIds(searchParams?.get('categoryIds')?.split(',').filter(Boolean) || [])
+  }, [searchParams])
 
   function handleCategorizedChange(event: SelectChangeEvent) {
     const categorized = event.target.value as string
-    let queryParams: string[] = []
     const categorizedParam = searchParams?.get('categorized') || 'any'
     if (categorizedParam !== categorized) {
+      let queryParams: string[] = []
       if (searchParams) {
         for (let [key, value] of searchParams?.entries()) {
           if (key !== 'categorized' && key !== 'page') {
@@ -40,30 +50,33 @@ export function TransactionFilter() {
         queryParams.push(`categorized=${categorized}`)
       }
       setTimeout(() => {
-        router.push(`${pathname}?${queryParams.join('&')}`)
+        startTransition(() => {
+          router.push(`${pathname}?${queryParams.join('&')}`)
+        })
       }, 1)
     }
   }
 
-  function handleCategoryChange(event: SelectChangeEvent) {
-    const category = event.target.value as string
+  function handleCategoryChange(event: SelectChangeEvent<string[]>) {
+    const value = event.target.value
+    const categoryIds = typeof value === 'string' ? value.split(',').filter(Boolean) : value
+
     let queryParams: string[] = []
-    const categoryParam = searchParams?.get('category') || '-1'
-    if (categoryParam !== category) {
-      if (searchParams) {
-        for (let [key, value] of searchParams?.entries()) {
-          if (key !== 'category' && key !== 'page') {
-            queryParams.push(`${key}=${value}`)
-          }
+    if (searchParams) {
+      for (let [key, value] of searchParams.entries()) {
+        if (key !== 'categoryIds' && key !== 'page') {
+          queryParams.push(`${key}=${value}`)
         }
       }
-      if (fields.categorized === 'any' && category !== '-1') {
-        queryParams.push(`category=${category}`)
-      }
-      setTimeout(() => {
-        router.push(`${pathname}?${queryParams.join('&')}`)
-      }, 1)
     }
+    if (categoryIds.length > 0) {
+      queryParams.push(`categoryIds=${categoryIds.join(',')}`)
+    }
+    setTimeout(() => {
+      startTransition(() => {
+        router.push(`${pathname}?${queryParams.join('&')}`)
+      })
+    }, 1)
   }
 
   return (
@@ -74,11 +87,10 @@ export function TransactionFilter() {
           <FormControl size={'small'} sx={{ minWidth: 8 }}>
             <InputLabel>{t('shared.categorized')}: </InputLabel>
             <Select
-              value={fields.categorized}
-              label={'Category'}
+              value={categorized}
+              label={t('shared.categorized')}
               onChange={handleCategorizedChange}
               sx={{ minWidth: 140, maxWidth: 140 }}
-              key={`category-${fields.categorized}`}
             >
               <MenuItem value={'any'}>{t('shared.any')}</MenuItem>
               <MenuItem value={'true'}>{t('shared.categorized')}</MenuItem>
@@ -90,22 +102,31 @@ export function TransactionFilter() {
           <FormControl size={'small'}>
             <InputLabel>{t('shared.category')}: </InputLabel>
             <Select
-              value={fields.category}
-              label={'Category'}
+              multiple
+              value={selectedCategoryIds}
+              label={t('shared.category')}
               onChange={handleCategoryChange}
-              disabled={fields.categorized !== 'any'}
+              disabled={categorized === 'false'}
+              renderValue={(selectedValues) =>
+                selectedValues.length === 0
+                  ? t('shared.any')
+                  : categories
+                      .filter((category) => selectedValues.includes(String(category.id)))
+                      .map((category) => category.name)
+                      .join(', ')
+              }
               sx={{ minWidth: 220, maxWidth: 220 }}
-              key={`category-${fields.category}`}
             >
-              <MenuItem value={'-1'}>None</MenuItem>
               {categories.map((category) => (
-                <MenuItem key={category.nodeId} value={category.id}>
-                  {category.name}
+                <MenuItem key={category.nodeId} value={String(category.id)}>
+                  <Checkbox checked={selectedCategoryIds.includes(String(category.id))} />
+                  <ListItemText primary={category.name} />
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Box>
+        {children}
       </Box>
       <Divider />
     </Box>

@@ -79,7 +79,9 @@
       "category": "Category",
       "withdrawals": "Withdrawals",
       "deposits": "Deposits",
-      "noCategory": "Uncategorized"
+      "bankAccount": "Bank Account",
+      "noCategory": "Uncategorized",
+      "searchPlaceholder": "Search name or memo"
     },
     "transfer": {
       "matchTransaction": "Link to the selected matching transaction?",

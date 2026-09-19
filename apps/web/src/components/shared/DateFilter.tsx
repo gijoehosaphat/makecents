@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { IconButton, Box, Divider, Typography } from '@mui/material'
 import { NavigateBefore, NavigateNext } from '@mui/icons-material'
 import { format, add, isFuture, endOfMonth, startOfMonth, endOfDay } from 'date-fns'
@@ -12,6 +12,7 @@ export function DateFilter() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { dateFrom, dateTo } = useDateFilterParams()
+  const [, startTransition] = useTransition()
 
   const handleChange = (diff: number) => {
     let queryParams: string[] = []
@@ -24,7 +25,9 @@ export function DateFilter() {
     }
     queryParams.push(`dateFrom=${format(startOfMonth(add(dateFrom, { months: diff })), 'yyyy-MM-dd')}`)
     queryParams.push(`dateTo=${format(endOfMonth(endOfDay(add(dateTo, { months: diff }))), 'yyyy-MM-dd')}`)
-    router.push(`${pathname}?${queryParams.join('&')}`)
+    startTransition(() => {
+      router.push(`${pathname}?${queryParams.join('&')}`)
+    })
   }
 
   const nextDisabled = isFuture(add(dateFrom, { months: 1 }))
