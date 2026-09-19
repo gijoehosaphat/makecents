@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { differenceInCalendarDays } from 'date-fns'
+import { differenceInCalendarDays, startOfMonth, endOfMonth, endOfDay } from 'date-fns'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
 import { useTransactions } from '@/lib/useTransactions'
 import { useAppContext } from '../context/AppContextProvider'
@@ -24,7 +24,11 @@ import { useAmountVisibility } from '../context/AmountVisibilityContext'
 export function DailySpendingLineChart() {
   const { bankAccounts } = useAppContext()
   const { hidden } = useAmountVisibility()
-  const { dateFrom, dateTo } = useDateFilterParams()
+  const { dateFrom: rawDateFrom, dateTo: rawDateTo, dateRange } = useDateFilterParams()
+  const today = useMemo(() => new Date(), [])
+  // This chart bins transactions by day-of-month, so it only makes sense for a single month.
+  const dateFrom = dateRange === 'month' && rawDateFrom ? rawDateFrom : startOfMonth(today)
+  const dateTo = dateRange === 'month' && rawDateTo ? rawDateTo : endOfMonth(endOfDay(today))
   const { transactionsSansTransfers } = useTransactions({
     dateFrom,
     dateTo,

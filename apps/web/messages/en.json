@@ -29,6 +29,11 @@
       "hideAmounts": "Hide amounts",
       "showAmounts": "Show amounts"
     },
+    "dateFilter": {
+      "allTime": "All time",
+      "currentYear": "Current year",
+      "currentMonth": "Current month"
+    },
     "auth": {
       "signInWith": "Sign in with {name}",
       "signout": "Signout",

@@ -15,6 +15,8 @@ import {
   differenceInCalendarDays,
   differenceInMonths,
   getDaysInMonth,
+  endOfMonth,
+  endOfDay,
 } from 'date-fns'
 import { formatMoney } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
@@ -51,7 +53,10 @@ export default function BudgetDetails({
 }) {
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
-  const { dateTo } = useDateFilterParams()
+  const { dateTo: rawDateTo, dateRange } = useDateFilterParams()
+  // Budget accrual math is inherently month-scoped, so fall back to the
+  // current month when the shared date filter is set to "year" or "all time".
+  const dateTo = dateRange === 'month' && rawDateTo ? rawDateTo : endOfMonth(endOfDay(new Date()))
   const [updateBudget] = useMutation(UpdateBudgetDocument, {
     refetchQueries: [
       {
