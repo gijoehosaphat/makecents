@@ -1,14 +1,34 @@
-import NextAuth from 'next-auth'
-import Google from 'next-auth/providers/google'
-import ApolloAuthAdapter from '@/helpers/api/apolloAuthAdapter'
-import { GOOGLE_ID, GOOGLE_SECRET } from '@/helpers/api/env'
+import NextAuth, { CredentialsSignin } from 'next-auth'
+import Credentials from 'next-auth/providers/credentials'
+import { authenticateUser } from '@/helpers/api/apollo/auth'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: ApolloAuthAdapter(),
   providers: [
-    Google({
-      clientId: GOOGLE_ID,
-      clientSecret: GOOGLE_SECRET,
+    Credentials({
+      credentials: {
+        email: {},
+        password: {},
+      },
+      async authorize(credentials) {
+        const email = credentials?.email
+        const password = credentials?.password
+
+        if (typeof email !== 'string' || typeof password !== 'string') {
+          throw new CredentialsSignin()
+        }
+
+        const user = await authenticateUser({ email, password })
+
+        if (!user) {
+          throw new CredentialsSignin()
+        }
+
+        return {
+          id: String(user.id),
+          email: user.email,
+          name: user.name,
+        }
+      },
     }),
   ],
   session: {
@@ -25,7 +45,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async redirect({ url, baseUrl }) {
       return baseUrl
     },
-    async session({ session }) {
+    async session({ session, token }) {
+      if (token.sub) {
+        session.user.id = token.sub
+      }
       return session
     },
   },

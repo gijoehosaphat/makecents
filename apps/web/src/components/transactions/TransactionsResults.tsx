@@ -11,41 +11,51 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import { DateFilter } from '../shared/DateFilter'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { useMemo, useTransition } from 'react'
 import TransactionRow from './TransactionRow'
-import { StickyHeader } from '../shared/StickyHeader'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
 import { usePaginationParams } from '@/lib/usePaginationParams'
-import { useCurrentBankAccountIds } from '@/lib/useCurrentBankAccountIds'
-import { BankAccountHeader } from '../shared/BankAccountHeader'
-import { TransactionFilter } from '../shared/TransactionFilter'
 import { useTransactionFilterParams } from '@/lib/useTransactionFilterParams'
+import { useBankAccountFilterParams } from '@/lib/useBankAccountFilterParams'
+import { useTransactionSearchParams } from '@/lib/useTransactionSearchParams'
 import { useFilteredTransactions } from '@/lib/useFilteredTransactions'
+import { useAppContext } from '../context/AppContextProvider'
 
-export function Transactions() {
+export function TransactionsResults() {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
+  const { bankAccounts } = useAppContext()
   const t = useTranslations('common')
   const { dateFrom, dateTo } = useDateFilterParams()
   const { categorized, categoryIds } = useTransactionFilterParams()
+  const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
+  const { search } = useTransactionSearchParams()
   const { limit, page, offset } = usePaginationParams()
-  const { bankAccountIds } = useCurrentBankAccountIds()
+  const [, startTransition] = useTransition()
+
+  const filteredBankAccountIds = useMemo(() => {
+    return selectedBankAccountIds || bankAccounts.map((bankAccount) => bankAccount.id)
+  }, [selectedBankAccountIds, bankAccounts])
 
   const { transactions, totalCount, refetchQuery } = useFilteredTransactions({
     limit,
     offset,
-    bankAccountIds: bankAccountIds,
+    bankAccountIds: filteredBankAccountIds,
     dateFrom,
     dateTo,
     excludeSplitTransactions: true,
     categorized,
     categoryIds,
+    search,
   })
 
-  const handlePagination = (event: React.ChangeEvent<unknown>, newPage: number) => {
+  const handlePagination = (
+    event: React.ChangeEvent<unknown>,
+    newPage: number,
+  ) => {
     if (newPage !== page) {
       let queryParams: string[] = []
       if (searchParams) {
@@ -56,20 +66,24 @@ export function Transactions() {
         }
       }
       queryParams.push(`page=${newPage}`)
-      router.push(`${pathname}?${queryParams.join('&')}`)
+      startTransition(() => {
+        router.push(`${pathname}?${queryParams.join('&')}`)
+      })
     }
   }
 
   return (
     <>
-      <BankAccountHeader />
-      <StickyHeader>
-        <DateFilter />
-        <TransactionFilter />
-      </StickyHeader>
       {transactions.length === 0 && (
-        <Box p={10} display={'flex'} justifyContent={'center'} alignItems={'center'}>
-          <Typography variant={'subtitle1'}>{t('transactions.none')}</Typography>
+        <Box
+          p={10}
+          display={'flex'}
+          justifyContent={'center'}
+          alignItems={'center'}
+        >
+          <Typography variant={'subtitle1'}>
+            {t('transactions.none')}
+          </Typography>
         </Box>
       )}
       {transactions.length > 0 && (
@@ -81,6 +95,11 @@ export function Transactions() {
                   <TableCell>
                     <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
                       {t('shared.date')}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
+                      {t('transactions.bankAccount')}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -103,12 +122,16 @@ export function Transactions() {
                       {t('transactions.deposits')}
                     </Typography>
                   </TableCell>
-                  {/* <TableCell /> */}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {transactions.map((transaction) => (
-                  <TransactionRow key={transaction.nodeId} transaction={transaction} refetchQuery={refetchQuery} />
+                  <TransactionRow
+                    key={transaction.nodeId}
+                    transaction={transaction}
+                    refetchQuery={refetchQuery}
+                    showBankAccount
+                  />
                 ))}
               </TableBody>
             </Table>

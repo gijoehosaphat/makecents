@@ -44,7 +44,23 @@ import {
   differenceInCalendarDays,
   differenceInMonths,
   getDaysInMonth,
+  startOfMonth,
+  endOfMonth,
+  endOfDay,
 } from 'date-fns'
+
+// Budget accrual/reconciliation is inherently month-scoped, so when the shared
+// date filter is in "year" or "all time" mode, fall back to the current month.
+function useBudgetPeriod() {
+  const { dateFrom: rawDateFrom, dateTo: rawDateTo, dateRange } = useDateFilterParams()
+  return useMemo(() => {
+    const today = new Date()
+    return {
+      dateFrom: dateRange === 'month' && rawDateFrom ? rawDateFrom : startOfMonth(today),
+      dateTo: dateRange === 'month' && rawDateTo ? rawDateTo : endOfMonth(endOfDay(today)),
+    }
+  }, [dateRange, rawDateFrom, rawDateTo])
+}
 
 const MIN = 0
 const MAX = 150
@@ -71,7 +87,7 @@ function BudgetItem({
   const theme = useTheme()
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
-  const { dateTo } = useDateFilterParams()
+  const { dateTo } = useBudgetPeriod()
   const { bankAccounts } = useAppContext()
   const hoverRef = useRef<HTMLElement>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -301,7 +317,7 @@ export function Budgets() {
   const t = useTranslations('common')
   const { transactionsGroupedByBudget } = useTransactionsGroupedByBudgets()
   const { user, bankAccounts } = useAppContext()
-  const { dateTo, dateFrom } = useDateFilterParams()
+  const { dateTo, dateFrom } = useBudgetPeriod()
   const [previewOpen, setPreviewOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [previewTransactions, setPreviewTransactions] = useState<Transaction[]>(

@@ -16,7 +16,7 @@ interface TransactionsByCategory {
   transactions: Transaction[]
 }
 
-export function TransactionsByCategory({ dateFrom, dateTo }: { dateFrom: Date; dateTo: Date }) {
+export function TransactionsByCategory({ dateFrom, dateTo }: { dateFrom?: Date; dateTo?: Date }) {
   const { user, bankAccounts } = useAppContext()
   const { transactions, transactionsSansTransfers } = useTransactions({
     limit: 1000, //TODO: Optional non-paginated way?

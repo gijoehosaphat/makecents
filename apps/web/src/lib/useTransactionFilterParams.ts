@@ -15,27 +15,31 @@ export function useTransactionFilterParams() {
     return undefined
   }, [searchParams])
 
-  const categoryParam = useMemo(() => {
-    const val = Number(searchParams?.get('category'))
-    if (val) {
-      return val
+  const categoryIdsParam = useMemo(() => {
+    const val = searchParams?.get('categoryIds')
+    if (!val) {
+      return undefined
     }
-    return undefined
+    const ids = val
+      .split(',')
+      .map((id) => Number(id))
+      .filter((id) => !Number.isNaN(id))
+    return ids.length > 0 ? ids : undefined
   }, [searchParams])
 
   const [categorized, setCategorized] = useState<boolean | undefined>(categorizedParam)
-  const [category, setCategory] = useState<number | undefined>(categoryParam)
+  const [categoryIds, setCategoryIds] = useState<number[] | undefined>(categoryIdsParam)
 
   useEffect(() => {
     setCategorized(categorizedParam)
   }, [categorizedParam])
 
   useEffect(() => {
-    setCategory(categoryParam)
-  }, [categoryParam])
+    setCategoryIds(categoryIdsParam)
+  }, [categoryIdsParam])
 
   return {
     categorized,
-    category,
+    categoryIds,
   }
 }
