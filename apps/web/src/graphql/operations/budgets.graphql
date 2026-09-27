@@ -1,5 +1,5 @@
 mutation CreateBudget(
-  $userId: Int!
+  $accountId: Int!
   $amount: BigInt!
   $name: String!
   $startingAmount: BigInt
@@ -8,7 +8,7 @@ mutation CreateBudget(
   createBudget(
     input: {
       budget: {
-        userId: $userId
+        accountId: $accountId
         amount: $amount
         name: $name
         startingAmount: $startingAmount
@@ -49,8 +49,8 @@ mutation UpdateBudget(
   }
 }
 
-mutation CreateBudgetCategory($userId: Int!, $budgetId: Int!, $categoryId: Int!) {
-  createBudgetCategory(input: { budgetCategory: { userId: $userId, budgetId: $budgetId, categoryId: $categoryId } }) {
+mutation CreateBudgetCategory($accountId: Int!, $budgetId: Int!, $categoryId: Int!) {
+  createBudgetCategory(input: { budgetCategory: { accountId: $accountId, budgetId: $budgetId, categoryId: $categoryId } }) {
     budgetCategory {
       ...BudgetCategoryFragment
     }
@@ -73,8 +73,8 @@ mutation DeleteBudgetCategory($nodeId: ID!) {
   }
 }
 
-query GetBudgetsByUserId($userId: Int!) {
-  allBudgets(filter: { userId: { equalTo: $userId } }) {
+query GetBudgetsByAccountId($accountId: Int!) {
+  allBudgets(filter: { accountId: { equalTo: $accountId } }) {
     nodes {
       ...BudgetFragment
       budgetCategoriesByBudgetId {
@@ -89,8 +89,8 @@ query GetBudgetsByUserId($userId: Int!) {
   }
 }
 
-query GetBudgetCategoriesByUserId($equalTo: Int!) {
-  allBudgetCategories(filter: { userId: { equalTo: $equalTo } }) {
+query GetBudgetCategoriesByAccountId($accountId: Int!) {
+  allBudgetCategories(filter: { accountId: { equalTo: $accountId } }) {
     nodes {
       ...BudgetCategoryFragment
       categoryByCategoryId {
@@ -100,8 +100,8 @@ query GetBudgetCategoriesByUserId($equalTo: Int!) {
   }
 }
 
-query GetTransactionsGroupedByBudget($userId: Int!) {
-  allBudgets(filter: { userId: { equalTo: $userId } }) {
+query GetTransactionsGroupedByBudget($accountId: Int!) {
+  allBudgets(filter: { accountId: { equalTo: $accountId } }) {
     nodes {
       ...BudgetFragment
       budgetCategoriesByBudgetId {

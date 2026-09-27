@@ -1,13 +1,13 @@
-query GetCategories($userId: Int) {
-  allCategories(filter: { userId: { equalTo: $userId } }) {
+query GetCategories($accountId: Int!) {
+  allCategories(filter: { accountId: { equalTo: $accountId } }) {
     nodes {
       ...CategoryFragment
     }
   }
 }
 
-mutation CreateCategory($userId: Int!, $name: String, $regex: String) {
-  createCategory(input: { category: { userId: $userId, name: $name, regex: $regex } }) {
+mutation CreateCategory($accountId: Int!, $name: String, $regex: String) {
+  createCategory(input: { category: { accountId: $accountId, name: $name, regex: $regex } }) {
     category {
       ...CategoryFragment
     }

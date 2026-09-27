@@ -34,7 +34,7 @@ function parseDate(dateString: string) {
 export function Dropzone({ children }: { children: React.ReactNode }) {
   const t = useTranslations('common')
   const { enqueueSnackbar } = useSnackbar()
-  const { user } = useAppContext()
+  const { currentAccountId } = useAppContext()
   const theme = useTheme()
   const { uploadHandler } = useUploadHandler()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -42,8 +42,8 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
 
   const processOfxData = useCallback(
     (parsedFiles: OpenFinancialExchangeFormat[]) => {
-      const userId = user?.id
-      if (userId) {
+      const accountId = currentAccountId
+      if (accountId) {
         const accountGroups: AccountGroup[] = []
 
         const addAccountGroup = (newAccountGroup: AccountGroup) => {
@@ -86,7 +86,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
                 bankAccountId: bankAccount.STMTRS.BANKACCTFROM.ACCTID,
                 type: bankAccount.STMTRS.BANKACCTFROM.ACCTTYPE,
                 currency: bankAccount.STMTRS.CURDEF,
-                userId,
+                accountId,
               },
               reconciliation: {
                 balance: Number((Number(bankAccount.STMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
@@ -108,7 +108,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
                 bankAccountId: creditCardAccount.CCSTMTRS.CCACCTFROM.ACCTID,
                 type: 'CREDIT_CARD',
                 currency: creditCardAccount.CCSTMTRS.CURDEF,
-                userId,
+                accountId,
               },
               reconciliation: {
                 balance: Number((Number(creditCardAccount.CCSTMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
@@ -149,7 +149,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
         })
       }
     },
-    [uploadHandler, user?.id]
+    [uploadHandler, currentAccountId]
   )
 
   const processParsedFiles = useCallback(

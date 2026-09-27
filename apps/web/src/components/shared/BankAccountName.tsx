@@ -19,7 +19,7 @@ export default function BankAccountName({
   bankAccountId: number
   bankAccount: BankAccount | undefined
 }) {
-  const { user } = useAppContext()
+  const { user, currentAccountId } = useAppContext()
   const [updateBankAccountName] = useMutation(UpdateBankAccountNameDocument, {
     refetchQueries: [
       {
@@ -52,7 +52,7 @@ export default function BankAccountName({
       variables: {
         name: String(accountName),
         id: bankAccountId,
-        userId: Number(user?.id),
+        accountId: Number(currentAccountId),
       },
     })
     setIsEditting(false)

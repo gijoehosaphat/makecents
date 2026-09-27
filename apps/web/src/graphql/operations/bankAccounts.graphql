@@ -1,6 +1,6 @@
-mutation UpsertBankAccount($userId: Int!, $type: String!, $currency: String!, $bankAccountId: String!) {
+mutation UpsertBankAccount($accountId: Int!, $type: String!, $currency: String!, $bankAccountId: String!) {
   upsertBankAccount(
-    input: { bankAccount: { userId: $userId, type: $type, currency: $currency, bankAccountId: $bankAccountId } }
+    input: { bankAccount: { accountId: $accountId, type: $type, currency: $currency, bankAccountId: $bankAccountId } }
   ) {
     bankAccount {
       ...BankAccountFragment
@@ -18,16 +18,16 @@ mutation UpsertBankAccountReconciliation($bankAccountId: Int!, $balance: BigInt!
   }
 }
 
-mutation UpdateBankAccountName($id: Int!, $userId: Int!, $name: String!) {
-  upsertBankAccount(input: { bankAccount: { name: $name, userId: $userId } }, where: { id: $id }) {
+mutation UpdateBankAccountName($id: Int!, $accountId: Int!, $name: String!) {
+  upsertBankAccount(input: { bankAccount: { name: $name, accountId: $accountId } }, where: { id: $id }) {
     bankAccount {
       ...BankAccountFragment
     }
   }
 }
 
-mutation UpdateBankAccountClosed($id: Int!, $userId: Int!, $closed: Boolean!) {
-  upsertBankAccount(input: { bankAccount: { closed: $closed, userId: $userId } }, where: { id: $id }) {
+mutation UpdateBankAccountClosed($id: Int!, $accountId: Int!, $closed: Boolean!) {
+  upsertBankAccount(input: { bankAccount: { closed: $closed, accountId: $accountId } }, where: { id: $id }) {
     bankAccount {
       ...BankAccountFragment
     }

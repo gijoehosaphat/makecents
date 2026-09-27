@@ -1,6 +1,6 @@
 'use client'
 
-import { Category, Transaction, User } from '@/graphql/types'
+import { Category, Transaction } from '@/graphql/types'
 import { useLazyQuery } from '@apollo/client/react'
 import { Close } from '@mui/icons-material'
 import {
@@ -31,12 +31,10 @@ import { GetTransactionDocument, TransactionSearchDocument } from '@/graphql/ope
 export default function CategoryMatch({
   open,
   category,
-  user,
   handleComplete,
 }: {
   open: boolean
   category: Category
-  user: User | null
   handleComplete: () => void
 }) {
   //TODO: Use Apollo query tool!

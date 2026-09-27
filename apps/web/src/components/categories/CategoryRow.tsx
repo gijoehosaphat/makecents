@@ -1,6 +1,6 @@
 'use client'
 
-import { Category, User } from '@/graphql/types'
+import { Category } from '@/graphql/types'
 import { useMutation } from '@apollo/client/react'
 import { MoreVert } from '@mui/icons-material'
 import { IconButton, Menu, MenuItem, TableCell, TableRow, TextField, Typography } from '@mui/material'
@@ -12,13 +12,13 @@ import SaveCancel from '@/components/forms/SaveCancel'
 import { CategoryGroupEditor } from './CategoryGroupEditor'
 import { DeleteCategoryByIdDocument, GetCategoriesDocument, UpdateCategoryDocument } from '@/graphql/operations'
 
-export default function CategoryRow({ category, user }: { category: Category | null; user: User | null }) {
+export default function CategoryRow({ category, accountId }: { category: Category | null; accountId: number | null }) {
   const [deleteCategoryById] = useMutation(DeleteCategoryByIdDocument, {
     refetchQueries: [
       {
         query: GetCategoriesDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId: Number(accountId),
         },
       },
     ],
@@ -28,13 +28,13 @@ export default function CategoryRow({ category, user }: { category: Category | n
       {
         query: GetCategoriesDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId: Number(accountId),
         },
       },
     ],
   })
   const t = useTranslations('common')
-  const [fields, setFields] = useState({ name: '', regex: '', userId: Number(user?.id) })
+  const [fields, setFields] = useState({ name: '', regex: '' })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedCategory, setSelectedCategory] = useState<null | Category>(null)
   const [isEditting, setIsEditting] = useState(false)
@@ -171,7 +171,6 @@ export default function CategoryRow({ category, user }: { category: Category | n
           <CategoryMatch
             open={isFindOpen}
             category={selectedCategory}
-            user={user}
             handleComplete={handleMatchComplete}
           />
         )}

@@ -33,6 +33,7 @@ export function AppContextProvider({
 }) {
   const params = useParams()
   const [userContextValue, setUserContextValue] = useState<AppContext>(defaultAppContext)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     if (user && accounts && bankAccounts) {
@@ -42,7 +43,13 @@ export function AppContextProvider({
     }
   }, [user, accounts, bankAccounts, params?.accountId, params?.bankAccountId])
 
-  return <AppContext.Provider value={userContextValue}>{children}</AppContext.Provider>
+  // Queries only carry the session cookie from the browser. Rendering children during SSR would
+  // run them anonymously and hydrate the empty results, so wait until mounted.
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  return <AppContext.Provider value={userContextValue}>{isMounted ? children : null}</AppContext.Provider>
 }
 
 export function useAppContext() {

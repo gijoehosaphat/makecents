@@ -17,7 +17,7 @@ interface TransactionsByCategory {
 }
 
 export function TransactionsByCategory({ dateFrom, dateTo }: { dateFrom?: Date; dateTo?: Date }) {
-  const { user, bankAccounts } = useAppContext()
+  const { currentAccountId, bankAccounts } = useAppContext()
   const { transactions, transactionsSansTransfers } = useTransactions({
     limit: 1000, //TODO: Optional non-paginated way?
     offset: 0,
@@ -28,14 +28,14 @@ export function TransactionsByCategory({ dateFrom, dateTo }: { dateFrom?: Date; 
   const [getCategories, getCategoriesResults] = useLazyQuery(GetCategoriesDocument)
 
   useEffect(() => {
-    if (user?.id) {
+    if (currentAccountId) {
       getCategories({
         variables: {
-          userId: user?.id,
+          accountId: currentAccountId,
         },
       })
     }
-  }, [getCategories, user?.id])
+  }, [getCategories, currentAccountId])
 
   const categories: Category[] = useMemo(() => {
     return (getCategoriesResults?.data?.allCategories?.nodes as Category[]) || []

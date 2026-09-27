@@ -13,10 +13,10 @@ import { GetCategoriesDocument } from '@/graphql/operations'
 
 export default function Categories() {
   const t = useTranslations('common')
-  const { user } = useAppContext()
+  const { currentAccountId } = useAppContext()
   const query = useSuspenseQuery<Query>(GetCategoriesDocument, {
     variables: {
-      userId: Number(user?.id),
+      accountId: Number(currentAccountId),
     },
   })
 
@@ -30,7 +30,7 @@ export default function Categories() {
 
   return (
     <>
-      {!!user && <CategoryAdd user={user} />}
+      {!!currentAccountId && <CategoryAdd accountId={currentAccountId} />}
       {categories.length > 0 && (
         <TableContainer>
           <Table>
@@ -65,7 +65,7 @@ export default function Categories() {
             </TableHead>
             <TableBody>
               {categories.map((category) => (
-                <CategoryRow key={category.nodeId} category={category} user={user} />
+                <CategoryRow key={category.nodeId} category={category} accountId={currentAccountId} />
               ))}
             </TableBody>
           </Table>

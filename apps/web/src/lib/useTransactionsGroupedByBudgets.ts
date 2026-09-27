@@ -5,11 +5,11 @@ import { useMemo } from 'react'
 import { GetTransactionsGroupedByBudgetDocument } from '@/graphql/operations'
 
 export function useTransactionsGroupedByBudgets() {
-  const { user } = useAppContext()
+  const { currentAccountId } = useAppContext()
 
   const query = useSuspenseQuery(GetTransactionsGroupedByBudgetDocument, {
     variables: {
-      userId: user?.id || 0, //TODO Fix this
+      accountId: currentAccountId || 0, //TODO Fix this
     },
   })
 

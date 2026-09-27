@@ -1,4 +1,4 @@
-import { Category, Budget, BudgetCategory, User } from '@/graphql/types'
+import { Category, Budget, BudgetCategory } from '@/graphql/types'
 import { Add } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
@@ -9,26 +9,26 @@ import CategoryMenu from '../shared/CategoryMenu'
 import {
   CreateBudgetCategoryDocument,
   DeleteBudgetCategoryDocument,
-  GetBudgetCategoriesByUserIdDocument,
-  GetBudgetCategoriesByUserId,
-  GetBudgetsByUserIdDocument,
+  GetBudgetCategoriesByAccountIdDocument,
+  GetBudgetCategoriesByAccountId,
+  GetBudgetsByAccountIdDocument,
   GetCategoriesDocument,
 } from '@/graphql/operations'
 import { useCategories } from '@/lib/useCategories'
 
-function refetch(user: User | null) {
+function refetch(accountId: number | null) {
   return {
     refetchQueries: [
       {
-        query: GetBudgetsByUserIdDocument,
+        query: GetBudgetsByAccountIdDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId: Number(accountId),
         },
       },
       {
-        query: GetBudgetCategoriesByUserIdDocument,
+        query: GetBudgetCategoriesByAccountIdDocument,
         variables: {
-          equalTo: Number(user?.id),
+          accountId: Number(accountId),
         },
       },
     ],
@@ -42,25 +42,25 @@ export default function CategoryEditor({
   budget: Budget
   budgetCategories: BudgetCategory[]
 }) {
-  const { user } = useAppContext()
+  const { currentAccountId } = useAppContext()
   const [getCategories] = useLazyQuery(GetCategoriesDocument)
-  const [createBudgetCategory] = useMutation(CreateBudgetCategoryDocument, refetch(user))
-  const [deleteBudgetCategory] = useMutation(DeleteBudgetCategoryDocument, refetch(user))
+  const [createBudgetCategory] = useMutation(CreateBudgetCategoryDocument, refetch(currentAccountId))
+  const [deleteBudgetCategory] = useMutation(DeleteBudgetCategoryDocument, refetch(currentAccountId))
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const isMenuOpen = Boolean(menuAnchorEl)
   const { categories } = useCategories()
 
-  const queryBudgetCategories = useSuspenseQuery<GetBudgetCategoriesByUserId>(GetBudgetCategoriesByUserIdDocument, {
+  const queryBudgetCategories = useSuspenseQuery<GetBudgetCategoriesByAccountId>(GetBudgetCategoriesByAccountIdDocument, {
     variables: {
-      equalTo: Number(user?.id),
+      accountId: Number(currentAccountId),
     },
   })
 
   async function handleAddBudgetCategory(categoryId: number) {
-    if (user?.id) {
+    if (currentAccountId) {
       await createBudgetCategory({
         variables: {
-          userId: user?.id,
+          accountId: currentAccountId,
           budgetId: budget.id,
           categoryId,
         },
@@ -91,14 +91,14 @@ export default function CategoryEditor({
   }
 
   useEffect(() => {
-    if (isMenuOpen) {
+    if (isMenuOpen && currentAccountId) {
       getCategories({
         variables: {
-          userId: user?.id,
+          accountId: currentAccountId,
         },
       })
     }
-  }, [isMenuOpen, getCategories, user?.id])
+  }, [isMenuOpen, getCategories, currentAccountId])
 
   const currentCategories = useMemo(() => {
     return budgetCategories.map((budgetCategory) => budgetCategory.categoryByCategoryId as Category) || []
