@@ -24,7 +24,7 @@ import { useMutation, useSuspenseQuery } from '@apollo/client/react'
 import {
   GetAllBudgetReconsiliationsDocument,
   GetAllBudgetReconsiliations,
-  GetBudgetsByUserIdDocument,
+  GetBudgetsByAccountIdDocument,
   GetTransactionAggregatesByBankAccountDocument,
   GetTransactionAggregatesByBankAccount,
   UpsertBudgetReconsiliationDocument,
@@ -316,7 +316,7 @@ function BudgetItem({
 export function Budgets() {
   const t = useTranslations('common')
   const { transactionsGroupedByBudget } = useTransactionsGroupedByBudgets()
-  const { user, bankAccounts } = useAppContext()
+  const { currentAccountId, bankAccounts } = useAppContext()
   const { dateTo, dateFrom } = useBudgetPeriod()
   const [previewOpen, setPreviewOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -326,9 +326,9 @@ export function Budgets() {
   const [selectedBudgetItem, setSelectedBudgetItem] =
     useState<BudgetItem | null>(null)
 
-  const query = useSuspenseQuery<Query>(GetBudgetsByUserIdDocument, {
+  const query = useSuspenseQuery<Query>(GetBudgetsByAccountIdDocument, {
     variables: {
-      userId: Number(user?.id),
+      accountId: Number(currentAccountId),
     },
   })
 
@@ -614,7 +614,7 @@ export function Budgets() {
         <BudgetDetails
           open={detailsOpen}
           budgetItem={selectedBudgetItem}
-          user={user}
+          accountId={currentAccountId}
           handleComplete={handleBudgetItemClose}
         />
       )}

@@ -1,14 +1,17 @@
 query GetUserAndAccountsAndBankAccountsByEmail($email: String!) {
   userByEmail(email: $email) {
     ...UserFragment
-    bankAccountsByUserId {
+    accountMembersByUserId {
       nodes {
-        ...BankAccountFragment
-      }
-    }
-    accountsByUserId {
-      nodes {
-        ...AccountFragment
+        role
+        accountByAccountId {
+          ...AccountFragment
+          bankAccountsByAccountId {
+            nodes {
+              ...BankAccountFragment
+            }
+          }
+        }
       }
     }
   }

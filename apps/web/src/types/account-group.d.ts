@@ -2,7 +2,7 @@ interface InputAccount {
   bankAccountId: string
   type: string
   currency: string
-  userId: number
+  accountId: number
 }
 
 interface InputReconciliation {

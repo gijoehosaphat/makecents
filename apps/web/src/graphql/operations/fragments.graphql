@@ -14,6 +14,7 @@ fragment AccountFragment on Account {
   expiresAt
   id
   idToken
+  name
   nodeId
   provider
   providerAccountId
@@ -36,7 +37,7 @@ fragment BankAccountFragment on BankAccount {
   nodeId
   type
   updatedAt
-  userId
+  accountId
 }
 
 fragment TransactionFragment on Transaction {
@@ -78,7 +79,7 @@ fragment BankCsvDefinitionFragment on BankCsvDefinition {
   name
   nodeId
   updatedAt
-  userId
+  accountId
 }
 
 fragment CategoryFragment on Category {
@@ -87,7 +88,7 @@ fragment CategoryFragment on Category {
   name
   nodeId
   updatedAt
-  userId
+  accountId
   regex
 }
 
@@ -101,7 +102,7 @@ fragment TransferFragment on Transfer {
 }
 
 fragment BudgetFragment on Budget {
-  userId
+  accountId
   amount
   createdAt
   id
@@ -113,7 +114,7 @@ fragment BudgetFragment on Budget {
 }
 
 fragment BudgetCategoryFragment on BudgetCategory {
-  userId
+  accountId
   budgetId
   categoryId
   nodeId

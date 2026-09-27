@@ -7,6 +7,8 @@ export async function POST(req: NextRequest) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      // The API identifies the user from the Auth.js session cookie.
+      Cookie: req.headers.get('cookie') || '',
     },
     body,
   })

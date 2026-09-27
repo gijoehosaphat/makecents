@@ -1,6 +1,5 @@
 'use client'
 
-import { User } from '@/graphql/types'
 import { useMutation } from '@apollo/client/react'
 import { Add } from '@mui/icons-material'
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, TextField } from '@mui/material'
@@ -9,19 +8,19 @@ import { useState } from 'react'
 import SaveCancel from '@/components/forms/SaveCancel'
 import { CreateCategoryDocument, GetCategoriesDocument } from '@/graphql/operations'
 
-export default function CategoryAdd({ user }: { user: User }) {
+export default function CategoryAdd({ accountId }: { accountId: number }) {
   const [createCategory] = useMutation(CreateCategoryDocument, {
     refetchQueries: [
       {
         query: GetCategoriesDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId,
         },
       },
     ],
   })
   const t = useTranslations('common')
-  const [fields, setFields] = useState({ name: '', regex: '', userId: Number(user.id) })
+  const [fields, setFields] = useState({ name: '', regex: '' })
   const [isEditting, setIsEditting] = useState(false)
 
   function handleChange(field: string, value: string) {
@@ -33,7 +32,7 @@ export default function CategoryAdd({ user }: { user: User }) {
 
   async function handleAddCategory() {
     if (fields.name) {
-      await createCategory({ variables: fields })
+      await createCategory({ variables: { ...fields, accountId } })
       handleClose()
     }
   }

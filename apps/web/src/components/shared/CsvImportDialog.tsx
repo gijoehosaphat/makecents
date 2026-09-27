@@ -78,7 +78,7 @@ function findDefinitionForAccount(
 
 export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: string; csvText: string; onClose: () => void }) {
   const t = useTranslations('common')
-  const { user, bankAccounts } = useAppContext()
+  const { currentAccountId, bankAccounts } = useAppContext()
   const { importCsvTransactions, uploadHandler } = useUploadHandler()
 
   const [step, setStep] = useState<Step>('account')
@@ -91,8 +91,8 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
   const [newAccountCurrency, setNewAccountCurrency] = useState('USD')
 
   const { data: definitionsData } = useQuery(GetBankCsvDefinitionsDocument, {
-    variables: { userId: user?.id },
-    skip: !user?.id,
+    variables: { accountId: Number(currentAccountId) },
+    skip: !currentAccountId,
   })
   const definitions: BankCsvDefinition[] = useMemo(
     () => (definitionsData?.allBankCsvDefinitions?.nodes as BankCsvDefinition[]) ?? [],
@@ -267,7 +267,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
   }
 
   async function handleImport() {
-    if (!user?.id) {
+    if (!currentAccountId) {
       return
     }
     setIsProcessing(true)
@@ -283,7 +283,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
               bankAccountId: accountId,
               type: existingAccount?.type ?? 'CHECKING',
               currency: existingAccount?.currency ?? 'USD',
-              userId: user.id,
+              accountId: currentAccountId,
             },
             transactions,
           })
@@ -291,7 +291,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
 
         if (useNewDefinition) {
           await createBankCsvDefinition({
-            variables: { userId: user.id, name: definitionName || fileName, mapping: activeMapping },
+            variables: { accountId: currentAccountId, name: definitionName || fileName, mapping: activeMapping },
           })
         }
 
@@ -304,7 +304,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
       if (useNewAccount) {
         const response = await upsertBankAccount({
           variables: {
-            userId: user.id,
+            accountId: currentAccountId,
             type: newAccountType,
             currency: newAccountCurrency,
             bankAccountId: crypto.randomUUID(),
@@ -319,10 +319,10 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
         return
       }
 
-      if (useNewDefinition && user?.id) {
+      if (useNewDefinition) {
         await createBankCsvDefinition({
           variables: {
-            userId: user.id,
+            accountId: currentAccountId,
             name: definitionName || fileName,
             mapping: activeMapping,
             bankAccountId,

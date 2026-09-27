@@ -1,6 +1,6 @@
 'use client'
 
-import { Budget, Category, User } from '@/graphql/types'
+import { Budget, Category } from '@/graphql/types'
 import { useMutation } from '@apollo/client/react'
 import { MoreVert } from '@mui/icons-material'
 import {
@@ -26,7 +26,7 @@ import CurrencyTextField from '../shared/CurrencyTextField'
 import { formatMoney, formatMoneyCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import CategoryEditor from './CategoryEditor'
-import { DeleteBudgetDocument, GetBudgetsByUserIdDocument, UpdateBudgetDocument } from '@/graphql/operations'
+import { DeleteBudgetDocument, GetBudgetsByAccountIdDocument, UpdateBudgetDocument } from '@/graphql/operations'
 import { DatePicker } from '@mui/x-date-pickers'
 import { parse } from 'date-fns'
 
@@ -35,16 +35,15 @@ interface Fields {
   amount: number
   startingAmount: number | null
   effectiveDate: Date | null
-  userId: number
 }
 
-export default function BudgetRow({ budget, user }: { budget: Budget; user: User | null }) {
+export default function BudgetRow({ budget, accountId }: { budget: Budget; accountId: number | null }) {
   const [deleteBudget] = useMutation(DeleteBudgetDocument, {
     refetchQueries: [
       {
-        query: GetBudgetsByUserIdDocument,
+        query: GetBudgetsByAccountIdDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId: Number(accountId),
         },
       },
     ],
@@ -52,9 +51,9 @@ export default function BudgetRow({ budget, user }: { budget: Budget; user: User
   const [updateBudget] = useMutation(UpdateBudgetDocument, {
     refetchQueries: [
       {
-        query: GetBudgetsByUserIdDocument,
+        query: GetBudgetsByAccountIdDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId: Number(accountId),
         },
       },
     ],
@@ -67,7 +66,6 @@ export default function BudgetRow({ budget, user }: { budget: Budget; user: User
     amount: budget.amount,
     startingAmount: budget.startingAmount,
     effectiveDate: budget.effectiveDate,
-    userId: Number(user?.id),
   })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isEditting, setIsEditting] = useState(false)

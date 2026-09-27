@@ -1,6 +1,5 @@
 'use client'
 
-import { User } from '@/graphql/types'
 import { useMutation } from '@apollo/client/react'
 import { Add } from '@mui/icons-material'
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, TextField } from '@mui/material'
@@ -8,18 +7,18 @@ import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import SaveCancel from '@/components/forms/SaveCancel'
 import CurrencyTextField from '../shared/CurrencyTextField'
-import { CreateBudgetDocument, GetBudgetsByUserIdDocument } from '@/graphql/operations'
+import { CreateBudgetDocument, GetBudgetsByAccountIdDocument } from '@/graphql/operations'
 
-export default function BudgetAdd({ user }: { user: User }) {
+export default function BudgetAdd({ accountId }: { accountId: number }) {
   const t = useTranslations('common')
-  const [fields, setFields] = useState({ name: '', amount: 0, userId: Number(user.id) })
+  const [fields, setFields] = useState({ name: '', amount: 0 })
   const [isEditting, setIsEditting] = useState(false)
   const [createBudget] = useMutation(CreateBudgetDocument, {
     refetchQueries: [
       {
-        query: GetBudgetsByUserIdDocument,
+        query: GetBudgetsByAccountIdDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId,
         },
       },
     ],
@@ -38,7 +37,7 @@ export default function BudgetAdd({ user }: { user: User }) {
         variables: {
           name: fields.name,
           amount: fields.amount * 100,
-          userId: fields.userId,
+          accountId,
         },
       })
       handleClose()

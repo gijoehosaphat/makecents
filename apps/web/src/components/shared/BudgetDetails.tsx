@@ -1,6 +1,5 @@
 'use client'
 
-import { User } from '@/graphql/types'
 import {
   Box,
   Dialog,
@@ -27,7 +26,7 @@ import CurrencyTextField from './CurrencyTextField'
 import SaveCancel from '../forms/SaveCancel'
 import { DatePicker } from '@mui/x-date-pickers'
 import {
-  GetBudgetsByUserIdDocument,
+  GetBudgetsByAccountIdDocument,
   UpdateBudgetDocument,
 } from '@/graphql/operations'
 import { useMutation } from '@apollo/client/react'
@@ -37,18 +36,17 @@ interface Fields {
   amount: number
   startingAmount: number | null
   effectiveDate: Date | null
-  userId: number
 }
 
 export default function BudgetDetails({
   open,
   budgetItem,
-  user,
+  accountId,
   handleComplete,
 }: {
   open: boolean
   budgetItem: BudgetItem | null
-  user: User | null
+  accountId: number | null
   handleComplete: () => void
 }) {
   const t = useTranslations('common')
@@ -60,9 +58,9 @@ export default function BudgetDetails({
   const [updateBudget] = useMutation(UpdateBudgetDocument, {
     refetchQueries: [
       {
-        query: GetBudgetsByUserIdDocument,
+        query: GetBudgetsByAccountIdDocument,
         variables: {
-          userId: Number(user?.id),
+          accountId: Number(accountId),
         },
       },
     ],
@@ -74,7 +72,6 @@ export default function BudgetDetails({
     effectiveDate: budgetItem?.budget.effectiveDate
       ? new Date(budgetItem.budget.effectiveDate)
       : null,
-    userId: user ? Number(user.id) : 0,
   })
 
   const total = useMemo(() => {

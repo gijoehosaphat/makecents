@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typog
 import BudgetRow from './BudgetRow'
 import { useMemo } from 'react'
 import {
-  GetBudgetsByUserIdDocument,
+  GetBudgetsByAccountIdDocument,
   GetTransactionAggregatesByBankAccountDocument,
   GetTransactionAggregatesByBankAccount,
 } from '@/graphql/operations'
@@ -18,12 +18,12 @@ import { Money } from '../shared/Money'
 
 export default function Budgets() {
   const t = useTranslations('common')
-  const { user, bankAccounts } = useAppContext()
+  const { currentAccountId, bankAccounts } = useAppContext()
   const { dateFrom, dateTo } = useDateFilterParams()
 
-  const query = useSuspenseQuery<Query>(GetBudgetsByUserIdDocument, {
+  const query = useSuspenseQuery<Query>(GetBudgetsByAccountIdDocument, {
     variables: {
-      userId: Number(user?.id),
+      accountId: Number(currentAccountId),
     },
   })
 
@@ -56,7 +56,7 @@ export default function Budgets() {
 
   return (
     <>
-      {!!user && <BudgetAdd user={user} />}
+      {!!currentAccountId && <BudgetAdd accountId={currentAccountId} />}
       <Typography>Deposits: </Typography>
       {bankAccounts[0].currency && (
         <Money amountInCents={depositTotal} currency={bankAccounts[0].currency} colored={true} />
@@ -103,7 +103,7 @@ export default function Budgets() {
           </TableHead>
           <TableBody>
             {budgets.map((budget) => (
-              <BudgetRow key={budget.nodeId} budget={budget} user={user} />
+              <BudgetRow key={budget.nodeId} budget={budget} accountId={currentAccountId} />
             ))}
           </TableBody>
         </Table>

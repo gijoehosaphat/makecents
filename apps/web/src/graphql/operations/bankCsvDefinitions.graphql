@@ -1,14 +1,14 @@
-query GetBankCsvDefinitions($userId: Int) {
-  allBankCsvDefinitions(filter: { userId: { equalTo: $userId } }) {
+query GetBankCsvDefinitions($accountId: Int!) {
+  allBankCsvDefinitions(filter: { accountId: { equalTo: $accountId } }) {
     nodes {
       ...BankCsvDefinitionFragment
     }
   }
 }
 
-mutation CreateBankCsvDefinition($userId: Int!, $name: String!, $mapping: JSON!, $bankAccountId: Int) {
+mutation CreateBankCsvDefinition($accountId: Int!, $name: String!, $mapping: JSON!, $bankAccountId: Int) {
   createBankCsvDefinition(
-    input: { bankCsvDefinition: { userId: $userId, name: $name, mapping: $mapping, bankAccountId: $bankAccountId } }
+    input: { bankCsvDefinition: { accountId: $accountId, name: $name, mapping: $mapping, bankAccountId: $bankAccountId } }
   ) {
     bankCsvDefinition {
       ...BankCsvDefinitionFragment

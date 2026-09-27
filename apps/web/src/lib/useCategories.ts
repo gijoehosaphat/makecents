@@ -5,11 +5,11 @@ import { useAppContext } from '@/components/context/AppContextProvider'
 import { GetCategoriesDocument } from '@/graphql/operations'
 
 export function useCategories() {
-  const { user } = useAppContext()
+  const { currentAccountId } = useAppContext()
 
   const query = useSuspenseQuery(GetCategoriesDocument, {
     variables: {
-      userId: user?.id,
+      accountId: Number(currentAccountId),
     },
   })
 

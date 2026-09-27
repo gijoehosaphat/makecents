@@ -1,15 +1,28 @@
 import { postgraphile, PostGraphileOptions } from 'postgraphile'
-import * as cookie from 'cookie'
 import PluginManyCreateUpdateDelete from 'postgraphile-plugin-many-create-update-delete'
 import ConnectionFilterPlugin from 'postgraphile-plugin-connection-filter'
 import { PgMutationUpsertPlugin } from 'postgraphile-upsert-plugin'
 import PgAggregatesPlugin from '@graphile/pg-aggregates'
-import { decode } from 'next-auth/jwt'
+import type { IncomingMessage } from 'http'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
 const isDev = process.env.NODE_ENV !== 'production'
+
+// Decodes the Auth.js (next-auth v5) session cookie the web app sets. @auth/core is ESM-only,
+// so it is loaded with a dynamic import from this CommonJS module.
+async function getSessionToken(req: IncomingMessage | undefined) {
+  if (!req?.headers?.cookie) {
+    return null
+  }
+  const { getToken } = await import('@auth/core/jwt')
+  return getToken({
+    req: { headers: { cookie: req.headers.cookie } },
+    secret: process.env.AUTH_SECRET || '',
+    secureCookie: process.env.AUTH_URL?.startsWith('https') ?? false,
+  })
+}
 
 function getPostgraphileOptions() {
   const postgraphileOptions: PostGraphileOptions = {
@@ -52,24 +65,18 @@ function getPostgraphileOptions() {
     },
     enableQueryBatching: true,
     // legacyRelations: 'omit',
+    // Every request runs as a restricted role so row-level security applies. Without a valid
+    // Auth.js session it can only call the SECURITY DEFINER sign-up/sign-in functions.
     pgSettings: async (req) => {
-      if (req?.headers?.cookie) {
-        const cookies = cookie.parse(req?.headers?.cookie || '')
-        // https://next-auth.js.org/configuration/options#usesecurecookies
-        const cookiePrefix = process.env.AUTH_URL?.startsWith('https') ? '__Secure-' : ''
-        const jwt = await decode({
-          token: cookies[`${cookiePrefix}next-auth.session-token`],
-          secret: process.env.AUTH_SECRET || '',
-        })
-        if (jwt) {
-          return {
-            'jwt.claims.user_id': jwt.sub,
-          }
-        } else {
-          return {}
+      const jwt = await getSessionToken(req)
+      if (jwt?.sub) {
+        return {
+          role: 'makecents_member',
+          'jwt.claims.user_id': jwt.sub,
         }
-      } else {
-        return {}
+      }
+      return {
+        role: 'makecents_anonymous',
       }
     },
     appendPlugins: [PgMutationUpsertPlugin, PluginManyCreateUpdateDelete, ConnectionFilterPlugin, PgAggregatesPlugin],

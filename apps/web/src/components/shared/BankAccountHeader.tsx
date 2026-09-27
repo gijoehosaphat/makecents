@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl'
 import { GetUserAndAccountsAndBankAccountsByEmailDocument, UpdateBankAccountClosedDocument } from '@/graphql/operations'
 
 export function BankAccountHeader() {
-  const { bankAccounts, user } = useAppContext()
+  const { bankAccounts, user, currentAccountId } = useAppContext()
   const { hidden } = useAmountVisibility()
   const theme = useTheme()
   const params = useParams()
@@ -38,7 +38,7 @@ export function BankAccountHeader() {
     updateBankAccountClosed({
       variables: {
         id: bankAccountId,
-        userId: Number(user?.id),
+        accountId: Number(currentAccountId),
         closed: !bankAccount?.closed,
       },
     })
