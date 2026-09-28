@@ -4,17 +4,6 @@ query GetTransaction($nodeId: ID!) {
   }
 }
 
-query GetTransactionWithSplitTransactions($nodeId: ID!) {
-  transaction(nodeId: $nodeId) {
-    ...TransactionFragment
-    transactionsBySplitSourceId {
-      nodes {
-        ...TransactionFragment
-      }
-    }
-  }
-}
-
 query GetTransactionsByBankAccounts(
   $first: Int
   $offset: Int

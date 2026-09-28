@@ -15,7 +15,6 @@ export function useTransactions({
   dateFrom,
   dateTo,
   bankAccountIds,
-  excludeSplitTransactions,
   isCategoryNull,
 }: {
   limit?: number
@@ -23,7 +22,6 @@ export function useTransactions({
   dateFrom?: Date
   dateTo?: Date
   bankAccountIds: number[]
-  excludeSplitTransactions?: boolean
   isCategoryNull?: boolean
 }) {
   const variables = useMemo(() => {
@@ -41,10 +39,6 @@ export function useTransactions({
       tempVariables.offset = offset
     }
 
-    // if (excludeSplitTransactions !== undefined || excludeSplitTransactions !== false) {
-    //   tempVariables.filter.splitSourceId = { isNull: excludeSplitTransactions }
-    // }
-
     if (isCategoryNull !== undefined) {
       tempVariables.filter.categoryId = { isNull: isCategoryNull }
     }
@@ -59,7 +53,7 @@ export function useTransactions({
     tempVariables.orderBy = 'POSTED_DESC'
 
     return tempVariables
-  }, [bankAccountIds, limit, offset, /*excludeSplitTransactions,*/ isCategoryNull, dateFrom, dateTo])
+  }, [bankAccountIds, limit, offset, isCategoryNull, dateFrom, dateTo])
 
   const query = useSuspenseQuery(GetTransactionsByBankAccountsDocument, {
     variables,
