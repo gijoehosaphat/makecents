@@ -46,7 +46,6 @@ export function TransactionsResults() {
     bankAccountIds: filteredBankAccountIds,
     dateFrom,
     dateTo,
-    excludeSplitTransactions: true,
     categorized,
     categoryIds,
     search,
@@ -131,6 +130,7 @@ export function TransactionsResults() {
                     transaction={transaction}
                     refetchQuery={refetchQuery}
                     showBankAccount
+                    rowFilter={{ categorized, categoryIds }}
                   />
                 ))}
               </TableBody>

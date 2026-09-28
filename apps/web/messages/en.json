@@ -86,7 +86,8 @@
       "deposits": "Deposits",
       "bankAccount": "Bank Account",
       "noCategory": "Uncategorized",
-      "searchPlaceholder": "Search name or memo"
+      "searchPlaceholder": "Search name or memo",
+      "splitOfTotal": "of {total}"
     },
     "transfer": {
       "matchTransaction": "Link to the selected matching transaction?",

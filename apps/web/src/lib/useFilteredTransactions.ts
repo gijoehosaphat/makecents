@@ -7,6 +7,7 @@ import {
   GetFilteredTransactionsBySearchDocument,
 } from '@/graphql/operations'
 import { buildTransactionSearchQuery } from './buildTransactionSearchQuery'
+import { buildTransactionRowFilter } from './transactionRowFilter'
 
 export function useFilteredTransactions({
   limit,
@@ -14,7 +15,6 @@ export function useFilteredTransactions({
   dateFrom,
   dateTo,
   bankAccountIds,
-  excludeSplitTransactions,
   categorized,
   categoryIds,
   search,
@@ -24,12 +24,10 @@ export function useFilteredTransactions({
   dateFrom?: Date
   dateTo?: Date
   bankAccountIds: number[]
-  excludeSplitTransactions?: boolean
   categorized?: boolean
   categoryIds?: number[]
   search?: string
 }) {
-  const hasCategoryIds = !!categoryIds && categoryIds.length > 0
   const match = useMemo(() => buildTransactionSearchQuery(search || ''), [search])
 
   const variables = useMemo(() => {
@@ -47,20 +45,12 @@ export function useFilteredTransactions({
       tempVariables.offset = offset
     }
 
-    if (categorized === false) {
-      tempVariables.filter.categoryId = { isNull: true }
-      tempVariables.filter.transferCount = { equalTo: 0 }
-    } else if (hasCategoryIds) {
-      tempVariables.filter.categoryId = { in: categoryIds }
-    } else if (categorized === true) {
-      tempVariables.filter.categoryId = { isNull: false }
-      tempVariables.filter.transferCount = { equalTo: 0 }
-    }
-
-    if (!hasCategoryIds) {
-      if (excludeSplitTransactions !== undefined) {
-        tempVariables.filter.splitSourceId = { isNull: excludeSplitTransactions }
-      }
+    // Split transactions are always returned nested under their parent. A parent is included when it,
+    // or any of its splits, matches the row-level filter.
+    const rowFilter = buildTransactionRowFilter({ categorized, categoryIds })
+    tempVariables.filter.splitSourceId = { isNull: true }
+    if (rowFilter) {
+      tempVariables.filter.or = [rowFilter, { transactionsBySplitSourceId: { some: rowFilter } }]
     }
 
     if (dateFrom !== undefined && dateTo !== undefined) {
@@ -75,7 +65,7 @@ export function useFilteredTransactions({
     }
 
     return tempVariables
-  }, [bankAccountIds, limit, offset, excludeSplitTransactions, categorized, categoryIds, hasCategoryIds, dateFrom, dateTo, match])
+  }, [bankAccountIds, limit, offset, categorized, categoryIds, dateFrom, dateTo, match])
 
   const document = match ? GetFilteredTransactionsBySearchDocument : GetFilteredTransactionsByBankAccountsDocument
   const documentVariables = match ? { ...variables, match } : variables

@@ -85,6 +85,8 @@ function getPostgraphileOptions() {
     graphiqlRoute: '/api/graphiql',
     retryOnInitFail: true,
     graphileBuildOptions: {
+      // Lets a transaction filter match on its split transactions (transactionsBySplitSourceId: { some: ... }).
+      connectionFilterRelations: true,
       // connectionFilterAllowedFieldTypes: [
       //   // 'String',
       //   // 'Int',

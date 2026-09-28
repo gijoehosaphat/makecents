@@ -129,7 +129,6 @@ export function CategorySpendingBarChart() {
     dateFrom,
     dateTo,
     bankAccountIds: bankAccounts.map((ba) => ba.id),
-    // excludeSplitTransactions: false,
   })
   const { categories } = useCategories()
   const { categoryGroups } = useCategoryGroups()

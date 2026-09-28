@@ -40,7 +40,6 @@ export function Transactions() {
     bankAccountIds: bankAccountIds,
     dateFrom,
     dateTo,
-    excludeSplitTransactions: true,
     categorized,
     categoryIds,
   })
@@ -108,7 +107,12 @@ export function Transactions() {
               </TableHead>
               <TableBody>
                 {transactions.map((transaction) => (
-                  <TransactionRow key={transaction.nodeId} transaction={transaction} refetchQuery={refetchQuery} />
+                  <TransactionRow
+                    key={transaction.nodeId}
+                    transaction={transaction}
+                    refetchQuery={refetchQuery}
+                    rowFilter={{ categorized, categoryIds }}
+                  />
                 ))}
               </TableBody>
             </Table>
