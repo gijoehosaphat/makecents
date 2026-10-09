@@ -24,7 +24,7 @@ import {
 } from '@mui/material'
 import { useAppContext } from '../context/AppContextProvider'
 import { GetImportBatchesDocument, MoveImportBatchDocument, UndoImportBatchDocument } from '@/graphql/operations'
-import { bankAccountLabel } from '@/lib/bankAccountLabel'
+import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 
 type PendingAction =
   | { kind: 'undo'; batchId: number; count: number; account: string }
@@ -36,6 +36,7 @@ type PendingAction =
  */
 export default function Imports() {
   const t = useTranslations('common')
+  const accountLabel = useBankAccountLabel()
   const { enqueueSnackbar } = useSnackbar()
   const { currentAccountId, bankAccounts } = useAppContext()
   const [pending, setPending] = useState<PendingAction | null>(null)
@@ -55,7 +56,7 @@ export default function Imports() {
 
   const labelFor = (bankAccountId: number) => {
     const account = bankAccounts?.find((candidate) => candidate.id === bankAccountId)
-    return account ? bankAccountLabel(account, t) : ''
+    return account ? accountLabel(account) : ''
   }
 
   async function confirmPending() {
@@ -149,7 +150,7 @@ export default function Imports() {
                         ?.filter((candidate) => candidate.id !== batch.bankAccountId)
                         .map((candidate) => (
                           <MenuItem key={candidate.id} value={candidate.id}>
-                            {bankAccountLabel(candidate, t)}
+                            {accountLabel(candidate)}
                           </MenuItem>
                         ))}
                     </TextField>

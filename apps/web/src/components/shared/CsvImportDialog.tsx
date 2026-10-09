@@ -60,7 +60,8 @@ import {
   matchAccount,
   scoreOverlap,
 } from '@/lib/csvAccountMatching'
-import { ACCOUNT_TYPES, bankAccountLabel } from '@/lib/bankAccountLabel'
+import { ACCOUNT_TYPES } from '@/lib/bankAccountLabel'
+import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 
 const NEW_ACCOUNT = 'new'
 const PREVIEW_ROWS = 5
@@ -283,7 +284,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
     refetchQueries: [{ query: GetUserAndAccountsAndBankAccountsByEmailDocument, variables: { email: user?.email || '' } }],
   })
 
-  const accountLabel = (account: Parameters<typeof bankAccountLabel>[0]) => bankAccountLabel(account, t)
+  const accountLabel = useBankAccountLabel()
 
   function autoMatchMessage() {
     if (!accountMatch || !matchedAccount) {
