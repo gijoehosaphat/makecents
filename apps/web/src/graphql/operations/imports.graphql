@@ -1,0 +1,44 @@
+mutation ImportTransactions($bankAccountId: Int!, $fileName: String, $transactions: JSON!) {
+  importTransactions(input: { bankAccountId: $bankAccountId, fileName: $fileName, transactions: $transactions }) {
+    importBatch {
+      id
+      createdCount
+      duplicateCount
+    }
+  }
+}
+
+mutation UndoImportBatch($batchId: Int!) {
+  undoImportBatch(input: { batchId: $batchId }) {
+    importBatch {
+      id
+    }
+  }
+}
+
+mutation MoveImportBatch($batchId: Int!, $targetBankAccountId: Int!) {
+  moveImportBatch(input: { batchId: $batchId, targetBankAccountId: $targetBankAccountId }) {
+    importBatch {
+      id
+      createdCount
+      duplicateCount
+    }
+  }
+}
+
+query GetImportBatches($accountId: Int!) {
+  allImportBatches(filter: { bankAccountByBankAccountId: { accountId: { equalTo: $accountId } } }) {
+    nodes {
+      id
+      nodeId
+      createdAt
+      fileName
+      createdCount
+      duplicateCount
+      bankAccountId
+      transactionsByImportBatchId(filter: { splitSourceId: { isNull: true } }) {
+        totalCount
+      }
+    }
+  }
+}

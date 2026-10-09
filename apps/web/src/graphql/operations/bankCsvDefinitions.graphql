@@ -31,3 +31,17 @@ mutation DeleteBankCsvDefinitionById($id: Int!) {
     deletedBankCsvDefinitionId
   }
 }
+
+query GetTransactionsForCsvAccountMatching($filter: TransactionFilter!) {
+  allTransactions(filter: $filter) {
+    nodes {
+      id
+      bankAccountId
+      bankTransactionId
+      amount
+      originalAmount
+      posted
+      originalPosted
+    }
+  }
+}

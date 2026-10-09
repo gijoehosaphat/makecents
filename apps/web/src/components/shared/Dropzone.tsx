@@ -38,10 +38,10 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
   const theme = useTheme()
   const { uploadHandler } = useUploadHandler()
   const [isProcessing, setIsProcessing] = useState(false)
-  const [csvQueue, setCsvQueue] = useState<{ fileName: string; text: string }[]>([])
+  const [csvQueue, setCsvQueue] = useState<{ id: string; fileName: string; text: string }[]>([])
 
   const processOfxData = useCallback(
-    (parsedFiles: OpenFinancialExchangeFormat[]) => {
+    (parsedFiles: OpenFinancialExchangeFormat[], fileName: string) => {
       const accountId = currentAccountId
       if (accountId) {
         const accountGroups: AccountGroup[] = []
@@ -144,7 +144,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
             }
           }
         })
-        uploadHandler(accountGroups).then(() => {
+        uploadHandler(accountGroups, fileName).then(() => {
           setIsProcessing(false)
         })
       }
@@ -153,7 +153,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
   )
 
   const processParsedFiles = useCallback(
-    (parsedFiles: OpenFinancialExchangeFormat[]) => {
+    (parsedFiles: OpenFinancialExchangeFormat[], fileName: string) => {
       parsedFiles.sort((a, b) => {
         const aDate = parseDate(a.OFX.SIGNONMSGSRSV1.SONRS.DTSERVER).getTime()
         const bDate = parseDate(b.OFX.SIGNONMSGSRSV1.SONRS.DTSERVER).getTime()
@@ -165,7 +165,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
           return 0
         }
       })
-      processOfxData(parsedFiles)
+      processOfxData(parsedFiles, fileName)
     },
     [processOfxData]
   )
@@ -182,7 +182,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
         reader.onload = () => {
           const text = String(reader.result || '')
           if (text) {
-            setCsvQueue((queue) => [...queue, { fileName: file.name, text }])
+            setCsvQueue((queue) => [...queue, { id: crypto.randomUUID(), fileName: file.name, text }])
           }
         }
 
@@ -213,7 +213,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
               parsedFiles.push(ofxData)
 
               if (ofxFiles.length === parsedFiles.length) {
-                processParsedFiles(parsedFiles)
+                processParsedFiles(parsedFiles, ofxFiles.map((ofxFile) => ofxFile.name).join(', '))
               }
             })
           }
@@ -276,6 +276,9 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
       </Backdrop>
       {csvQueue[0] && (
         <CsvImportDialog
+          // Keyed per file so each queued file starts fresh instead of inheriting the previous
+          // file's chosen account and template.
+          key={csvQueue[0].id}
           fileName={csvQueue[0].fileName}
           csvText={csvQueue[0].text}
           onClose={() => setCsvQueue((queue) => queue.slice(1))}
