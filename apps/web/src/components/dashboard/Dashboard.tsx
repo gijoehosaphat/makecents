@@ -11,6 +11,7 @@ import { useAppContext } from '../context/AppContextProvider'
 import { DateFilter } from '../shared/DateFilter'
 import { groupBy } from '@/lib/groupBy'
 import { Money } from '../shared/Money'
+import { useBankAccountLabel } from '../shared/BankAccountLabel'
 import React from 'react'
 import {
   GetTransactionAggregatesByBankAccountDocument,
@@ -19,6 +20,7 @@ import {
 
 function BankAccountGroup({ bankAccounts, currency }: { bankAccounts: BankAccount[]; currency: string }) {
   const t = useTranslations('common')
+  const accountLabel = useBankAccountLabel()
   const { dateFrom, dateTo } = useDateFilterParams()
 
   const query = useSuspenseQuery<GetTransactionAggregatesByBankAccount>(GetTransactionAggregatesByBankAccountDocument, {
@@ -35,7 +37,7 @@ function BankAccountGroup({ bankAccounts, currency }: { bankAccounts: BankAccoun
   return (
     <Box sx={{ pt: 4, pb: 4 }}>
       <Typography variant={'h1'}>{t('dashboard.bankAccountGroup', { count: bankAccounts.length })}:</Typography>
-      <Typography variant={'h6'}>({bankAccounts.map((ba) => ba.name).join(', ')})</Typography>
+      <Typography variant={'h6'}>({bankAccounts.map((ba) => accountLabel(ba)).join(', ')})</Typography>
       <Grid container>
         <Grid size={{ xs: 12, md: 4 }}>
           <MoneyGridItem label={t('transactions.deposits')} amountInCents={depositTotal} currency={currency} />

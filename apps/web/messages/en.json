@@ -169,6 +169,12 @@
       "name": "Name",
       "memo": "Memo"
     },
+    "privacy": {
+      "creditCard": "Credit Card",
+      "checkingAccount": "Checking Account",
+      "savingsAccount": "Savings Account",
+      "account": "Account"
+    },
     "csvImport": {
       "title": "Import CSV",
       "summary": "{count, plural, one {# transaction} other {# transactions}} from {start} to {end}.",

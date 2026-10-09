@@ -3,11 +3,13 @@
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { Box, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import { useTranslations } from 'next-intl'
+import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 
 export function BankAccountFilter() {
   const t = useTranslations('common')
+  const accountLabel = useBankAccountLabel()
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -58,7 +60,7 @@ export function BankAccountFilter() {
               ? t('shared.any')
               : bankAccounts
                   .filter((bankAccount) => selectedValues.includes(String(bankAccount.id)))
-                  .map((bankAccount) => bankAccount.name || bankAccount.type)
+                  .map((bankAccount) => accountLabel(bankAccount))
                   .join(', ')
           }
           sx={{ minWidth: 200, maxWidth: 260 }}
@@ -66,7 +68,7 @@ export function BankAccountFilter() {
           {bankAccounts.map((bankAccount) => (
             <MenuItem key={bankAccount.nodeId} value={String(bankAccount.id)}>
               <Checkbox checked={selected.includes(String(bankAccount.id))} />
-              <ListItemText primary={bankAccount.name || bankAccount.type} />
+              <ListItemText primary={accountLabel(bankAccount)} />
             </MenuItem>
           ))}
         </Select>

@@ -2,6 +2,7 @@ import { Box, TableCell, TableRow, Typography } from '@mui/material'
 import CategoryEditor from './CategoryEditor'
 import { Transaction } from '@/graphql/types'
 import { formatMoney } from '@/lib/formatMoney'
+import { useBankAccountLabel } from '../shared/BankAccountLabel'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { useMemo } from 'react'
 import { TransactionLink } from './TransactionLink'
@@ -74,10 +75,11 @@ export default function TransactionRow({
   rowFilter?: TransactionRowFilterOptions
 }) {
   const { bankAccounts } = useAppContext()
+  const accountLabel = useBankAccountLabel()
 
   function bankAccountLabel(bankAccountId?: number | null) {
     const bankAccount = bankAccounts.find((account) => account.id === bankAccountId)
-    return bankAccount?.name || bankAccount?.type
+    return accountLabel(bankAccount)
   }
 
   const splitTransactions = useMemo(() => {

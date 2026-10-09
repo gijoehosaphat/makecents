@@ -7,12 +7,14 @@ import { formatMoney } from '@/lib/formatMoney'
 import { useAmountVisibility } from '@/components/context/AmountVisibilityContext'
 import { useTranslations } from 'next-intl'
 import { MainMenuItem } from '../shared/MainMenuItem'
+import { useBankAccountLabel } from '../shared/BankAccountLabel'
 
 export function BankAccountList() {
   const pathname = usePathname()
   const { bankAccounts, currentAccountId } = useAppContext()
   const { hidden } = useAmountVisibility()
   const t = useTranslations('common')
+  const accountLabel = useBankAccountLabel()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [listOpen, setListOpen] = useState(true)
@@ -77,7 +79,7 @@ export function BankAccountList() {
                 onClick={() => {
                   router.push(`/${currentAccountId}/dashboard/bank-account/${bankAccount.id}${queryString}`)
                 }}
-                primary={bankAccount.closed ? `${bankAccount?.name || bankAccount?.type || ''} (${t('dashboard.closed')})` : bankAccount?.name || bankAccount?.type || ''}
+                primary={bankAccount.closed ? `${accountLabel(bankAccount)} (${t('dashboard.closed')})` : accountLabel(bankAccount)}
                 secondary={formatMoney(bankAccount.balance / 100, bankAccount?.currency || 'CAD', hidden)}
                 icon={icon}
                 selected={pathname === `/${currentAccountId}/dashboard/bank-account/${bankAccount.id}`}

@@ -10,6 +10,7 @@ import { useRef, useState } from 'react'
 import { useHover } from 'usehooks-ts'
 import SaveCancel from '@/components/forms/SaveCancel'
 import { BankAccount } from '@/graphql/types'
+import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 import { GetUserAndAccountsAndBankAccountsByEmailDocument, UpdateBankAccountNameDocument } from '@/graphql/operations'
 
 export default function BankAccountName({
@@ -31,6 +32,7 @@ export default function BankAccountName({
     ],
   })
   const t = useTranslations('common')
+  const accountLabel = useBankAccountLabel()
   const router = useRouter()
 
   const hoverRef = useRef<HTMLElement | null>(null)
@@ -85,7 +87,7 @@ export default function BankAccountName({
           visibility: isEditting ? 'hidden' : 'visible',
         }}
       >
-        <Typography variant={'h1'}>{bankAccount?.name || bankAccount?.type}</Typography>
+        <Typography variant={'h1'}>{accountLabel(bankAccount) || bankAccount?.type}</Typography>
         {isHover && (
           <IconButton size={'small'} color={'secondary'} sx={{ ml: 2 }} onClick={toggleEditting}>
             <Edit />
