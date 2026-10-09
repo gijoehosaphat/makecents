@@ -1,5 +1,5 @@
 import Papa from 'papaparse'
-import { parse as parseDateString } from 'date-fns'
+import { isValid, parse as parseDateString } from 'date-fns'
 
 export interface CsvPreview {
   headers: string[]
@@ -47,37 +47,53 @@ export function parsePreview(text: string, mapping: Pick<CsvColumnMapping, 'deli
   return { headers, rows }
 }
 
-function parseAmount(value: string | undefined): number {
+/** Just the column names a file has when read with these settings, without parsing every row. */
+export function parseHeaders(text: string, mapping: Pick<CsvColumnMapping, 'delimiter' | 'hasHeaderRow' | 'skipRows'>): string[] {
+  const result = Papa.parse<string[]>(stripSkippedRows(text, mapping.skipRows), {
+    delimiter: mapping.delimiter,
+    header: false,
+    skipEmptyLines: true,
+    preview: 1,
+  })
+  const firstRow = result.data[0] ?? []
+  return mapping.hasHeaderRow ? firstRow : firstRow.map((_, index) => String(index))
+}
+
+export function parseAmount(value: string | undefined): number {
   if (!value) {
     return 0
   }
   const trimmed = value.trim()
   const isParenNegative = /^\(.*\)$/.test(trimmed)
-  const cleaned = trimmed.replace(/[()$,\s]/g, '')
+  // "-1.234,50" (European decimal comma) rather than "1,234" (US thousands separator).
+  const isDecimalComma = /,\d{1,2}\)?$/.test(trimmed)
+  const cleaned = (isDecimalComma ? trimmed.replace(/\./g, '').replace(',', '.') : trimmed).replace(/[()$,\s]/g, '')
   const magnitude = Number(cleaned) || 0
   const signed = isParenNegative ? -Math.abs(magnitude) : magnitude
   return Math.round(signed * 100)
 }
 
-const ACCOUNT_ID_HEADER_ALIASES = new Set(['accountid', 'acctid', 'accountnumber', 'acctnum', 'accountno'])
+const ACCOUNT_ID_HEADER_ALIASES = new Set([
+  'accountid',
+  'acctid',
+  'accountnumber',
+  'acctnum',
+  'accountno',
+  'account',
+  'cardno',
+  'cardnumber',
+  'cardnum',
+  'card',
+])
 
-function normalizeHeader(header: string): string {
-  return header.trim().toLowerCase().replace(/[\s_-]+/g, '')
+export function normalizeHeader(header: string): string {
+  // "Card No.", "Account #", "account_number" all normalize to their bare letters.
+  return header.trim().toLowerCase().replace(/[\s_.#-]+/g, '')
 }
 
 /** Finds a header that looks like it holds the bank's own account identifier (e.g. "account_id"). */
 export function findAccountIdColumn(headers: string[]): string | undefined {
   return headers.find((header) => ACCOUNT_ID_HEADER_ALIASES.has(normalizeHeader(header)))
-}
-
-export function findAccountIdValue(rows: Record<string, string>[], column: string): string | undefined {
-  for (const row of rows) {
-    const value = row[column]?.trim()
-    if (value) {
-      return value
-    }
-  }
-  return undefined
 }
 
 /** Splits rows into per-account groups using an account id column, preserving first-seen order. */
@@ -109,21 +125,57 @@ export function getMappedColumns(mapping: CsvColumnMapping): string[] {
   return columns.filter((column): column is string => Boolean(column))
 }
 
+/** Whether the mapping names every column needed to read an amount. */
+export function hasAmountColumns(mapping: CsvColumnMapping): boolean {
+  return mapping.amountMode === 'debitCredit' ? !!mapping.debitColumn && !!mapping.creditColumn : !!mapping.amountColumn
+}
+
 export function computeAmount(row: Record<string, string>, mapping: CsvColumnMapping): number {
+  // Some banks (e.g. Citi) write payments as negative numbers in the credit column, so a credit
+  // always adds. A negative debit is a refund/reversal and keeps its sign, so it adds too.
   const amount =
     mapping.amountMode === 'debitCredit'
-      ? parseAmount(row[mapping.creditColumn ?? '']) - parseAmount(row[mapping.debitColumn ?? ''])
+      ? Math.abs(parseAmount(row[mapping.creditColumn ?? ''])) - parseAmount(row[mapping.debitColumn ?? ''])
       : parseAmount(row[mapping.amountColumn ?? ''])
   return mapping.amountSign === 'flipped' ? -amount : amount
 }
 
-async function hashTransactionId(bankAccountId: string, posted: Date, amount: number, name: string): Promise<string> {
-  const input = `${bankAccountId}|${posted.toISOString()}|${amount}|${name}`
+/**
+ * A CSV row's id within a bank account, so re-importing an overlapping file skips rows already
+ * there. Identical rows in one file (two $5 coffees the same day) are told apart by occurrence;
+ * the first keeps the plain id so earlier imports still match. The database assigns the stored id
+ * itself (app_private.csv_transaction_id in import_transactions); this copy only lets the import
+ * dialog preview how many rows are already there.
+ */
+async function hashTransactionId(
+  bankAccountId: string,
+  posted: Date,
+  amount: number,
+  name: string,
+  occurrence: number
+): Promise<string> {
+  const input = `${bankAccountId}|${posted.toISOString()}|${amount}|${name}${occurrence > 1 ? `|${occurrence}` : ''}`
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input))
   const hex = Array.from(new Uint8Array(digest))
     .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('')
   return `csv-${hex}`
+}
+
+/** The row's posted date and signed amount in cents, or undefined when it has no usable date. */
+export function parseRowDateAndAmount(
+  row: Record<string, string>,
+  mapping: CsvColumnMapping
+): { posted: Date; amount: number } | undefined {
+  const dateValue = row[mapping.dateColumn]
+  const amountColumns =
+    mapping.amountMode === 'debitCredit' ? [mapping.debitColumn, mapping.creditColumn] : [mapping.amountColumn]
+  // Summary lines like Bank of America's "Beginning balance as of …" have a date but no amount.
+  if (!dateValue || amountColumns.every((column) => !row[column ?? '']?.trim())) {
+    return undefined
+  }
+  const posted = parseDateString(dateValue.trim(), mapping.dateFormat, new Date())
+  return isValid(posted) ? { posted, amount: computeAmount(row, mapping) } : undefined
 }
 
 export async function buildTransactions(
@@ -132,16 +184,19 @@ export async function buildTransactions(
   bankAccountId: string
 ): Promise<InputTransaction[]> {
   const transactions: InputTransaction[] = []
+  const occurrences = new Map<string, number>()
   for (const row of rows) {
-    const dateValue = row[mapping.dateColumn]
-    if (!dateValue) {
+    const parsed = parseRowDateAndAmount(row, mapping)
+    if (!parsed) {
       continue
     }
-    const posted = parseDateString(dateValue, mapping.dateFormat, new Date())
-    const amount = computeAmount(row, mapping)
+    const { posted, amount } = parsed
     const name = row[mapping.descriptionColumn] ?? ''
     const memo = (mapping.memoColumn && row[mapping.memoColumn]) || ''
-    const bankTransactionId = await hashTransactionId(bankAccountId, posted, amount, name)
+    const key = `${posted.toISOString()}|${amount}|${name}`
+    const occurrence = (occurrences.get(key) ?? 0) + 1
+    occurrences.set(key, occurrence)
+    const bankTransactionId = await hashTransactionId(bankAccountId, posted, amount, name, occurrence)
     transactions.push({ posted, amount, name, memo, type: 'CSV', bankTransactionId })
   }
   return transactions

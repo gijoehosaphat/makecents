@@ -8,10 +8,14 @@ import { BankAccountFilter } from '../shared/BankAccountFilter'
 import { TransactionFilter } from '../shared/TransactionFilter'
 import { TransactionSearchFilter } from '../shared/TransactionSearchFilter'
 import { TransactionsResults } from './TransactionsResults'
+import { TransactionTotals } from './TransactionTotals'
 
 export function SearchTransactions() {
   return (
     <>
+      <Suspense fallback={<Loading />}>
+        <TransactionTotals />
+      </Suspense>
       <StickyHeader>
         <DateFilter />
         <TransactionFilter>

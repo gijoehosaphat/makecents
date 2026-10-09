@@ -318,3 +318,45 @@ mutation UpsertSplitTransactions(
     }
   }
 }
+
+query GetFilteredTransactionTotalsByBankAccounts($depositFilter: TransactionFilter!, $withdrawalFilter: TransactionFilter!) {
+  deposits: allTransactions(filter: $depositFilter) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+  withdrawals: allTransactions(filter: $withdrawalFilter) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+}
+
+query GetFilteredTransactionTotalsBySearch(
+  $depositFilter: TransactionFilter!
+  $withdrawalFilter: TransactionFilter!
+  $match: String!
+) {
+  deposits: transactionSearch(filter: $depositFilter, match: $match) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+  withdrawals: transactionSearch(filter: $withdrawalFilter, match: $match) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+}

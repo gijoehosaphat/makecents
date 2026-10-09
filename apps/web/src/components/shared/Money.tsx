@@ -13,11 +13,25 @@ export function Money({
 }) {
   const theme = useTheme()
   const { hidden } = useAmountVisibility()
+
+  function color() {
+    if (!colored) {
+      return 'inherit'
+    }
+    if (amountInCents > 0) {
+      return theme.palette.money.positive
+    }
+    if (amountInCents < 0) {
+      return theme.palette.money.negative
+    }
+    return theme.palette.text.secondary
+  }
+
   return (
     <Box
       component="span"
       sx={{
-        color: colored ? (amountInCents > 0 ? theme.palette.money.positive : theme.palette.money.negative) : 'inheret',
+        color: color(),
       }}
     >
       {formatMoneyCents(amountInCents, currency, hidden)}
