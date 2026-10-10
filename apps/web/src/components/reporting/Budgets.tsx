@@ -1,86 +1,47 @@
 'use client'
 
 import { useTransactionsGroupedByBudgets } from '@/lib/useTransactionsGroupedByBudgets'
-import {
-  Box,
-  Button,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Menu,
-  MenuItem,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material'
+import { Alert, Box, Divider, Grid, IconButton, Menu, MenuItem, Tooltip, Typography, useTheme } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import { Money } from '../shared/Money'
 import { formatMoneyCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
-import { useDateFilterParams } from '@/lib/useDateFilterParams'
+import { useBudgetPeriod } from '@/lib/useBudgetPeriod'
 import { useMemo, useRef, useState } from 'react'
-import { useMutation, useSuspenseQuery } from '@apollo/client/react'
-import {
-  GetAllBudgetReconsiliationsDocument,
-  GetAllBudgetReconsiliations,
-  GetBudgetsByAccountIdDocument,
-  GetTransactionAggregatesByBankAccountDocument,
-  GetTransactionAggregatesByBankAccount,
-  UpsertBudgetReconsiliationDocument,
-} from '@/graphql/operations'
+import { useSuspenseQuery } from '@apollo/client/react'
+import { GetBudgetsByAccountIdDocument } from '@/graphql/operations'
 import { useAppContext } from '../context/AppContextProvider'
-import {
-  Budget,
-  BudgetReconsiliation,
-  Query,
-  Transaction,
-} from '@/graphql/types'
+import { Budget, Query, Transaction } from '@/graphql/types'
 import { useHover } from 'usehooks-ts'
 import TransactionsPreview from '../shared/TransactionsPreview'
 import { MoreVert } from '@mui/icons-material'
 import BudgetDetails from '../shared/BudgetDetails'
-import {
-  differenceInCalendarDays,
-  differenceInMonths,
-  getDaysInMonth,
-  startOfMonth,
-  endOfMonth,
-  endOfDay,
-} from 'date-fns'
-
-// Budget accrual/reconciliation is inherently month-scoped, so when the shared
-// date filter is in "year" or "all time" mode, fall back to the current month.
-function useBudgetPeriod() {
-  const { dateFrom: rawDateFrom, dateTo: rawDateTo, dateRange } = useDateFilterParams()
-  return useMemo(() => {
-    const today = new Date()
-    return {
-      dateFrom: dateRange === 'month' && rawDateFrom ? rawDateFrom : startOfMonth(today),
-      dateTo: dateRange === 'month' && rawDateTo ? rawDateTo : endOfMonth(endOfDay(today)),
-    }
-  }, [dateRange, rawDateFrom, rawDateTo])
-}
+import { BudgetPlan } from './BudgetPlan'
+import { format, getDate, getDaysInMonth, isSameMonth } from 'date-fns'
+import { availableBalance, isWithin, spendProgress, spentInPeriod } from '@/lib/budgetMath'
 
 const MIN = 0
 const MAX = 150
 
 export interface BudgetItem {
   budget: Budget
-  budgetReconsiliation?: BudgetReconsiliation
+  /** What the budget allows this month. */
+  budgeted: number
   transactionsSum: number
+  /** Accruing budgets only: the balance available as of the end of the selected month. */
+  available: number | null
+  /** Budget-relative amount still unspent (negative when over): `available` for accruing budgets, else budgeted - spent. */
+  remaining: number
   transactions: Transaction[]
+  /** Accruing budgets only: every transaction in the budget's categories, for balance calculations. */
   budgetTransactions: Transaction[]
 }
 
 function BudgetItem({
   budgetItem,
-  onReconsileClick,
   onViewTransactionsClick,
   onBudgetDetailsClick,
 }: {
   budgetItem: BudgetItem
-  onReconsileClick: () => void
   onViewTransactionsClick: () => void
   onBudgetDetailsClick: () => void
 }) {
@@ -89,69 +50,31 @@ function BudgetItem({
   const { hidden } = useAmountVisibility()
   const { dateTo } = useBudgetPeriod()
   const { bankAccounts } = useAppContext()
+  const currency = bankAccounts[0]?.currency || 'CAD'
   const hoverRef = useRef<HTMLElement>(null)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const isHover = useHover(hoverRef as React.RefObject<HTMLElement>)
   const normalize = (value: number) => ((value - MIN) * 100) / (MAX - MIN)
+  const isAccruing = !!budgetItem.budget.effectiveDate
   const currentAmount = budgetItem.transactionsSum
-  const maxAmount =
-    budgetItem.budgetReconsiliation?.amount || budgetItem.budget.amount
-  const progress = Math.min(MAX, (currentAmount / maxAmount) * 100)
+  const maxAmount = budgetItem.budgeted
+  const progress = Math.max(0, Math.min(MAX, spendProgress(currentAmount, maxAmount)))
 
   const percentage = Math.min(99, Math.max(0.5, normalize(progress)))
-  const color =
-    progress > 100 ? theme.palette.money.negative : theme.palette.money.positive
+  // Going over a category is information, not failure: the plan as a whole decides whether the month is on track,
+  // so over-budget items are amber and red is kept for the plan.
+  const color = progress > 100 ? theme.palette.warning.main : theme.palette.money.positive
 
-  const total = useMemo(() => {
-    if (budgetItem?.budget.effectiveDate) {
-      const effectiveDate = new Date(budgetItem?.budget.effectiveDate)
-      const amount = Number(budgetItem?.budget.amount)
-      const startingAmount = Number(budgetItem?.budget.startingAmount)
-      const transactionsTotal =
-        budgetItem?.budgetTransactions.reduce((partialSum, transaction) => {
-          const date = new Date(transaction.posted)
-
-          if (date.getTime() >= effectiveDate.getTime()) {
-            return partialSum + Number(transaction.amount)
-          } else {
-            return partialSum
-          }
-        }, 0) || 0
-
-      // Calculate total based on budget and effectiveDate and currentDate
-      // from effectiveDate to today
-      let accruedAmount = 0
-      if (
-        effectiveDate.getMonth() === dateTo.getMonth() &&
-        effectiveDate.getFullYear() === dateTo.getFullYear()
-      ) {
-        //Same month..
-        const diff = differenceInCalendarDays(dateTo, effectiveDate) + 1
-        const daysInMonth = getDaysInMonth(effectiveDate)
-        accruedAmount = Math.floor((amount / daysInMonth) * diff)
-      } else {
-        //Get accrued value of starting month
-        const daysInEffectiveMonth = getDaysInMonth(effectiveDate)
-        accruedAmount += Math.floor(
-          (amount / daysInEffectiveMonth) *
-            (daysInEffectiveMonth - effectiveDate.getDate()),
-        )
-
-        //Get accrued value of months in between
-        const monthsDiff = differenceInMonths(dateTo, effectiveDate)
-        accruedAmount += monthsDiff * amount
-      }
-      return transactionsTotal + startingAmount + accruedAmount
-    } else {
-      return 0
-    }
-  }, [
-    dateTo,
-    budgetItem?.budgetTransactions,
-    budgetItem?.budget.amount,
-    budgetItem?.budget.startingAmount,
-    budgetItem?.budget.effectiveDate,
-  ])
+  // Where an even spend would be by today, so a bar can be read as ahead of or behind pace. Only meaningful for a
+  // monthly budget while its month is under way.
+  const today = new Date()
+  const paceFraction = !isAccruing && maxAmount > 0 && isSameMonth(dateTo, today) ? getDate(today) / getDaysInMonth(today) : null
+  const pacePercentage = paceFraction === null ? null : normalize(paceFraction * 100)
+  const remainingCaption = isAccruing
+    ? t('budgets.available')
+    : budgetItem.remaining < 0
+      ? t('budgets.over')
+      : t('budgets.left')
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -180,12 +103,11 @@ function BudgetItem({
         >
           <Typography>{budgetItem.budget.name}</Typography>
         </Grid>
-        <Grid size={8} sx={{ pt: 4, pb: 4 }}>
+        <Grid size={7} sx={{ pt: 4, pb: 4 }}>
           <Box sx={{ position: 'relative', ml: 2, mr: 20 }}>
             <Box
               sx={{ borderRadius: 2, overflow: 'hidden', position: 'relative' }}
             >
-              {/* <LinearProgress variant="determinate" value={normalise(progress)} sx={{ height: 20 }} /> */}
               <Box
                 sx={{ width: '100%', display: 'flex', flexDirection: 'row' }}
               >
@@ -205,6 +127,20 @@ function BudgetItem({
                 ></Box>
               </Box>
             </Box>
+            {pacePercentage !== null && (
+              <Tooltip title={t('budgets.pace')}>
+                <Box
+                  sx={{
+                    width: 0,
+                    height: 20,
+                    top: 0,
+                    left: `${pacePercentage}%`,
+                    position: 'absolute',
+                    borderLeft: `2px dashed ${theme.palette.text.secondary}`,
+                  }}
+                />
+              </Tooltip>
+            )}
             <Box
               sx={{
                 width: 2,
@@ -235,7 +171,7 @@ function BudgetItem({
                 position: 'absolute',
               }}
             >
-              <Typography>{formatMoneyCents(currentAmount, 'CAD', hidden)}</Typography>
+              <Typography>{formatMoneyCents(currentAmount, currency, hidden)}</Typography>
             </Box>
             <Box
               sx={{
@@ -244,14 +180,25 @@ function BudgetItem({
                 position: 'absolute',
               }}
             >
-              <Typography>{formatMoneyCents(maxAmount, 'CAD', hidden)}</Typography>
+              <Typography>{formatMoneyCents(maxAmount, currency, hidden)}</Typography>
             </Box>
           </Box>
+        </Grid>
+        <Grid size={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Typography
+            variant={'h4'}
+            sx={{ color: budgetItem.remaining < 0 ? theme.palette.warning.main : theme.palette.money.positive }}
+          >
+            {formatMoneyCents(isAccruing ? budgetItem.remaining : Math.abs(budgetItem.remaining), currency, hidden)}
+          </Typography>
+          <Typography variant={'caption'} color={'text.secondary'}>
+            {remainingCaption}
+          </Typography>
         </Grid>
         <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton
             onClick={handleOpenUserMenu}
-            sx={{ visibility: isHover ? 'visible' : 'hidden' }}
+            sx={{ opacity: isHover || anchorEl !== null ? 1 : 0.4 }}
           >
             <MoreVert />
           </IconButton>
@@ -269,16 +216,6 @@ function BudgetItem({
             open={Boolean(anchorEl)}
             onClose={handleCloseUserMenu}
           >
-            {!budgetItem.budget.effectiveDate && (
-              <MenuItem
-                onClick={() => {
-                  handleCloseUserMenu()
-                  onReconsileClick()
-                }}
-              >
-                <Typography>{t('budgets.reconsile')}</Typography>
-              </MenuItem>
-            )}
             <MenuItem
               onClick={() => {
                 handleCloseUserMenu()
@@ -299,32 +236,24 @@ function BudgetItem({
             )}
           </Menu>
         </Grid>
-        <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-          {budgetItem.budget.effectiveDate && bankAccounts[0].currency && (
-            <Money
-              amountInCents={total}
-              currency={bankAccounts[0].currency}
-              colored={false}
-            />
-          )}
-        </Grid>
       </Grid>
     </Box>
   )
+}
+
+function compareBudgetItems(a: BudgetItem, b: BudgetItem) {
+  return (a.budget.name || '').localeCompare(b.budget.name || '')
 }
 
 export function Budgets() {
   const t = useTranslations('common')
   const { transactionsGroupedByBudget } = useTransactionsGroupedByBudgets()
   const { currentAccountId, bankAccounts } = useAppContext()
-  const { dateTo, dateFrom } = useBudgetPeriod()
+  const { dateTo, dateFrom, isFallback } = useBudgetPeriod()
   const [previewOpen, setPreviewOpen] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(false)
-  const [previewTransactions, setPreviewTransactions] = useState<Transaction[]>(
-    [],
-  )
-  const [selectedBudgetItem, setSelectedBudgetItem] =
-    useState<BudgetItem | null>(null)
+  const [previewTransactions, setPreviewTransactions] = useState<Transaction[]>([])
+  const [selectedBudgetItem, setSelectedBudgetItem] = useState<BudgetItem | null>(null)
 
   const query = useSuspenseQuery<Query>(GetBudgetsByAccountIdDocument, {
     variables: {
@@ -332,124 +261,65 @@ export function Budgets() {
     },
   })
 
-  const aggregates = useSuspenseQuery<GetTransactionAggregatesByBankAccount>(
-    GetTransactionAggregatesByBankAccountDocument,
-    {
-      variables: {
-        bankAccountIds: bankAccounts.map((bankAccount) => bankAccount.id),
-        dateFrom,
-        dateTo,
-      },
-    },
-  )
-
-  const reconsiliationsQuery = useSuspenseQuery<GetAllBudgetReconsiliations>(
-    GetAllBudgetReconsiliationsDocument,
-    {
-      variables: {
-        budgetIds: query?.data?.allBudgets?.nodes.map((budget) => budget.id),
-        month: dateTo.getMonth() + 1,
-        year: dateTo.getFullYear(),
-      },
-      skip: query?.data?.allBudgets?.nodes?.length === 0,
-    },
-  )
-
-  const [upsertBudgetReconsiliation] = useMutation(
-    UpsertBudgetReconsiliationDocument,
-    {
-      refetchQueries: [
-        {
-          query: GetAllBudgetReconsiliationsDocument,
-          variables: {
-            budgetIds: query?.data?.allBudgets?.nodes.map(
-              (budget) => budget.id,
-            ),
-            month: dateTo.getMonth() + 1,
-            year: dateTo.getFullYear(),
-          },
-        },
-      ],
-    },
-  )
-
-  const budgets: Budget[] = useMemo(() => {
-    return [...(query?.data?.allBudgets?.nodes || [])]?.sort(
-      (a: Budget, b: Budget) => {
-        if ((a.name || '') > (b.name || '')) return 1
-        if ((a.name || '') < (b.name || '')) return -1
-        return 0
-      },
-    )
-  }, [query?.data?.allBudgets?.nodes])
-
-  const reconsiliations = useMemo(() => {
-    return (reconsiliationsQuery?.data?.allBudgetReconsiliations?.nodes ||
-      []) as BudgetReconsiliation[]
-  }, [reconsiliationsQuery?.data?.allBudgetReconsiliations?.nodes])
-
-  const depositTotal: number = useMemo(() => {
-    return Number(aggregates?.data?.deposits?.aggregates?.sum?.amount)
-  }, [aggregates?.data?.deposits?.aggregates?.sum?.amount])
-
-  const totalBudgeted = useMemo(() => {
-    return budgets.reduce((partialSum, b) => {
-      const reconsiliation =
-        reconsiliations.find((rec) => rec.budgetId === b.id) || undefined
-      return partialSum + Number(reconsiliation?.amount || b.amount)
-    }, 0)
-  }, [budgets, reconsiliations])
-
-  const budgetItems = useMemo(() => {
+  const budgetItems: BudgetItem[] = useMemo(() => {
     return transactionsGroupedByBudget
       .map((group) => {
-        const doesAccrue = !!group.budget.effectiveDate
-        const filteredTransactions = group.transactions.filter(
-          (transaction) => {
-            const timestamp = new Date(transaction.posted).getTime()
-            return (
-              timestamp > dateFrom.getTime() && timestamp < dateTo.getTime()
+        const isAccruing = !!group.budget.effectiveDate
+        const transactions = group.transactions.filter((transaction) => isWithin(transaction.posted, dateFrom, dateTo))
+        const transactionsSum = spentInPeriod(transactions, dateFrom, dateTo)
+        const budgeted = Number(group.budget.amount)
+        const available = isAccruing
+          ? availableBalance(
+              { ...group.budget, effectiveDate: group.budget.effectiveDate },
+              group.transactions,
+              dateTo,
             )
-          },
-        )
-        const budgetTransactions = doesAccrue
-          ? group.transactions.filter((transaction) => {
-              const timestamp = new Date(transaction.posted).getTime()
-              return (
-                timestamp > new Date(group.budget.effectiveDate).getTime() &&
-                timestamp < dateTo.getTime()
-              )
-            })
-          : []
-        const transactionsSum = filteredTransactions.reduce(
-          (partialSum, t) => partialSum + -Number(t.amount),
-          0,
-        )
-        const budgetReconsiliation =
-          reconsiliations.find(
-            (reconsiliation) => reconsiliation.budgetId === group.budget.id,
-          ) || undefined
+          : null
         return {
           budget: group.budget,
-          budgetReconsiliation,
+          budgeted,
           transactionsSum,
-          transactions: filteredTransactions,
-          budgetTransactions,
+          available,
+          remaining: available ?? budgeted - transactionsSum,
+          transactions,
+          budgetTransactions: isAccruing ? group.transactions : [],
         }
       })
-      .sort((a: BudgetItem, b: BudgetItem) => {
-        if ((a.budget.name || '') > (b.budget.name || '')) return 1
-        if ((a.budget.name || '') < (b.budget.name || '')) return -1
-        return 0
-      }) as BudgetItem[]
-  }, [transactionsGroupedByBudget, reconsiliations, dateFrom, dateTo])
+      .sort(compareBudgetItems)
+  }, [transactionsGroupedByBudget, dateFrom, dateTo])
 
-  const overallTotal = useMemo(() => {
-    return budgetItems.reduce(
-      (partialSum, bi) => partialSum + Number(bi.transactionsSum),
-      0,
-    )
-  }, [budgetItems])
+  const fixedItems = useMemo(() => budgetItems.filter((item) => !item.budget.effectiveDate), [budgetItems])
+  const accruingItems = useMemo(() => budgetItems.filter((item) => !!item.budget.effectiveDate), [budgetItems])
+
+  // Both kinds are money chosen in advance: fixed budgets are spent within the month, while accruing budgets (funds)
+  // are set aside every month and spent from their balance later.
+  const fixedBudgeted = useMemo(() => fixedItems.reduce((sum, item) => sum + item.budgeted, 0), [fixedItems])
+  const accruingBudgeted = useMemo(() => accruingItems.reduce((sum, item) => sum + item.budgeted, 0), [accruingItems])
+  const fundBalance = useMemo(() => accruingItems.reduce((sum, item) => sum + (item.available ?? 0), 0), [accruingItems])
+
+  // Money that left each kind of budget this month, counting a transaction once even if its category is in more
+  // than one budget (a category in a fixed budget counts as fixed). Transfers between the user's own accounts are
+  // left out, as they are from total spending, and refunds are not netted off: these are compared with gross total
+  // spending.
+  const { fixedSpend, fundSpend } = useMemo(() => {
+    const outflow = (items: BudgetItem[], seen: Set<number>) => {
+      let total = 0
+      for (const item of items) {
+        for (const transaction of item.transactions) {
+          const amount = Number(transaction.amount)
+          const isTransfer = Number(transaction.transferCount ?? 0) > 0
+          if (amount < 0 && !isTransfer && !seen.has(transaction.id)) {
+            seen.add(transaction.id)
+            total -= amount
+          }
+        }
+      }
+      return total
+    }
+    const seen = new Set<number>()
+    const fixed = outflow(fixedItems, seen)
+    return { fixedSpend: fixed, fundSpend: outflow(accruingItems, seen) }
+  }, [fixedItems, accruingItems])
 
   function handleBudgetItemClick(budgetItem: BudgetItem) {
     setSelectedBudgetItem(budgetItem)
@@ -471,145 +341,45 @@ export function Budgets() {
     setPreviewTransactions([])
   }
 
-  async function handleReconsiliation(budgetItem: BudgetItem) {
-    await upsertBudgetReconsiliation({
-      variables: {
-        budgetId: budgetItem.budget.id,
-        amount: budgetItem.transactionsSum,
-        month: dateTo.getMonth() + 1,
-        year: dateTo.getFullYear(),
-        id: budgetItem.budgetReconsiliation?.id || undefined,
-      },
-    })
-  }
+  const currency = bankAccounts?.[0]?.currency
 
-  const bankAccount = useMemo(
-    () => (bankAccounts?.[0] ? bankAccounts[0] : null),
-    [bankAccounts],
-  )
+  function renderItems(items: BudgetItem[]) {
+    if (items.length === 0) return <Typography color={'text.secondary'}>{t('budgets.noBudgetItems')}</Typography>
+    return items.map((budgetItem) => (
+      <BudgetItem
+        key={`${budgetItem.budget.id}`}
+        budgetItem={budgetItem}
+        onViewTransactionsClick={() => handlePreviewTransactionsClick(budgetItem)}
+        onBudgetDetailsClick={() => handleBudgetItemClick(budgetItem)}
+      />
+    ))
+  }
 
   return (
     <>
-      <Grid container>
-        <Grid
-          size={3}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography>Budgeted: </Typography>
-          {bankAccount?.currency && (
-            <Typography variant={'h2'}>
-              <Money
-                amountInCents={totalBudgeted}
-                currency={bankAccount.currency}
-                colored={true}
-              />
-            </Typography>
-          )}
-        </Grid>
-        <Grid
-          size={3}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography>Deposits: </Typography>
-          {bankAccount?.currency && (
-            <Typography variant={'h2'}>
-              <Money
-                amountInCents={depositTotal}
-                currency={bankAccount.currency}
-                colored={true}
-              />
-            </Typography>
-          )}
-        </Grid>
-        <Grid
-          size={3}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography>Withdrawals: </Typography>
-          {bankAccount?.currency && (
-            <Typography variant={'h2'}>
-              <Money
-                amountInCents={overallTotal}
-                currency={bankAccount.currency}
-                colored={true}
-              />
-            </Typography>
-          )}
-        </Grid>
-        <Grid
-          size={3}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Typography>Difference: </Typography>
-          {bankAccount?.currency && (
-            <Typography variant={'h2'}>
-              <Money
-                amountInCents={depositTotal - overallTotal}
-                currency={bankAccount.currency}
-                colored={true}
-              />
-            </Typography>
-          )}
-        </Grid>
-      </Grid>
+      {isFallback && (
+        <Alert severity={'info'} sx={{ mb: 2 }}>
+          {t('budgets.monthOnlyNotice', { month: format(dateTo, 'MMMM yyyy') })}
+        </Alert>
+      )}
+      {currency && (
+        <BudgetPlan
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          fixedBudgeted={fixedBudgeted}
+          accruingBudgeted={accruingBudgeted}
+          fundBalance={fundBalance}
+          fixedSpend={fixedSpend}
+          fundSpend={fundSpend}
+          currency={currency}
+        />
+      )}
       <Divider sx={{ mb: 4, mt: 4 }} />
       <Typography variant={'h1'}>{t('budgets.budgetItems')}</Typography>
-      {budgetItems.filter((budgetItem) => !budgetItem.budget.effectiveDate)
-        .length === 0 && <p>No budget items</p>}
-      {budgetItems
-        .filter((budgetItem) => !budgetItem.budget.effectiveDate)
-        .map((budgetItem) => {
-          return (
-            <BudgetItem
-              key={`${budgetItem.budget.id}`}
-              budgetItem={budgetItem}
-              onReconsileClick={() => handleReconsiliation(budgetItem)}
-              onViewTransactionsClick={() =>
-                handlePreviewTransactionsClick(budgetItem)
-              }
-              onBudgetDetailsClick={() => handleBudgetItemClick(budgetItem)}
-            />
-          )
-        })}
+      {renderItems(fixedItems)}
       <Divider sx={{ mb: 4, mt: 4 }} />
       <Typography variant={'h1'}>{t('budgets.accruingBudgets')}</Typography>
-      {budgetItems.filter((budgetItem) => !!budgetItem.budget.effectiveDate)
-        .length === 0 && <p>No budget items</p>}
-      {budgetItems
-        .filter((budgetItem) => !!budgetItem.budget.effectiveDate)
-        .map((budgetItem) => {
-          return (
-            <BudgetItem
-              key={`${budgetItem.budget.id}`}
-              budgetItem={budgetItem}
-              onReconsileClick={() => handleReconsiliation(budgetItem)}
-              onViewTransactionsClick={() =>
-                handlePreviewTransactionsClick(budgetItem)
-              }
-              onBudgetDetailsClick={() => handleBudgetItemClick(budgetItem)}
-            />
-          )
-        })}
+      {renderItems(accruingItems)}
       {selectedBudgetItem && (
         <BudgetDetails
           open={detailsOpen}

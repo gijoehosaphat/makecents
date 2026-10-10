@@ -90,6 +90,7 @@ fragment CategoryFragment on Category {
   updatedAt
   accountId
   regex
+  kind
 }
 
 fragment TransferFragment on Transfer {
@@ -133,15 +134,4 @@ fragment CategoryGroupFragment on CategoryGroup {
   customCategoryGroupId
   id
   nodeId
-}
-
-fragment BudgetReconsiliationFragment on BudgetReconsiliation {
-  nodeId
-  id
-  budgetId
-  createdAt
-  updatedAt
-  month
-  year
-  amount
 }

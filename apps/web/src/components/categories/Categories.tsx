@@ -46,6 +46,11 @@ export default function Categories() {
                     {t('categories.regex')}
                   </Typography>
                 </TableCell>
+                <TableCell>
+                  <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
+                    {t('categories.kind.label')}
+                  </Typography>
+                </TableCell>
                 <TableCell align={'right'}>
                   <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
                     {t('shared.created')}

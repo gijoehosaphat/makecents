@@ -114,7 +114,12 @@
       "findTransactions": "Find matching transactions",
       "selectCategory": "Select category",
       "splitTransaction": "Split Transaction",
-      "totalOf": "{total} of {maximum}"
+      "totalOf": "{total} of {maximum}",
+      "kind": {
+        "label": "Counts as",
+        "spending": "Spending",
+        "payroll": "Payroll (income)"
+      }
     },
     "forms": {
       "addName": "Name",
@@ -130,13 +135,37 @@
       "effectiveDate": "Effective Date",
       "startingAmount": "Starting Amount",
       "viewTransactions": "View transactions",
-      "reconsile": "Reconsile",
       "accrue": "Should totals accrue?",
       "details": "Budget details",
       "viewBudgetDetails": "View budget details",
       "accruedTotal": "Accrued",
       "accruingBudgets": "Accruing budgets",
-      "budgetItems": "Budget items"
+      "budgetItems": "Budget items",
+      "left": "left",
+      "over": "over",
+      "available": "available",
+      "noBudgetItems": "No budget items",
+      "monthOnlyNotice": "Budgets are tracked month by month, so this page is showing {month} regardless of the year / all-time filter.",
+      "plan": {
+        "title": "Monthly plan",
+        "thisMonth": "This month",
+        "expectedIncome": "Expected income",
+        "expectedIncomeBasis": "Typical pay (median) of each payroll category over the last {months, plural, one {month} other {# months}}",
+        "noPayroll": "No payroll found in the previous months. Mark your payroll categories under Settings → Categories to estimate your income.",
+        "fixedBudgets": "Fixed budgets",
+        "accruingBudgets": "Accruing budgets",
+        "accruingBudgetsCaption": "Set aside every month. Balance across all accruing budgets: {balance}",
+        "impliedSavings": "Left unbudgeted (implied savings)",
+        "impliedSavingsCaption": "Expected income minus all budgets",
+        "overAllocated": "Budgets exceed expected income by",
+        "totalBudgeted": "Total budgeted",
+        "deposits": "Deposits",
+        "spending": "Spending",
+        "unbudgeted": "{amount} is outside any budget",
+        "saved": "Saved",
+        "paidFromFunds": "{amount} of this was paid from funds"
+      },
+      "pace": "Where an even spend would be by today"
     },
     "groups": {
       "title": "Groups",

@@ -112,6 +112,7 @@ query GetTransactionsGroupedByBudget($accountId: Int!) {
             transactionsByCategoryId {
               nodes {
                 ...TransactionFragment
+                transferCount
                 categoryByCategoryId {
                   ...CategoryFragment
                 }
@@ -124,22 +125,51 @@ query GetTransactionsGroupedByBudget($accountId: Int!) {
   }
 }
 
-query GetAllBudgetReconsiliations($budgetIds: [Int!]!, $month: Int!, $year: Int!) {
-  allBudgetReconsiliations(
-    filter: { budgetId: { in: $budgetIds }, month: { equalTo: $month }, year: { equalTo: $year } }
+# Deposit and withdrawal totals for a period, leaving out transfers between the user's own accounts.
+query GetBudgetPeriodTotals($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
+  deposits: allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      transferCount: { equalTo: "0" }
+      amount: { greaterThan: "0" }
+    }
   ) {
-    nodes {
-      ...BudgetReconsiliationFragment
+    aggregates {
+      sum {
+        amount
+      }
+    }
+  }
+  withdrawals: allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      transferCount: { equalTo: "0" }
+      amount: { lessThan: "0" }
+    }
+  ) {
+    aggregates {
+      sum {
+        amount
+      }
     }
   }
 }
 
-mutation UpsertBudgetReconsiliation($budgetId: Int!, $amount: BigInt!, $month: Int!, $year: Int!, $id: Int) {
-  upsertBudgetReconsiliation(
-    input: { budgetReconsiliation: { budgetId: $budgetId, amount: $amount, month: $month, year: $year, id: $id } }
+query GetPayrollTransactions($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
+  allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      categoryByCategoryId: { kind: { equalTo: "payroll" } }
+    }
   ) {
-    budgetReconsiliation {
-      ...BudgetReconsiliationFragment
+    nodes {
+      id
+      categoryId
+      amount
+      posted
     }
   }
 }

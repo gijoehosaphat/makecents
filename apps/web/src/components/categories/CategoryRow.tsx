@@ -3,7 +3,7 @@
 import { Category } from '@/graphql/types'
 import { useMutation } from '@apollo/client/react'
 import { MoreVert } from '@mui/icons-material'
-import { IconButton, Menu, MenuItem, TableCell, TableRow, TextField, Typography } from '@mui/material'
+import { Chip, IconButton, Menu, MenuItem, Select, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -34,7 +34,7 @@ export default function CategoryRow({ category, accountId }: { category: Categor
     ],
   })
   const t = useTranslations('common')
-  const [fields, setFields] = useState({ name: '', regex: '' })
+  const [fields, setFields] = useState({ name: '', regex: '', kind: '' })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedCategory, setSelectedCategory] = useState<null | Category>(null)
   const [isEditting, setIsEditting] = useState(false)
@@ -67,13 +67,14 @@ export default function CategoryRow({ category, accountId }: { category: Categor
   }
 
   async function handleSave() {
-    if (fields.name || fields.regex) {
+    if (fields.name || fields.regex || fields.kind) {
       if (category?.nodeId) {
         await updateCategory({
           variables: {
             nodeId: category?.nodeId,
             name: fields.name || category?.name,
             regex: fields.regex || category?.regex,
+            kind: fields.kind || category?.kind,
           },
         })
       }
@@ -130,6 +131,26 @@ export default function CategoryRow({ category, accountId }: { category: Categor
               />
             ) : (
               <Typography variant={'body2'}>/{category.regex || t('categories.noRegex')}/gmi</Typography>
+            )}
+          </TableCell>
+          <TableCell size={'small'} sx={{ width: '15%' }}>
+            {isEditting ? (
+              <Select
+                size={'small'}
+                value={fields.kind || category.kind}
+                onChange={(event) => handleChange('kind', event.target.value)}
+                aria-label={t('categories.kind.label')}
+              >
+                {['spending', 'payroll'].map((kind) => (
+                  <MenuItem key={kind} value={kind}>
+                    {t(`categories.kind.${kind}`)}
+                  </MenuItem>
+                ))}
+              </Select>
+            ) : (
+              category.kind !== 'spending' && (
+                <Chip size={'small'} label={t(`categories.kind.${category.kind}`)} />
+              )
             )}
           </TableCell>
           <TableCell size={'small'} align={'right'} sx={{ width: '15%' }}>
