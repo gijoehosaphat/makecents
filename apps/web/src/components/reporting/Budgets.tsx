@@ -8,10 +8,11 @@ import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { useBudgetPeriod } from '@/lib/useBudgetPeriod'
 import { useMemo, useRef, useState } from 'react'
 import { useSuspenseQuery } from '@apollo/client/react'
-import { GetBudgetsByAccountIdDocument } from '@/graphql/operations'
+import { GetBudgetsByAccountIdDocument, GetTransactionsGroupedByBudgetDocument } from '@/graphql/operations'
 import { useAppContext } from '../context/AppContextProvider'
 import { Budget, Query, Transaction } from '@/graphql/types'
 import { useHover } from 'usehooks-ts'
+import { useCategories } from '@/lib/useCategories'
 import TransactionsPreview from '../shared/TransactionsPreview'
 import { MoreVert } from '@mui/icons-material'
 import BudgetDetails from '../shared/BudgetDetails'
@@ -248,11 +249,13 @@ function compareBudgetItems(a: BudgetItem, b: BudgetItem) {
 export function Budgets() {
   const t = useTranslations('common')
   const { transactionsGroupedByBudget } = useTransactionsGroupedByBudgets()
+  // Load categories with the page: the transactions dialog's category editors need them, and suspending when the
+  // dialog opens would blank the whole page (and leave the body scroll-locked).
+  useCategories()
   const { currentAccountId, bankAccounts } = useAppContext()
   const { dateTo, dateFrom, isFallback } = useBudgetPeriod()
-  const [previewOpen, setPreviewOpen] = useState(false)
-  const [detailsOpen, setDetailsOpen] = useState(false)
-  const [previewTransactions, setPreviewTransactions] = useState<Transaction[]>([])
+    const [detailsOpen, setDetailsOpen] = useState(false)
+  const [previewNodeIds, setPreviewNodeIds] = useState<string[] | null>(null)
   const [selectedBudgetItem, setSelectedBudgetItem] = useState<BudgetItem | null>(null)
 
   const query = useSuspenseQuery<Query>(GetBudgetsByAccountIdDocument, {
@@ -321,6 +324,16 @@ export function Budgets() {
     return { fixedSpend: fixed, fundSpend: outflow(accruingItems, seen) }
   }, [fixedItems, accruingItems])
 
+  const budgetedCategoryIds = useMemo(
+    () =>
+      new Set(
+        transactionsGroupedByBudget.flatMap((group) =>
+          (group.budget.budgetCategoriesByBudgetId?.nodes ?? []).map((budgetCategory) => budgetCategory.categoryId),
+        ),
+      ),
+    [transactionsGroupedByBudget],
+  )
+
   function handleBudgetItemClick(budgetItem: BudgetItem) {
     setSelectedBudgetItem(budgetItem)
     setDetailsOpen(true)
@@ -332,14 +345,17 @@ export function Budgets() {
   }
 
   function handlePreviewTransactionsClick(budgetItem: BudgetItem) {
-    setPreviewTransactions(budgetItem.transactions)
-    setPreviewOpen(true)
+    setPreviewNodeIds(budgetItem.transactions.map((transaction) => transaction.nodeId))
   }
 
   function handlePreviewTransactionsClose() {
-    setPreviewOpen(false)
-    setPreviewTransactions([])
+    setPreviewNodeIds(null)
   }
+
+  const previewPool = useMemo(
+    () => transactionsGroupedByBudget.flatMap((group) => group.transactions),
+    [transactionsGroupedByBudget],
+  )
 
   const currency = bankAccounts?.[0]?.currency
 
@@ -371,6 +387,7 @@ export function Budgets() {
           fundBalance={fundBalance}
           fixedSpend={fixedSpend}
           fundSpend={fundSpend}
+          budgetedCategoryIds={budgetedCategoryIds}
           currency={currency}
         />
       )}
@@ -389,8 +406,9 @@ export function Budgets() {
         />
       )}
       <TransactionsPreview
-        open={previewOpen}
-        transactions={previewTransactions}
+        nodeIds={previewNodeIds}
+        pool={previewPool}
+        refetchQuery={{ query: GetTransactionsGroupedByBudgetDocument, variables: { accountId: currentAccountId || 0 } }}
         handleComplete={handlePreviewTransactionsClose}
       />
     </>

@@ -91,6 +91,8 @@ fragment CategoryFragment on Category {
   accountId
   regex
   kind
+  # Payroll in its own right or through a payroll group.
+  isPayroll
 }
 
 fragment TransferFragment on Transfer {
@@ -125,6 +127,7 @@ fragment BudgetCategoryFragment on BudgetCategory {
 fragment CustomCategoryGroupFragment on CustomCategoryGroup {
   id
   name
+  kind
   nodeId
 }
 

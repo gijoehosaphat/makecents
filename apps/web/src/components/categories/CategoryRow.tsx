@@ -7,6 +7,7 @@ import { Chip, IconButton, Menu, MenuItem, Select, TableCell, TableRow, TextFiel
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+import { useSnackbar } from 'notistack'
 import CategoryMatch from '@/components/categories/CategoryMatch'
 import SaveCancel from '@/components/forms/SaveCancel'
 import { CategoryGroupEditor } from './CategoryGroupEditor'
@@ -34,6 +35,7 @@ export default function CategoryRow({ category, accountId }: { category: Categor
     ],
   })
   const t = useTranslations('common')
+  const { enqueueSnackbar } = useSnackbar()
   const [fields, setFields] = useState({ name: '', regex: '', kind: '' })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedCategory, setSelectedCategory] = useState<null | Category>(null)
@@ -69,14 +71,19 @@ export default function CategoryRow({ category, accountId }: { category: Categor
   async function handleSave() {
     if (fields.name || fields.regex || fields.kind) {
       if (category?.nodeId) {
-        await updateCategory({
-          variables: {
-            nodeId: category?.nodeId,
-            name: fields.name || category?.name,
-            regex: fields.regex || category?.regex,
-            kind: fields.kind || category?.kind,
-          },
-        })
+        try {
+          await updateCategory({
+            variables: {
+              nodeId: category?.nodeId,
+              name: fields.name || category?.name,
+              regex: fields.regex || category?.regex,
+              kind: fields.kind || category?.kind,
+            },
+          })
+        } catch (error) {
+          // e.g. a payroll category cannot belong to a budget
+          enqueueSnackbar(error instanceof Error ? error.message : t('categories.kind.saveFailed'), { variant: 'error' })
+        }
       }
     }
     handleClose()
@@ -148,8 +155,11 @@ export default function CategoryRow({ category, accountId }: { category: Categor
                 ))}
               </Select>
             ) : (
-              category.kind !== 'spending' && (
-                <Chip size={'small'} label={t(`categories.kind.${category.kind}`)} />
+              category.isPayroll && (
+                <Chip
+                  size={'small'}
+                  label={category.kind === 'payroll' ? t('categories.kind.payroll') : t('categories.kind.payrollViaGroup')}
+                />
               )
             )}
           </TableCell>

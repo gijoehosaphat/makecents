@@ -157,12 +157,34 @@ query GetBudgetPeriodTotals($bankAccountIds: [Int!], $dateFrom: Datetime!, $date
   }
 }
 
+# Every withdrawal in the period (leaving out transfers), so spending that no budget accounts for can be found and fixed.
+query GetPeriodWithdrawals($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
+  allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      transferCount: { equalTo: "0" }
+      amount: { lessThan: "0" }
+    }
+    orderBy: POSTED_DESC
+  ) {
+    nodes {
+      ...TransactionFragment
+      categoryByCategoryId {
+        ...CategoryFragment
+      }
+    }
+  }
+}
+
+# Deposits in payroll categories (or categories in payroll groups): the basis for expected income.
 query GetPayrollTransactions($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
   allTransactions(
     filter: {
       bankAccountId: { in: $bankAccountIds }
       posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
-      categoryByCategoryId: { kind: { equalTo: "payroll" } }
+      transferCount: { equalTo: "0" }
+      categoryByCategoryId: { isPayroll: { equalTo: true } }
     }
   ) {
     nodes {
@@ -170,6 +192,31 @@ query GetPayrollTransactions($bankAccountIds: [Int!], $dateFrom: Datetime!, $dat
       categoryId
       amount
       posted
+      categoryByCategoryId {
+        id
+        name
+      }
+    }
+  }
+}
+
+# Categorized deposits that are not payroll, offered as candidates when no payroll has been marked yet.
+query GetPayrollCandidates($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
+  allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      transferCount: { equalTo: "0" }
+      amount: { greaterThan: "0" }
+      categoryByCategoryId: { isPayroll: { equalTo: false } }
+    }
+  ) {
+    nodes {
+      id
+      amount
+      categoryByCategoryId {
+        ...CategoryFragment
+      }
     }
   }
 }

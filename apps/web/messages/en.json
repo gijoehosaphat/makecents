@@ -84,6 +84,7 @@
     "transactions": {
       "transactions": "Transactions",
       "none": "No transactions found",
+      "showMore": "Show more ({remaining} remaining)",
       "category": "Category",
       "withdrawals": "Withdrawals",
       "deposits": "Deposits",
@@ -107,6 +108,7 @@
     },
     "categories": {
       "title": "Categories",
+      "description": "Categories label what each transaction was for. Give each one a match pattern and new transactions are filed automatically, or assign them by hand. Aim to get every transaction categorized, because budgets, reports and expected income all depend on it. Mark the categories your pay is deposited into as payroll.",
       "namePlaceholder": "Add a name",
       "noRegex": "none",
       "regex": "Transaction Match",
@@ -118,7 +120,9 @@
       "kind": {
         "label": "Counts as",
         "spending": "Spending",
-        "payroll": "Payroll (income)"
+        "payroll": "Payroll (income)",
+        "payrollViaGroup": "Payroll (via group)",
+        "saveFailed": "Could not save the category type."
       }
     },
     "forms": {
@@ -131,11 +135,13 @@
     },
     "budgets": {
       "title": "Budgets",
+      "description": "Budgets set a monthly amount for one or more categories. Expected income (typical monthly pay over the last 6 months) is shown next to the total you've budgeted. Aim to budget less than you expect to earn, and the difference is your planned savings. A fixed budget is a spending limit that resets each month. An accruing budget sets the amount aside every month and carries unspent money forward, which suits irregular costs like car repairs or annual fees.",
       "addBudget": "Add Budget",
       "effectiveDate": "Effective Date",
       "startingAmount": "Starting Amount",
       "viewTransactions": "View transactions",
       "accrue": "Should totals accrue?",
+      "resetAccrual": "Reset to $0 as of today",
       "details": "Budget details",
       "viewBudgetDetails": "View budget details",
       "accruedTotal": "Accrued",
@@ -151,7 +157,11 @@
         "thisMonth": "This month",
         "expectedIncome": "Expected income",
         "expectedIncomeBasis": "Typical pay (median) of each payroll category over the last {months, plural, one {month} other {# months}}",
-        "noPayroll": "No payroll found in the previous months. Mark your payroll categories under Settings → Categories to estimate your income.",
+        "noPayroll": "No payroll found in the previous months, so expected income is zero. Mark the categories your pay is deposited into as payroll (here, or under Settings → Categories or Groups) to estimate your income.",
+        "expectedIncomeSources": "From payroll: {names}",
+        "payrollCandidates": "Which of these is your pay? Only categories you mark as payroll count towards expected income.",
+        "markPayroll": "Mark as payroll",
+        "payrollMarkFailed": "Could not mark the category as payroll.",
         "fixedBudgets": "Fixed budgets",
         "accruingBudgets": "Accruing budgets",
         "accruingBudgetsCaption": "Set aside every month. Balance across all accruing budgets: {balance}",
@@ -161,15 +171,30 @@
         "totalBudgeted": "Total budgeted",
         "deposits": "Deposits",
         "spending": "Spending",
-        "unbudgeted": "{amount} is outside any budget",
+        "unbudgeted": "{amount} is in categories outside any budget",
+        "uncategorized": "{amount} is uncategorized",
+        "unaccountedTitle": "Spending not accounted for by a budget",
+        "unaccountedHelp": "Categorize these transactions, or add their categories to a budget, so every dollar is accounted for.",
+        "uncategorizedCount": "{count, plural, one {# uncategorized transaction} other {# uncategorized transactions}}",
+        "categorize": "Categorize",
+        "openBudgetSettings": "Budget settings",
         "saved": "Saved",
-        "paidFromFunds": "{amount} of this was paid from funds"
+        "spentFromFixed": "Spent from fixed budgets",
+        "spentFromAccruing": "Spent from accruing budgets"
       },
       "pace": "Where an even spend would be by today"
     },
     "groups": {
       "title": "Groups",
-      "addGroup": "Add Group"
+      "description": "Groups bundle related categories, such as \"Utilities\" or \"Transport\", so you can see and budget them together. Aim for every category to belong to a group. Marking a group as payroll treats all of its categories as income.",
+      "addGroup": "Add Group",
+      "kind": {
+        "label": "Counts as",
+        "help": "Every category in a payroll group counts as payroll (income).",
+        "spending": "Spending",
+        "payroll": "Payroll (income)",
+        "saveFailed": "Could not save the group type."
+      }
     },
     "imports": {
       "title": "Imports",

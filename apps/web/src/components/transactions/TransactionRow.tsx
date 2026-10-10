@@ -68,11 +68,14 @@ export default function TransactionRow({
   refetchQuery,
   showBankAccount,
   rowFilter,
+  categorizeOnly,
 }: {
   transaction: Transaction
   refetchQuery: InternalRefetchQueryDescriptor
   showBankAccount?: boolean
   rowFilter?: TransactionRowFilterOptions
+  /** Hides linking and splitting, for views that only need to categorize (e.g. the budget previews). */
+  categorizeOnly?: boolean
 }) {
   const { bankAccounts } = useAppContext()
   const accountLabel = useBankAccountLabel()
@@ -145,13 +148,13 @@ export default function TransactionRow({
                 refetchQuery={refetchQuery}
               />
             )}
-            {!transaction.categoryId && !hasSplits && (
+            {!categorizeOnly && !transaction.categoryId && !hasSplits && (
               <TransactionLink
                 transaction={transaction}
                 refetchQuery={refetchQuery}
               />
             )}
-            {!hasTransfer && (
+            {!categorizeOnly && !hasTransfer && (
               <TransactionSplit
                 transaction={transaction}
                 refetchQuery={refetchQuery}

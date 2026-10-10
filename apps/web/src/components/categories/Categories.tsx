@@ -31,6 +31,9 @@ export default function Categories() {
   return (
     <>
       {!!currentAccountId && <CategoryAdd accountId={currentAccountId} />}
+      <Typography sx={{ mt: 3, mb: 1 }} color={'text.secondary'}>
+        {t('categories.description')}
+      </Typography>
       {categories.length > 0 && (
         <TableContainer>
           <Table>
