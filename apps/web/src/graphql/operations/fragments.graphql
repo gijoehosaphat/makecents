@@ -90,6 +90,9 @@ fragment CategoryFragment on Category {
   updatedAt
   accountId
   regex
+  kind
+  # Payroll in its own right or through a payroll group.
+  isPayroll
 }
 
 fragment TransferFragment on Transfer {
@@ -124,6 +127,7 @@ fragment BudgetCategoryFragment on BudgetCategory {
 fragment CustomCategoryGroupFragment on CustomCategoryGroup {
   id
   name
+  kind
   nodeId
 }
 
@@ -133,15 +137,4 @@ fragment CategoryGroupFragment on CategoryGroup {
   customCategoryGroupId
   id
   nodeId
-}
-
-fragment BudgetReconsiliationFragment on BudgetReconsiliation {
-  nodeId
-  id
-  budgetId
-  createdAt
-  updatedAt
-  month
-  year
-  amount
 }

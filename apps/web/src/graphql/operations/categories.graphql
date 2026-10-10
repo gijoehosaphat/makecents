@@ -14,8 +14,8 @@ mutation CreateCategory($accountId: Int!, $name: String, $regex: String) {
   }
 }
 
-mutation UpdateCategory($nodeId: ID!, $name: String, $regex: String) {
-  updateCategory(input: { nodeId: $nodeId, categoryPatch: { name: $name, regex: $regex } }) {
+mutation UpdateCategory($nodeId: ID!, $name: String, $regex: String, $kind: String) {
+  updateCategory(input: { nodeId: $nodeId, categoryPatch: { name: $name, regex: $regex, kind: $kind } }) {
     category {
       ...CategoryFragment
     }

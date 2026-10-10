@@ -31,6 +31,9 @@ export default function Categories() {
   return (
     <>
       {!!currentAccountId && <CategoryAdd accountId={currentAccountId} />}
+      <Typography sx={{ mt: 3, mb: 1 }} color={'text.secondary'}>
+        {t('categories.description')}
+      </Typography>
       {categories.length > 0 && (
         <TableContainer>
           <Table>
@@ -44,6 +47,11 @@ export default function Categories() {
                 <TableCell>
                   <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
                     {t('categories.regex')}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
+                    {t('categories.kind.label')}
                   </Typography>
                 </TableCell>
                 <TableCell align={'right'}>

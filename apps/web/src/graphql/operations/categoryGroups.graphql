@@ -49,8 +49,10 @@ mutation UpsertCategoryGroup($id: Int, $accountId: Int!, $categoryId: Int!, $cus
   }
 }
 
-mutation UpsertCustomCategoryGroup($id: Int, $accountId: Int!, $name: String!) {
-  upsertCustomCategoryGroup(input: { customCategoryGroup: { id: $id, accountId: $accountId, name: $name } }) {
+mutation UpsertCustomCategoryGroup($id: Int, $accountId: Int!, $name: String!, $kind: String) {
+  upsertCustomCategoryGroup(
+    input: { customCategoryGroup: { id: $id, accountId: $accountId, name: $name, kind: $kind } }
+  ) {
     customCategoryGroup {
       ...CustomCategoryGroupFragment
     }

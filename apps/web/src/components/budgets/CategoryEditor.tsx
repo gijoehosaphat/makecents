@@ -116,6 +116,8 @@ export default function CategoryEditor({
 
   const availableCategories: Category[] = useMemo(() => {
     return categories.filter((category: Category) => {
+      // Payroll is income, so it is never part of a budget.
+      if (category.isPayroll) return false
       return !usedCategories.find((usedCategory: Category) => {
         return category.id === usedCategory.id
       })
@@ -141,19 +143,18 @@ export default function CategoryEditor({
           flexDirection: 'column',
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
+          flexShrink: 0,
         }}
       >
-        {budgetCategories.length <= 3 && (
-          <IconButton
-            size={'small'}
-            color={'secondary'}
-            sx={{ mr: 2, visibility: 'hidden' }}
-            className={'budget-row-hover'}
-            onClick={toggleMenu}
-          >
-            <Add />
-          </IconButton>
-        )}
+        <IconButton
+          size={'small'}
+          color={'secondary'}
+          sx={{ mr: 2, visibility: 'hidden' }}
+          className={'budget-row-hover'}
+          onClick={toggleMenu}
+        >
+          <Add />
+        </IconButton>
         <CategoryMenu
           open={isMenuOpen}
           anchorEl={menuAnchorEl}

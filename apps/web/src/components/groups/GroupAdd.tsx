@@ -2,7 +2,7 @@
 
 import { useMutation } from '@apollo/client/react'
 import { Add } from '@mui/icons-material'
-import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, TextField } from '@mui/material'
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, MenuItem, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import SaveCancel from '@/components/forms/SaveCancel'
@@ -10,7 +10,7 @@ import { GetCustomCategoryGroupsDocument, UpsertCustomCategoryGroupDocument } fr
 
 export default function GroupAdd({ accountId }: { accountId: number }) {
   const t = useTranslations('common')
-  const [fields, setFields] = useState({ name: '' })
+  const [fields, setFields] = useState({ name: '', kind: 'spending' })
   const [isEditting, setIsEditting] = useState(false)
   const [createGroup] = useMutation(UpsertCustomCategoryGroupDocument, {
     refetchQueries: [
@@ -68,6 +68,21 @@ export default function GroupAdd({ accountId }: { accountId: number }) {
               placeholder={t('forms.namePlaceholder')}
               sx={{ mb: 4 }}
             />
+            <TextField
+              select
+              label={t('groups.kind.label')}
+              value={fields.kind}
+              onChange={(event) => handleChange('kind', event.target.value)}
+              size={'small'}
+              helperText={t('groups.kind.help')}
+              sx={{ mb: 4 }}
+            >
+              {['spending', 'payroll'].map((kind) => (
+                <MenuItem key={kind} value={kind}>
+                  {t(`groups.kind.${kind}`)}
+                </MenuItem>
+              ))}
+            </TextField>
           </Box>
         </DialogContent>
         <DialogActions>

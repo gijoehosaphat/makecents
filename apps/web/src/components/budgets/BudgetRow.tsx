@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client/react'
 import { MoreVert } from '@mui/icons-material'
 import {
   Box,
+  Button,
   FormControlLabel,
   FormGroup,
   IconButton,
@@ -111,7 +112,7 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
           nodeId: budget?.nodeId,
           name: fields.name || budget?.name || '',
           amount: fields.amount || budget?.amount,
-          startingAmount: isSavingsBudget === true ? fields.startingAmount || budget?.startingAmount || null : null,
+          startingAmount: isSavingsBudget === true ? fields.startingAmount ?? budget?.startingAmount ?? null : null,
           effectiveDate: isSavingsBudget === true ? fields.effectiveDate || null : null,
         },
       })
@@ -126,6 +127,10 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
       },
     })
     handleClose()
+  }
+
+  function handleResetAccrual() {
+    setFields({ ...fields, startingAmount: 0, effectiveDate: new Date() })
   }
 
   function handleIsSavingsBudget() {
@@ -225,6 +230,13 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
                 control={<Switch checked={isSavingsBudget} onChange={handleIsSavingsBudget} size={'small'} />}
                 label={t('budgets.accrue')}
               />
+              {isSavingsBudget && (
+                <Box>
+                  <Button size={'small'} onClick={handleResetAccrual}>
+                    {t('budgets.resetAccrual')}
+                  </Button>
+                </Box>
+              )}
             </FormGroup>
           </TableCell>
         </TableRow>

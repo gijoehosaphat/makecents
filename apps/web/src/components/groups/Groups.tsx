@@ -33,6 +33,9 @@ export default function Groups() {
   return (
     <>
       {currentAccountId && <GroupAdd accountId={currentAccountId} />}
+      <Typography sx={{ mt: 3, mb: 1 }} color={'text.secondary'}>
+        {t('groups.description')}
+      </Typography>
       <TableContainer>
         <Table>
           <TableHead>
@@ -40,6 +43,11 @@ export default function Groups() {
               <TableCell>
                 <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
                   {t('shared.name')}
+                </Typography>
+              </TableCell>
+              <TableCell>
+                <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
+                  {t('groups.kind.label')}
                 </Typography>
               </TableCell>
               <TableCell align={'right'}>

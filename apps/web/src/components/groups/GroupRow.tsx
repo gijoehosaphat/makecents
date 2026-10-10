@@ -3,9 +3,10 @@
 import { CustomCategoryGroup } from '@/graphql/types'
 import { useMutation } from '@apollo/client/react'
 import { MoreVert } from '@mui/icons-material'
-import { IconButton, Menu, MenuItem, TableCell, TableRow, TextField, Typography } from '@mui/material'
+import { Chip, IconButton, Menu, MenuItem, Select, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+import { useSnackbar } from 'notistack'
 import SaveCancel from '@/components/forms/SaveCancel'
 import {
   DeleteCustomCategoryGroupDocument,
@@ -24,18 +25,11 @@ export default function GroupRow({ group, accountId }: { group: CustomCategoryGr
       },
     ],
   })
-  const [updateGroup] = useMutation(UpsertCustomCategoryGroupDocument, {
-    refetchQueries: [
-      {
-        query: GetCustomCategoryGroupsDocument,
-        variables: {
-          accountId,
-        },
-      },
-    ],
-  })
+  // A group's type changes which of its categories count as payroll, so everything on screen is refreshed.
+  const [updateGroup] = useMutation(UpsertCustomCategoryGroupDocument, { refetchQueries: 'active' })
   const t = useTranslations('common')
-  const [fields, setFields] = useState({ name: '' })
+  const { enqueueSnackbar } = useSnackbar()
+  const [fields, setFields] = useState({ name: '', kind: '' })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isEditting, setIsEditting] = useState(false)
 
@@ -63,14 +57,20 @@ export default function GroupRow({ group, accountId }: { group: CustomCategoryGr
   }
 
   async function handleSave() {
-    if (fields.name && accountId) {
-      await updateGroup({
-        variables: {
-          id: group?.id,
-          name: fields.name,
-          accountId,
-        },
-      })
+    if ((fields.name || fields.kind) && accountId) {
+      try {
+        await updateGroup({
+          variables: {
+            id: group?.id,
+            name: fields.name || group.name || '',
+            kind: fields.kind || group.kind,
+            accountId,
+          },
+        })
+      } catch (error) {
+        // e.g. a payroll group cannot contain categories that are in a budget
+        enqueueSnackbar(error instanceof Error ? error.message : t('groups.kind.saveFailed'), { variant: 'error' })
+      }
     }
     handleClose()
   }
@@ -128,6 +128,24 @@ export default function GroupRow({ group, accountId }: { group: CustomCategoryGr
         {/* <TableCell size={'small'} align={'right'} sx={{ width: '10%' }}>
           <Typography variant={'body2'}>{format(new Date(group.updatedAt), 'MMM dd, yyyy')}</Typography>
         </TableCell> */}
+        <TableCell size={'small'} sx={{ width: '20%' }}>
+          {isEditting ? (
+            <Select
+              size={'small'}
+              value={fields.kind || group.kind}
+              onChange={(event) => handleChange('kind', event.target.value)}
+              aria-label={t('groups.kind.label')}
+            >
+              {['spending', 'payroll'].map((kind) => (
+                <MenuItem key={kind} value={kind}>
+                  {t(`groups.kind.${kind}`)}
+                </MenuItem>
+              ))}
+            </Select>
+          ) : (
+            group.kind === 'payroll' && <Chip size={'small'} label={t('groups.kind.payroll')} />
+          )}
+        </TableCell>
         <TableCell size={'small'} align={'right'} sx={{ width: '10%' }}>
           {isEditting ? (
             <>

@@ -10,18 +10,12 @@ import {
   Typography,
 } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import {
-  differenceInCalendarDays,
-  differenceInMonths,
-  getDaysInMonth,
-  endOfMonth,
-  endOfDay,
-} from 'date-fns'
 import { formatMoney } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { BudgetItem } from '../reporting/Budgets'
 import { useMemo, useState } from 'react'
-import { useDateFilterParams } from '@/lib/useDateFilterParams'
+import { useBudgetPeriod } from '@/lib/useBudgetPeriod'
+import { availableBalance } from '@/lib/budgetMath'
 import CurrencyTextField from './CurrencyTextField'
 import SaveCancel from '../forms/SaveCancel'
 import { DatePicker } from '@mui/x-date-pickers'
@@ -51,10 +45,7 @@ export default function BudgetDetails({
 }) {
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
-  const { dateTo: rawDateTo, dateRange } = useDateFilterParams()
-  // Budget accrual math is inherently month-scoped, so fall back to the
-  // current month when the shared date filter is set to "year" or "all time".
-  const dateTo = dateRange === 'month' && rawDateTo ? rawDateTo : endOfMonth(endOfDay(new Date()))
+  const { dateTo } = useBudgetPeriod()
   const [updateBudget] = useMutation(UpdateBudgetDocument, {
     refetchQueries: [
       {
@@ -75,60 +66,22 @@ export default function BudgetDetails({
   })
 
   const total = useMemo(() => {
-    if (fields.effectiveDate) {
-      const effectiveDate = new Date(fields.effectiveDate)
-      const amount = Number(fields.amount)
-      const startingAmount = Number(fields.startingAmount)
-      const transactionsTotal =
-        budgetItem?.budgetTransactions.reduce((partialSum, transaction) => {
-          const date = new Date(transaction.posted)
-
-          if (date.getTime() >= effectiveDate.getTime()) {
-            return partialSum + Number(transaction.amount)
-          } else {
-            return partialSum
-          }
-        }, 0) || 0
-
-      // Calculate total based on budget and effectiveDate and currentDate
-      // from effectiveDate to today
-      let accruedAmount = 0
-      if (
-        effectiveDate.getMonth() === dateTo.getMonth() &&
-        effectiveDate.getFullYear() === dateTo.getFullYear()
-      ) {
-        //Same month..
-        const diff = differenceInCalendarDays(dateTo, effectiveDate) + 1
-        const daysInMonth = getDaysInMonth(effectiveDate)
-        accruedAmount = Math.floor((amount / daysInMonth) * diff)
-      } else {
-        //Get accrued value of starting month
-        const daysInEffectiveMonth = getDaysInMonth(effectiveDate)
-        accruedAmount += Math.floor(
-          (amount / daysInEffectiveMonth) *
-            (daysInEffectiveMonth - effectiveDate.getDate()),
-        )
-
-        //Get accrued value of months in between
-        const monthsDiff = differenceInMonths(dateTo, effectiveDate)
-        accruedAmount += monthsDiff * amount
-      }
-      return transactionsTotal + startingAmount + accruedAmount
-    } else {
-      return 0
-    }
-  }, [
-    dateTo,
-    budgetItem?.budgetTransactions,
-    fields.amount,
-    fields.startingAmount,
-    fields.effectiveDate,
-  ])
+    if (!fields.effectiveDate) return 0
+    return availableBalance(
+      {
+        amount: fields.amount,
+        startingAmount: fields.startingAmount,
+        effectiveDate: fields.effectiveDate,
+      },
+      budgetItem?.budgetTransactions || [],
+      dateTo,
+    )
+  }, [dateTo, budgetItem?.budgetTransactions, fields.amount, fields.startingAmount, fields.effectiveDate])
 
   function handleChange(field: string, value: string | number) {
     let newValue = value
     if (field === 'amount' || field === 'startingAmount') {
-      newValue = Math.floor(Number(newValue) * 100)
+      newValue = Math.round(Number(newValue) * 100)
     }
     setFields({
       ...fields,
@@ -149,7 +102,7 @@ export default function BudgetDetails({
         variables: {
           nodeId: budgetItem?.budget?.nodeId,
           name: fields.name || budgetItem?.budget?.name || '',
-          amount: fields.amount || budgetItem?.budget?.amount,
+          amount: fields.amount ?? budgetItem?.budget?.amount,
           startingAmount: fields.startingAmount || 0,
           effectiveDate: fields.effectiveDate || null,
         },
