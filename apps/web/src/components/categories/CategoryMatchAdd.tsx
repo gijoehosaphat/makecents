@@ -3,11 +3,11 @@ import CategoryDisplay from '../shared/CategoryDisplay'
 import { useMemo } from 'react'
 import { IconButton } from '@mui/material'
 import { Add } from '@mui/icons-material'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { TransactionSearchDocument, UpdateTransactionDocument } from '@/graphql/operations'
 
 export function CategoryMatchAdd({ category, transaction }: { category: Category; transaction: Transaction }) {
-  const [addCategory] = useMutation(UpdateTransactionDocument, {
+  const [addCategory] = useMutationWithToast(UpdateTransactionDocument, {
     refetchQueries: [
       {
         query: TransactionSearchDocument,
@@ -17,7 +17,7 @@ export function CategoryMatchAdd({ category, transaction }: { category: Category
       },
     ],
   })
-  const [removeCategory] = useMutation(UpdateTransactionDocument, {
+  const [removeCategory] = useMutationWithToast(UpdateTransactionDocument, {
     refetchQueries: [
       {
         query: TransactionSearchDocument,

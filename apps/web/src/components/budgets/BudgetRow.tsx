@@ -1,7 +1,7 @@
 'use client'
 
 import { Budget, Category } from '@/graphql/types'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { MoreVert } from '@mui/icons-material'
 import {
   Box,
@@ -39,7 +39,7 @@ interface Fields {
 }
 
 export default function BudgetRow({ budget, accountId }: { budget: Budget; accountId: number | null }) {
-  const [deleteBudget] = useMutation(DeleteBudgetDocument, {
+  const [deleteBudget] = useMutationWithToast(DeleteBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,
@@ -49,7 +49,7 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
       },
     ],
   })
-  const [updateBudget] = useMutation(UpdateBudgetDocument, {
+  const [updateBudget] = useMutationWithToast(UpdateBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,

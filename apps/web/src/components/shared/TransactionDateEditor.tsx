@@ -11,7 +11,7 @@ import { DateTimePicker } from '@mui/x-date-pickers'
 import { Transaction } from '@/graphql/types'
 import { UpdateTransactionDocument } from '@/graphql/operations'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useTranslations } from 'next-intl'
 
 export function TransactionDateEditor({
@@ -23,7 +23,7 @@ export function TransactionDateEditor({
   transaction: Transaction
   refetchQuery: InternalRefetchQueryDescriptor
 }) {
-  const [updateTransaction] = useMutation(UpdateTransactionDocument, {
+  const [updateTransaction] = useMutationWithToast(UpdateTransactionDocument, {
     refetchQueries: [refetchQuery],
   })
   const t = useTranslations('common')

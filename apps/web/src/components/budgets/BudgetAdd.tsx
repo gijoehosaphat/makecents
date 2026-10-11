@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { Add } from '@mui/icons-material'
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
@@ -13,7 +13,7 @@ export default function BudgetAdd({ accountId }: { accountId: number }) {
   const t = useTranslations('common')
   const [fields, setFields] = useState({ name: '', amount: 0 })
   const [isEditting, setIsEditting] = useState(false)
-  const [createBudget] = useMutation(CreateBudgetDocument, {
+  const [createBudget] = useMutationWithToast(CreateBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,

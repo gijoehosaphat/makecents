@@ -7,7 +7,7 @@ import { useAppContext } from '../context/AppContextProvider'
 import { useParams, useRouter } from 'next/navigation'
 import { formatMoneyCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useTranslations } from 'next-intl'
 import { GetUserAndAccountsAndBankAccountsByEmailDocument, UpdateBankAccountClosedDocument } from '@/graphql/operations'
 
@@ -23,7 +23,7 @@ export function BankAccountHeader() {
 
   const bankAccount = bankAccounts.find((bankAccount) => bankAccount.id === bankAccountId)
 
-  const [updateBankAccountClosed] = useMutation(UpdateBankAccountClosedDocument, {
+  const [updateBankAccountClosed] = useMutationWithToast(UpdateBankAccountClosedDocument, {
     refetchQueries: [
       {
         query: GetUserAndAccountsAndBankAccountsByEmailDocument,

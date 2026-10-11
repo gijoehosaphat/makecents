@@ -23,7 +23,7 @@ import {
   GetBudgetsByAccountIdDocument,
   UpdateBudgetDocument,
 } from '@/graphql/operations'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 
 interface Fields {
   name: string
@@ -46,7 +46,7 @@ export default function BudgetDetails({
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
   const { dateTo } = useBudgetPeriod()
-  const [updateBudget] = useMutation(UpdateBudgetDocument, {
+  const [updateBudget] = useMutationWithToast(UpdateBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,

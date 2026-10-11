@@ -1,6 +1,7 @@
 {
   "common": {
     "shared": {
+      "saveError": "Something went wrong and your change was not saved. Please try again.",
       "save": "Save",
       "cancel": "Cancel",
       "name": "Name",

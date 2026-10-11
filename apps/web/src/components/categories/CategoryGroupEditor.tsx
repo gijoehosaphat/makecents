@@ -1,6 +1,6 @@
 import { useCategoryGroups } from '@/lib/useCategoryGroups'
 import { Category, CustomCategoryGroup } from '@/graphql/types'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useAppContext } from '../context/AppContextProvider'
 import { Chip, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material'
 import { Category as CategoryIcon, Check } from '@mui/icons-material'
@@ -17,7 +17,7 @@ export function CategoryGroupEditor({ category }: { category: Category }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const { currentAccountId } = useAppContext()
   const { categoryGroups, customCategoryGroups } = useCategoryGroups()
-  const [upsertCategoryGroup] = useMutation(UpsertCategoryGroupDocument, {
+  const [upsertCategoryGroup] = useMutationWithToast(UpsertCategoryGroupDocument, {
     refetchQueries: [
       {
         query: GetCategoryGroupsDocument,
@@ -27,7 +27,7 @@ export function CategoryGroupEditor({ category }: { category: Category }) {
       },
     ],
   })
-  const [deleteCategoryGroup] = useMutation(DeleteCategoryGroupDocument, {
+  const [deleteCategoryGroup] = useMutationWithToast(DeleteCategoryGroupDocument, {
     refetchQueries: [
       {
         query: GetCategoryGroupsDocument,

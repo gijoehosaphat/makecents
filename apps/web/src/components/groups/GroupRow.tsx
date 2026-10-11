@@ -1,12 +1,11 @@
 'use client'
 
 import { CustomCategoryGroup } from '@/graphql/types'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { MoreVert } from '@mui/icons-material'
 import { Chip, IconButton, Menu, MenuItem, Select, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { useSnackbar } from 'notistack'
 import SaveCancel from '@/components/forms/SaveCancel'
 import {
   DeleteCustomCategoryGroupDocument,
@@ -15,7 +14,8 @@ import {
 } from '@/graphql/operations'
 
 export default function GroupRow({ group, accountId }: { group: CustomCategoryGroup; accountId: number | null }) {
-  const [deleteGroup] = useMutation(DeleteCustomCategoryGroupDocument, {
+  const t = useTranslations('common')
+  const [deleteGroup] = useMutationWithToast(DeleteCustomCategoryGroupDocument, {
     refetchQueries: [
       {
         query: GetCustomCategoryGroupsDocument,
@@ -26,9 +26,11 @@ export default function GroupRow({ group, accountId }: { group: CustomCategoryGr
     ],
   })
   // A group's type changes which of its categories count as payroll, so everything on screen is refreshed.
-  const [updateGroup] = useMutation(UpsertCustomCategoryGroupDocument, { refetchQueries: 'active' })
-  const t = useTranslations('common')
-  const { enqueueSnackbar } = useSnackbar()
+  const [updateGroup] = useMutationWithToast(UpsertCustomCategoryGroupDocument, {
+    refetchQueries: 'active',
+    showServerMessage: true,
+    errorMessage: t('groups.kind.saveFailed'),
+  })
   const [fields, setFields] = useState({ name: '', kind: '' })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isEditting, setIsEditting] = useState(false)
@@ -67,9 +69,8 @@ export default function GroupRow({ group, accountId }: { group: CustomCategoryGr
             accountId,
           },
         })
-      } catch (error) {
-        // e.g. a payroll group cannot contain categories that are in a budget
-        enqueueSnackbar(error instanceof Error ? error.message : t('groups.kind.saveFailed'), { variant: 'error' })
+      } catch {
+        // Reported by the mutation hook, e.g. a payroll group cannot contain categories that are in a budget.
       }
     }
     handleClose()

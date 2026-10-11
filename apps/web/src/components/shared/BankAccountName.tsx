@@ -1,7 +1,7 @@
 'use client'
 
 import { useAppContext } from '@/components/context/AppContextProvider'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { CreditCard, Edit, Savings, Wallet } from '@mui/icons-material'
 import { Box, IconButton, TextField, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
@@ -21,7 +21,7 @@ export default function BankAccountName({
   bankAccount: BankAccount | undefined
 }) {
   const { user, currentAccountId } = useAppContext()
-  const [updateBankAccountName] = useMutation(UpdateBankAccountNameDocument, {
+  const [updateBankAccountName] = useMutationWithToast(UpdateBankAccountNameDocument, {
     refetchQueries: [
       {
         query: GetUserAndAccountsAndBankAccountsByEmailDocument,

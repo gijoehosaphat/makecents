@@ -1,6 +1,7 @@
 import { BankAccount, Query, Transaction, UpdateTransactionInput } from '@/graphql/types'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useMutation, useSuspenseQuery } from '@apollo/client/react'
+import { useSuspenseQuery } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import {
   GetTransactionsByBankAccountsDocument,
   UpdateTransactionDocument,
@@ -59,7 +60,7 @@ export function useTransactions({
     variables,
   })
 
-  const [updateTransaction] = useMutation(UpdateTransactionDocument, {
+  const [updateTransaction] = useMutationWithToast(UpdateTransactionDocument, {
     refetchQueries: [
       {
         query: GetTransactionsByBankAccountsDocument,
@@ -68,7 +69,7 @@ export function useTransactions({
     ],
   })
 
-  const [createTransaction] = useMutation(CreateTransactionDocument, {
+  const [createTransaction] = useMutationWithToast(CreateTransactionDocument, {
     refetchQueries: [
       {
         query: GetTransactionsByBankAccountsDocument,
@@ -77,7 +78,7 @@ export function useTransactions({
     ],
   })
 
-  const [deleteTransaction] = useMutation(DeleteTransactionDocument, {
+  const [deleteTransaction] = useMutationWithToast(DeleteTransactionDocument, {
     refetchQueries: [
       {
         query: GetTransactionsByBankAccountsDocument,

@@ -26,7 +26,8 @@ import {
 import { useTranslations } from 'next-intl'
 import { useSnackbar } from 'notistack'
 import { addDays, format } from 'date-fns'
-import { useMutation, useQuery } from '@apollo/client/react'
+import { useQuery } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { useUploadHandler } from '@/lib/useUploadHandler'
 import { formatMoneyCents } from '@/lib/formatMoney'
@@ -277,10 +278,14 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
     }
   }, [selectedAccountId, isMultiAccountFile, isMappingUsable, existingTransactions, preview.rows, activeMapping])
 
-  const [createBankCsvDefinition] = useMutation(CreateBankCsvDefinitionDocument, { refetchQueries: definitionsRefetch })
-  const [updateBankCsvDefinition] = useMutation(UpdateBankCsvDefinitionDocument)
-  const [upsertBankAccount] = useMutation(UpsertBankAccountDocument)
-  const [updateBankAccountName] = useMutation(UpdateBankAccountNameDocument, {
+  const [createBankCsvDefinition] = useMutationWithToast(CreateBankCsvDefinitionDocument, {
+    refetchQueries: definitionsRefetch,
+    reportErrors: false,
+  })
+  const [updateBankCsvDefinition] = useMutationWithToast(UpdateBankCsvDefinitionDocument, { reportErrors: false })
+  const [upsertBankAccount] = useMutationWithToast(UpsertBankAccountDocument, { reportErrors: false })
+  const [updateBankAccountName] = useMutationWithToast(UpdateBankAccountNameDocument, {
+    reportErrors: false,
     refetchQueries: [{ query: GetUserAndAccountsAndBankAccountsByEmailDocument, variables: { email: user?.email || '' } }],
   })
 

@@ -6,8 +6,7 @@ import { Alert, AlertTitle, Box, Button, Paper, Table, TableBody, TableCell, Tab
 import { useSuspenseQuery } from '@apollo/client/react'
 import { useTranslations } from 'next-intl'
 import { Category, Transaction } from '@/graphql/types'
-import { useMutation } from '@apollo/client/react'
-import { useSnackbar } from 'notistack'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import TransactionsPreview from '../shared/TransactionsPreview'
 import { subMonths, startOfMonth } from 'date-fns'
 import { useAppContext } from '../context/AppContextProvider'
@@ -136,8 +135,11 @@ export function BudgetPlan({
   const candidates = useSuspenseQuery(GetPayrollCandidatesDocument, {
     variables: { bankAccountIds, dateFrom: historyStart, dateTo: monthStart },
   })
-  const { enqueueSnackbar } = useSnackbar()
-  const [updateCategory] = useMutation(UpdateCategoryDocument, { refetchQueries: 'active' })
+  const [updateCategory] = useMutationWithToast(UpdateCategoryDocument, {
+    refetchQueries: 'active',
+    showServerMessage: true,
+    errorMessage: t('budgets.plan.payrollMarkFailed'),
+  })
   // Load categories with the page: the transactions dialog's category editors need them, and suspending when the
   // dialog opens would blank the whole page (and leave the body scroll-locked).
   useCategories()
@@ -179,8 +181,8 @@ export function BudgetPlan({
       await updateCategory({
         variables: { nodeId: category.nodeId, name: category.name, regex: category.regex, kind: 'payroll' },
       })
-    } catch (error) {
-      enqueueSnackbar(error instanceof Error ? error.message : t('budgets.plan.payrollMarkFailed'), { variant: 'error' })
+    } catch {
+      // Reported by the mutation hook.
     }
   }
   const totalBudgeted = fixedBudgeted + accruingBudgeted

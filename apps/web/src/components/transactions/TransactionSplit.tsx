@@ -17,7 +17,7 @@ import SaveCancel from '../forms/SaveCancel'
 import { useTranslations } from 'next-intl'
 import CurrencyTextField from '../shared/CurrencyTextField'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { UpsertSplitTransactionsDocument } from '@/graphql/operations'
 
 interface SplitTransaction {
@@ -36,7 +36,7 @@ export function TransactionSplit({
   refetchQuery: InternalRefetchQueryDescriptor
 }) {
   const t = useTranslations('common')
-  const [upsertSplitTransactions] = useMutation(UpsertSplitTransactionsDocument, {
+  const [upsertSplitTransactions] = useMutationWithToast(UpsertSplitTransactionsDocument, {
     refetchQueries: [refetchQuery],
   })
   const [isWithdrawal] = useState(transaction.originalAmount < 0)

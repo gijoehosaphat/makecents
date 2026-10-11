@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { Add } from '@mui/icons-material'
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, MenuItem, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
@@ -12,7 +12,7 @@ export default function GroupAdd({ accountId }: { accountId: number }) {
   const t = useTranslations('common')
   const [fields, setFields] = useState({ name: '', kind: 'spending' })
   const [isEditting, setIsEditting] = useState(false)
-  const [createGroup] = useMutation(UpsertCustomCategoryGroupDocument, {
+  const [createGroup] = useMutationWithToast(UpsertCustomCategoryGroupDocument, {
     refetchQueries: [
       {
         query: GetCustomCategoryGroupsDocument,

@@ -1,4 +1,5 @@
-import { useApolloClient, useMutation } from '@apollo/client/react'
+import { useApolloClient } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { Button } from '@mui/material'
 import {
   UpsertBankAccountDocument,
@@ -16,8 +17,8 @@ export function useUploadHandler() {
   const t = useTranslations('common')
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const client = useApolloClient()
-  const [importTransactions] = useMutation(ImportTransactionsDocument)
-  const [undoImportBatch] = useMutation(UndoImportBatchDocument)
+  const [importTransactions] = useMutationWithToast(ImportTransactionsDocument, { reportErrors: false })
+  const [undoImportBatch] = useMutationWithToast(UndoImportBatchDocument, { errorMessage: t('upload.undoError') })
 
   // Imports and undos can touch any visible list, total or balance; refresh them once per
   // file rather than once per bank account in it.
@@ -29,8 +30,10 @@ export function useUploadHandler() {
       console.error(error)
     }
   }
-  const [upsertBankAccount] = useMutation(UpsertBankAccountDocument)
-  const [upsertBankAccountReconciliation] = useMutation(UpsertBankAccountReconciliationDocument)
+  const [upsertBankAccount] = useMutationWithToast(UpsertBankAccountDocument, { reportErrors: false })
+  const [upsertBankAccountReconciliation] = useMutationWithToast(UpsertBankAccountReconciliationDocument, {
+    reportErrors: false,
+  })
 
   /** Imports in one request; rows the account already has are skipped by the database. */
   async function createTransactionsForAccount(
@@ -68,9 +71,8 @@ export function useUploadHandler() {
       }
       await refreshActiveQueries()
       enqueueSnackbar(t('upload.undone'), { variant: 'info' })
-    } catch (error) {
-      console.error(error)
-      enqueueSnackbar(t('upload.undoError'), { variant: 'error' })
+    } catch {
+      // Reported by the mutation hook.
     }
   }
 
