@@ -148,7 +148,7 @@ export default function TransactionRow({
                 refetchQuery={refetchQuery}
               />
             )}
-            {!categorizeOnly && !transaction.categoryId && !hasSplits && (
+            {!categorizeOnly && (hasTransfer || !transaction.categoryId) && !hasSplits && (
               <TransactionLink
                 transaction={transaction}
                 refetchQuery={refetchQuery}
