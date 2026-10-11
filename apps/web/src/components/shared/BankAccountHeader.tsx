@@ -4,10 +4,11 @@ import { useState } from 'react'
 import BankAccountName from './BankAccountName'
 import ReconcileBalanceDialog from './ReconcileBalanceDialog'
 import { useAppContext } from '../context/AppContextProvider'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { formatMoneyCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
+import { useRefreshAccountData } from '@/lib/useRefreshAccountData'
 import { useTranslations } from 'next-intl'
 import { GetUserAndAccountsAndBankAccountsByEmailDocument, UpdateBankAccountClosedDocument } from '@/graphql/operations'
 
@@ -16,7 +17,7 @@ export function BankAccountHeader() {
   const { hidden } = useAmountVisibility()
   const theme = useTheme()
   const params = useParams()
-  const router = useRouter()
+  const refreshAccountData = useRefreshAccountData()
   const t = useTranslations('common')
   const bankAccountId = Number(Array.isArray(params?.bankAccountId) ? params?.bankAccountId[0] : params?.bankAccountId)
   const [isReconciling, setIsReconciling] = useState(false)
@@ -34,16 +35,15 @@ export function BankAccountHeader() {
     ],
   })
 
-  function handleToggleClosed() {
-    updateBankAccountClosed({
+  async function handleToggleClosed() {
+    await updateBankAccountClosed({
       variables: {
         id: bankAccountId,
         accountId: Number(currentAccountId),
         closed: !bankAccount?.closed,
       },
     })
-    //TODO: This is lame
-    router.refresh()
+    refreshAccountData()
   }
 
   return (

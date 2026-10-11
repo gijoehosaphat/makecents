@@ -4,11 +4,8 @@ import { formatMoney } from '@/lib/formatMoney'
 import { Box, Divider, Typography, useTheme } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { useAppContext } from '../context/AppContextProvider'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
-import { useDateFilterParams } from '@/lib/useDateFilterParams'
-import { GetCategoryTotalsDocument } from '@/graphql/operations'
-import { useSuspenseQuery } from '@apollo/client/react'
+import { useCategoryTotals } from '@/lib/useCategoryTotals'
 import { Category, CategoryGroup } from '@/graphql/types'
 import { useMemo } from 'react'
 import { useCategories } from '@/lib/useCategories'
@@ -127,33 +124,11 @@ function CategoryBarChart({ title, data, yAxisWidth }: { title: string; data: Ch
 
 export function CategorySpendingBarChart() {
   const t = useTranslations('common')
-  const { bankAccounts } = useAppContext()
-  const { dateFrom, dateTo } = useDateFilterParams()
-  const bankAccountIds = useMemo(() => bankAccounts.map((ba) => ba.id), [bankAccounts])
-  const { data: totalsData } = useSuspenseQuery(GetCategoryTotalsDocument, {
-    variables: {
-      filter: {
-        bankAccountId: { in: bankAccountIds },
-        // Uncategorized rows would group under a null key, which the schema's non-null `keys` can't return.
-        categoryId: { isNull: false },
-        ...(dateFrom !== undefined && dateTo !== undefined
-          ? { posted: { greaterThanOrEqualTo: dateFrom, lessThan: dateTo } }
-          : {}),
-        transferByTransactionSourceIdExists: false,
-        transferByTransactionTargetIdExists: false,
-      },
-    },
-  })
+  const totals = useCategoryTotals()
   const { categories } = useCategories()
   const { categoryGroups } = useCategoryGroups()
 
   const data = useMemo(() => {
-    const totals = new Map<string, number>()
-    for (const group of totalsData.allTransactions?.groupedAggregates ?? []) {
-      const categoryId = group.keys?.[0]
-      if (categoryId == null) continue
-      totals.set(categoryId, Number(group.sum?.amount ?? 0))
-    }
     return (categories ?? [])
       .map((category) => ({
         label: category.name || '',
@@ -165,7 +140,7 @@ export function CategorySpendingBarChart() {
         if (a.label < b.label) return 1
         return 0
       })
-  }, [categories, totalsData])
+  }, [categories, totals])
 
   const ids = categoryGroups.map((cg) => cg.categoryId)
   const spending: ChartData[] = data.filter((cd) => !ids.includes(cd.category.id))

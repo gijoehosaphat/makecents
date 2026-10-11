@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
+import { useRefreshAccountData } from '@/lib/useRefreshAccountData'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import CurrencyTextField from './CurrencyTextField'
 import {
@@ -24,7 +24,7 @@ export default function ReconcileBalanceDialog({
   onClose: () => void
 }) {
   const t = useTranslations('common')
-  const router = useRouter()
+  const refreshAccountData = useRefreshAccountData()
   const { user } = useAppContext()
   const [balance, setBalance] = useState(fromCents(currentBalance))
   const [asOf, setAsOf] = useState(new Date())
@@ -48,8 +48,7 @@ export default function ReconcileBalanceDialog({
         asOf,
       },
     })
-    //TODO: This is lame
-    router.refresh()
+    refreshAccountData()
     onClose()
   }
 

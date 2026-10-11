@@ -2,10 +2,10 @@
 
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
+import { useRefreshAccountData } from '@/lib/useRefreshAccountData'
 import { CreditCard, Edit, Savings, Wallet } from '@mui/icons-material'
 import { Box, IconButton, TextField, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { useHover } from 'usehooks-ts'
 import SaveCancel from '@/components/forms/SaveCancel'
@@ -33,7 +33,7 @@ export default function BankAccountName({
   })
   const t = useTranslations('common')
   const accountLabel = useBankAccountLabel()
-  const router = useRouter()
+  const refreshAccountData = useRefreshAccountData()
 
   const hoverRef = useRef<HTMLElement | null>(null)
   const isHover = useHover(hoverRef as React.RefObject<HTMLElement>)
@@ -50,7 +50,7 @@ export default function BankAccountName({
   }
 
   async function handleSaveName() {
-    updateBankAccountName({
+    await updateBankAccountName({
       variables: {
         name: String(accountName),
         id: bankAccountId,
@@ -58,8 +58,7 @@ export default function BankAccountName({
       },
     })
     setIsEditting(false)
-    //TODO: This is lame
-    router.refresh()
+    refreshAccountData()
   }
 
   return (
