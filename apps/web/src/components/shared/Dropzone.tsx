@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import { useUploadHandler } from '@/lib/useUploadHandler'
 import { useSnackbar } from 'notistack'
 import { CsvImportDialog } from './CsvImportDialog'
+import { toCents } from '@/lib/formatMoney'
 
 function parseDate(dateString: string) {
   const dateParts = String(dateString).split('[')
@@ -65,7 +66,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
             statementTransactions.forEach((statementTransaction) => {
               const newTransaction = {
                 posted: parseDate(statementTransaction.DTPOSTED),
-                amount: Number((Number(statementTransaction.TRNAMT) * 100).toFixed(2)),
+                amount: toCents(Number(statementTransaction.TRNAMT)),
                 bankTransactionId: statementTransaction.FITID,
                 name: statementTransaction.NAME,
                 memo: statementTransaction.MEMO,
@@ -89,7 +90,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
                 accountId,
               },
               reconciliation: {
-                balance: Number((Number(bankAccount.STMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
+                balance: toCents(Number(bankAccount.STMTRS.LEDGERBAL.BALAMT)),
                 asOf: parseDate(bankAccount.STMTRS.LEDGERBAL.DTASOF),
               },
               transactions: [],
@@ -111,7 +112,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
                 accountId,
               },
               reconciliation: {
-                balance: Number((Number(creditCardAccount.CCSTMTRS.LEDGERBAL.BALAMT) * 100).toFixed(2)),
+                balance: toCents(Number(creditCardAccount.CCSTMTRS.LEDGERBAL.BALAMT)),
                 asOf: parseDate(creditCardAccount.CCSTMTRS.LEDGERBAL.DTASOF),
               },
               transactions: [],

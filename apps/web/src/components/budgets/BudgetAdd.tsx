@@ -8,6 +8,7 @@ import { useState } from 'react'
 import SaveCancel from '@/components/forms/SaveCancel'
 import CurrencyTextField from '../shared/CurrencyTextField'
 import { CreateBudgetDocument, GetBudgetsByAccountIdDocument } from '@/graphql/operations'
+import { toCents } from '@/lib/formatMoney'
 
 export default function BudgetAdd({ accountId }: { accountId: number }) {
   const t = useTranslations('common')
@@ -36,7 +37,7 @@ export default function BudgetAdd({ accountId }: { accountId: number }) {
       await createBudget({
         variables: {
           name: fields.name,
-          amount: fields.amount * 100,
+          amount: toCents(fields.amount),
           accountId,
         },
       })

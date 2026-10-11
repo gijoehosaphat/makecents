@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import { formatMoney } from '@/lib/formatMoney'
+import { formatMoney, toCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { BudgetItem } from '../reporting/Budgets'
 import { useMemo, useState } from 'react'
@@ -81,7 +81,7 @@ export default function BudgetDetails({
   function handleChange(field: string, value: string | number) {
     let newValue = value
     if (field === 'amount' || field === 'startingAmount') {
-      newValue = Math.round(Number(newValue) * 100)
+      newValue = toCents(Number(newValue))
     }
     setFields({
       ...fields,

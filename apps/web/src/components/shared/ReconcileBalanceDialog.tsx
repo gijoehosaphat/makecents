@@ -12,6 +12,7 @@ import {
   GetUserAndAccountsAndBankAccountsByEmailDocument,
   UpsertBankAccountReconciliationDocument,
 } from '@/graphql/operations'
+import { fromCents, toCents } from '@/lib/formatMoney'
 
 export default function ReconcileBalanceDialog({
   bankAccountId,
@@ -25,7 +26,7 @@ export default function ReconcileBalanceDialog({
   const t = useTranslations('common')
   const router = useRouter()
   const { user } = useAppContext()
-  const [balance, setBalance] = useState(currentBalance / 100)
+  const [balance, setBalance] = useState(fromCents(currentBalance))
   const [asOf, setAsOf] = useState(new Date())
 
   const [upsertBankAccountReconciliation, { loading }] = useMutationWithToast(UpsertBankAccountReconciliationDocument, {
@@ -43,7 +44,7 @@ export default function ReconcileBalanceDialog({
     await upsertBankAccountReconciliation({
       variables: {
         bankAccountId,
-        balance: Math.round(balance * 100),
+        balance: toCents(balance),
         asOf,
       },
     })
