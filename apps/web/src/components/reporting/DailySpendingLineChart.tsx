@@ -2,7 +2,8 @@
 
 import { formatMoney } from '@/lib/formatMoney'
 import { useColors } from '@/lib/useColors'
-import { Transaction } from '@/graphql/types'
+import { GetDailyCashFlowTransactionsDocument } from '@/graphql/operations'
+import { useSuspenseQuery } from '@apollo/client/react'
 import { Box, Divider, Typography, useTheme } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
@@ -17,7 +18,6 @@ import {
 } from 'recharts'
 import { differenceInCalendarDays, startOfMonth, endOfMonth, endOfDay } from 'date-fns'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
-import { useTransactions } from '@/lib/useTransactions'
 import { useAppContext } from '../context/AppContextProvider'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 
@@ -29,10 +29,16 @@ export function DailySpendingLineChart() {
   // This chart bins transactions by day-of-month, so it only makes sense for a single month.
   const dateFrom = dateRange === 'month' && rawDateFrom ? rawDateFrom : startOfMonth(today)
   const dateTo = dateRange === 'month' && rawDateTo ? rawDateTo : endOfMonth(endOfDay(today))
-  const { transactionsSansTransfers } = useTransactions({
-    dateFrom,
-    dateTo,
-    bankAccountIds: bankAccounts.map((ba) => ba.id),
+  const bankAccountIds = useMemo(() => bankAccounts.map((ba) => ba.id), [bankAccounts])
+  const { data } = useSuspenseQuery(GetDailyCashFlowTransactionsDocument, {
+    variables: {
+      filter: {
+        bankAccountId: { in: bankAccountIds },
+        posted: { greaterThanOrEqualTo: dateFrom, lessThan: dateTo },
+        transferByTransactionSourceIdExists: false,
+        transferByTransactionTargetIdExists: false,
+      },
+    },
   })
   const { getColors } = useColors()
   const theme = useTheme()
@@ -41,45 +47,22 @@ export function DailySpendingLineChart() {
   const numDays = Math.abs(differenceInCalendarDays(dateFrom, dateTo)) + 1
   const colorGradient = getColors(numDays)
 
-  const negativeTransactions = useMemo(() => {
-    return transactionsSansTransfers.filter(
-      (transaction) => transaction.amount <= 0,
-    )
-  }, [transactionsSansTransfers])
-
-  const positiveTransactions = useMemo(() => {
-    return transactionsSansTransfers.filter(
-      (transaction) => transaction.amount > 0,
-    )
-  }, [transactionsSansTransfers])
-
   const transactionsByDay = useMemo(() => {
-    return Array.from({ length: numDays }, (e, i: number) => {
-      const day = i + 1
-      const positiveDailyTransactions = positiveTransactions.filter(
-        (transaction: Transaction) =>
-          new Date(transaction.posted).getDate() === day,
-      )
-      const negativeDailyTransactions = negativeTransactions.filter(
-        (transaction: Transaction) =>
-          new Date(transaction.posted).getDate() === day,
-      )
-      const negativeValue = negativeDailyTransactions.reduce(
-        (partialSum, t) => partialSum + Number(t.amount),
-        0,
-      )
-      const positiveValue = positiveDailyTransactions.reduce(
-        (partialSum, t) => partialSum + Number(t.amount),
-        0,
-      )
-      return {
-        label: `${day}`,
-        negativeValue,
-        positiveValue,
-        color: colorGradient[i],
-      }
-    })
-  }, [positiveTransactions, negativeTransactions, colorGradient, numDays])
+    const days = Array.from({ length: numDays }, (e, i: number) => ({
+      label: `${i + 1}`,
+      negativeValue: 0,
+      positiveValue: 0,
+      color: colorGradient[i],
+    }))
+    for (const transaction of data.allTransactions?.nodes ?? []) {
+      const day = days[new Date(transaction.posted).getDate() - 1]
+      if (!day) continue
+      const amount = Number(transaction.amount)
+      if (amount > 0) day.positiveValue += amount
+      else day.negativeValue += amount
+    }
+    return days
+  }, [data, colorGradient, numDays])
 
   return (
     <>

@@ -360,3 +360,15 @@ query GetFilteredTransactionTotalsBySearch(
     }
   }
 }
+
+# Slim query for the daily cash flow chart: only the fields needed to bin by day, with transfers excluded
+# in the database instead of fetching splits/transfers and filtering on the client.
+query GetDailyCashFlowTransactions($filter: TransactionFilter!) {
+  allTransactions(filter: $filter) {
+    nodes {
+      nodeId
+      posted
+      amount
+    }
+  }
+}
