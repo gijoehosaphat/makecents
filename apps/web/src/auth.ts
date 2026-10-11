@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import NextAuth, { CredentialsSignin } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { authenticateUser } from '@/helpers/api/apollo/auth'
@@ -48,6 +49,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (token.sub) {
         session.user.id = token.sub
+      }
+      if (session.user.email) {
+        const hash = createHash('sha256').update(session.user.email.trim().toLowerCase()).digest('hex')
+        // d=404 makes the image fail when no Gravatar exists, so Avatar falls back to initials
+        session.user.image = `https://www.gravatar.com/avatar/${hash}?s=80&d=404`
       }
       return session
     },
