@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { useMutation, useSuspenseQuery } from '@apollo/client/react'
+import { useSuspenseQuery } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { format } from 'date-fns'
 import { useSnackbar } from 'notistack'
 import {
@@ -43,8 +44,14 @@ export default function Imports() {
   const [isWorking, setIsWorking] = useState(false)
 
   const { data } = useSuspenseQuery(GetImportBatchesDocument, { variables: { accountId: Number(currentAccountId) } })
-  const [undoImportBatch] = useMutation(UndoImportBatchDocument, { refetchQueries: 'active' })
-  const [moveImportBatch] = useMutation(MoveImportBatchDocument, { refetchQueries: 'active' })
+  const [undoImportBatch] = useMutationWithToast(UndoImportBatchDocument, {
+    refetchQueries: 'active',
+    errorMessage: t('imports.error'),
+  })
+  const [moveImportBatch] = useMutationWithToast(MoveImportBatchDocument, {
+    refetchQueries: 'active',
+    errorMessage: t('imports.error'),
+  })
 
   const batches = useMemo(
     () =>
@@ -77,9 +84,8 @@ export default function Imports() {
           variant: 'success',
         })
       }
-    } catch (error) {
-      console.error(error)
-      enqueueSnackbar(t('imports.error'), { variant: 'error' })
+    } catch {
+      // Reported by the mutation hook.
     } finally {
       setIsWorking(false)
       setPending(null)

@@ -1,23 +1,16 @@
 import { CategoryGroup, CustomCategoryGroup } from '@/graphql/types'
 import { useMemo } from 'react'
-import { useSuspenseQuery } from '@apollo/client/react'
+import { skipToken, useSuspenseQuery } from '@apollo/client/react'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { GetCategoryGroupsDocument, GetCustomCategoryGroupsDocument } from '@/graphql/operations'
 
 export function useCategoryGroups() {
   const { currentAccountId } = useAppContext()
 
-  const queryCG = useSuspenseQuery(GetCategoryGroupsDocument, {
-    variables: {
-      accountId: currentAccountId || 0, //TODO Fix this
-    },
-  })
-
-  const queryCCG = useSuspenseQuery(GetCustomCategoryGroupsDocument, {
-    variables: {
-      accountId: currentAccountId || 0, //TODO Fix this
-    },
-  })
+  // The context fills in after mount; without an account there is nothing to ask for.
+  const options = currentAccountId ? { variables: { accountId: currentAccountId } } : skipToken
+  const queryCG = useSuspenseQuery(GetCategoryGroupsDocument, options)
+  const queryCCG = useSuspenseQuery(GetCustomCategoryGroupsDocument, options)
 
   const categoryGroups: CategoryGroup[] = useMemo(() => {
     return (queryCG?.data?.allCategoryGroups?.nodes as CategoryGroup[]) || []

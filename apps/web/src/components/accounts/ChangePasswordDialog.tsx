@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { ChangeUserPasswordDocument } from '@/graphql/operations'
@@ -15,7 +15,7 @@ export default function ChangePasswordDialog({ onClose }: { onClose: () => void 
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [changeUserPassword, { loading }] = useMutation(ChangeUserPasswordDocument)
+  const [changeUserPassword, { loading }] = useMutationWithToast(ChangeUserPasswordDocument, { reportErrors: false })
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()

@@ -1,7 +1,7 @@
 'use client'
 
 import { Budget, Category } from '@/graphql/types'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { MoreVert } from '@mui/icons-material'
 import {
   Box,
@@ -24,7 +24,7 @@ import { useState } from 'react'
 import CategoryMatch from '@/components/categories/CategoryMatch'
 import SaveCancel from '@/components/forms/SaveCancel'
 import CurrencyTextField from '../shared/CurrencyTextField'
-import { formatMoney, formatMoneyCents } from '@/lib/formatMoney'
+import { formatMoney, formatMoneyCents, toCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import CategoryEditor from './CategoryEditor'
 import { DeleteBudgetDocument, GetBudgetsByAccountIdDocument, UpdateBudgetDocument } from '@/graphql/operations'
@@ -39,7 +39,7 @@ interface Fields {
 }
 
 export default function BudgetRow({ budget, accountId }: { budget: Budget; accountId: number | null }) {
-  const [deleteBudget] = useMutation(DeleteBudgetDocument, {
+  const [deleteBudget] = useMutationWithToast(DeleteBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,
@@ -49,7 +49,7 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
       },
     ],
   })
-  const [updateBudget] = useMutation(UpdateBudgetDocument, {
+  const [updateBudget] = useMutationWithToast(UpdateBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,
@@ -76,7 +76,7 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
   function handleChange(field: string, value: string | number) {
     let newValue = value
     if (field === 'amount' || field === 'startingAmount') {
-      newValue = Math.floor(Number(newValue) * 100)
+      newValue = toCents(Number(newValue))
     }
     setFields({
       ...fields,

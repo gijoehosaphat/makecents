@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { Add } from '@mui/icons-material'
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
@@ -8,12 +8,13 @@ import { useState } from 'react'
 import SaveCancel from '@/components/forms/SaveCancel'
 import CurrencyTextField from '../shared/CurrencyTextField'
 import { CreateBudgetDocument, GetBudgetsByAccountIdDocument } from '@/graphql/operations'
+import { toCents } from '@/lib/formatMoney'
 
 export default function BudgetAdd({ accountId }: { accountId: number }) {
   const t = useTranslations('common')
   const [fields, setFields] = useState({ name: '', amount: 0 })
   const [isEditting, setIsEditting] = useState(false)
-  const [createBudget] = useMutation(CreateBudgetDocument, {
+  const [createBudget] = useMutationWithToast(CreateBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,
@@ -36,7 +37,7 @@ export default function BudgetAdd({ accountId }: { accountId: number }) {
       await createBudget({
         variables: {
           name: fields.name,
-          amount: fields.amount * 100,
+          amount: toCents(fields.amount),
           accountId,
         },
       })

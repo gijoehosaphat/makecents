@@ -12,13 +12,15 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import SaveCancel from '../forms/SaveCancel'
 import { useTranslations } from 'next-intl'
 import CurrencyTextField from '../shared/CurrencyTextField'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { UpsertSplitTransactionsDocument } from '@/graphql/operations'
+import { fromCents, toCents } from '@/lib/formatMoney'
+import { MIN_PART_CENTS, canAddPart, clampPartCents, maxPartCents, remainingCents } from '@/lib/splitMath'
 
 interface SplitTransaction {
   nodeId: string
@@ -36,13 +38,12 @@ export function TransactionSplit({
   refetchQuery: InternalRefetchQueryDescriptor
 }) {
   const t = useTranslations('common')
-  const [upsertSplitTransactions] = useMutation(UpsertSplitTransactionsDocument, {
+  const [upsertSplitTransactions] = useMutationWithToast(UpsertSplitTransactionsDocument, {
     refetchQueries: [refetchQuery],
   })
   const [isWithdrawal] = useState(transaction.originalAmount < 0)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
 
-  const [amount, setAmount] = useState(Math.abs(Number(transaction.amount))) //Main transactions amount...
   const [splitTransactions, setSplitTransactions] = useState<SplitTransaction[]>(
     transaction?.transactionsBySplitSourceId?.nodes?.map((splitTransaction) => ({
       nodeId: splitTransaction.nodeId,
@@ -55,18 +56,10 @@ export function TransactionSplit({
   const [toCreateTransactions, setToCreateTransactions] = useState<Transaction[]>([])
   const [toDelete, setToDelete] = useState<number[]>([])
 
-  const maximumAmount = useMemo(() => {
-    return Math.abs(Number(transaction.originalAmount))
-  }, [transaction.originalAmount]) //Original amount, maximum overall total all transactions can add up to.
-  const maximumInputValue = useMemo(() => {
-    return Math.abs(maximumAmount) - (splitTransactions.length + toCreateTransactions.length)
-  }, [maximumAmount, splitTransactions.length, toCreateTransactions.length])
-  const currentToCreateTotal = useMemo(() => {
-    return toCreateTransactions.reduce((partialSum, t) => partialSum + Math.abs(t.amount), 0)
-  }, [toCreateTransactions])
-  const currentSplitTotal = useMemo(() => {
-    return splitTransactions.reduce((partialSum, t) => partialSum + Math.abs(t.amount), 0)
-  }, [splitTransactions])
+  // The original row keeps whatever the other parts leave, so the parts always add up to the original amount.
+  const totalCents = Math.abs(Number(transaction.originalAmount))
+  const partCents = [...splitTransactions, ...toCreateTransactions].map((part) => Math.abs(part.amount))
+  const amount = remainingCents(totalCents, partCents)
 
   function openEditor() {
     setIsEditorOpen(true)
@@ -74,6 +67,7 @@ export function TransactionSplit({
 
   function handleClose() {
     setToCreateTransactions([])
+    setToDelete([])
     setIsEditorOpen(false)
   }
 
@@ -124,17 +118,28 @@ export function TransactionSplit({
     handleClose()
   }
 
+  /** Every part's cents except one, by position in the splits followed by the new parts. */
+  function otherPartCents(partIndex: number) {
+    return partCents.filter((_, i) => i !== partIndex)
+  }
+
   function onAmountChangeSplitTransaction(value: number, index: number, nodeId: string) {
     if (splitTransactions[index].nodeId === nodeId) {
       const newSplitTransactions = [...splitTransactions]
-      newSplitTransactions[index].amount = Math.floor(value * 100)
+      newSplitTransactions[index] = {
+        ...newSplitTransactions[index],
+        amount: clampPartCents(toCents(value), totalCents, otherPartCents(index)),
+      }
       setSplitTransactions(newSplitTransactions)
     }
   }
   function onAmountChangeToCreateTransaction(value: number, index: number, nodeId: string) {
     if (toCreateTransactions[index].nodeId === nodeId) {
       const newToCreateTransactions = [...toCreateTransactions]
-      newToCreateTransactions[index].amount = Math.floor(value * 100)
+      newToCreateTransactions[index] = {
+        ...newToCreateTransactions[index],
+        amount: clampPartCents(toCents(value), totalCents, otherPartCents(splitTransactions.length + index)),
+      }
       setToCreateTransactions(newToCreateTransactions)
     }
   }
@@ -157,61 +162,10 @@ export function TransactionSplit({
       {
         nodeId: `pending-${new Date().getTime()}`,
         name: 'Pending',
-        amount: 0,
+        amount: MIN_PART_CENTS,
       } as Transaction,
     ])
   }
-
-  const decrement = useCallback(
-    (currentTotal: number) => {
-      if (isEditorOpen) {
-        if (amount > 1) {
-          setAmount(Math.max(1, amount - (currentTotal - maximumAmount)))
-        } else if (currentSplitTotal > splitTransactions.length) {
-          splitTransactions.forEach((splitTransaction, i) => {
-            if (Math.abs(splitTransaction.amount) > 1) {
-              const newAmount = Math.max(1, splitTransaction.amount - (currentTotal - maximumAmount))
-              const newSplitTransactions = [...toCreateTransactions]
-              newSplitTransactions[i].amount = newAmount
-              setToCreateTransactions(newSplitTransactions)
-              return
-            }
-          })
-        } else if (currentToCreateTotal > toCreateTransactions.length) {
-          toCreateTransactions.forEach((toCreateTransaction, i) => {
-            if (Math.abs(toCreateTransaction.amount) > 1) {
-              const newAmount = Math.max(1, toCreateTransaction.amount - (currentTotal - maximumAmount))
-              const newToCreateTransactions = [...toCreateTransactions]
-              newToCreateTransactions[i].amount = newAmount
-              setToCreateTransactions(newToCreateTransactions)
-              return
-            }
-          })
-        }
-      }
-    },
-    [
-      isEditorOpen,
-      toCreateTransactions,
-      splitTransactions,
-      amount,
-      maximumAmount,
-      currentToCreateTotal,
-      currentSplitTotal,
-    ]
-  )
-
-  const increment = useCallback(
-    (currentTotal: number) => {
-      if (isEditorOpen) {
-        const max = Math.floor(maximumInputValue * 100)
-        if (amount < max) {
-          setAmount(Math.min(max, amount + (maximumAmount - currentTotal)))
-        }
-      }
-    },
-    [isEditorOpen, amount, maximumAmount, maximumInputValue]
-  )
 
   useEffect(() => {
     if (isEditorOpen) {
@@ -226,21 +180,6 @@ export function TransactionSplit({
       )
     }
   }, [isEditorOpen, transaction?.transactionsBySplitSourceId?.nodes])
-
-  useEffect(() => {
-    if (isEditorOpen) {
-      const currentToCreateTotal = toCreateTransactions.reduce((partialSum, t) => partialSum + Math.abs(t.amount), 0)
-      const currentSplitTotal = splitTransactions.reduce((partialSum, t) => partialSum + Math.abs(t.amount), 0)
-      if (currentToCreateTotal + currentSplitTotal + amount > Math.abs(maximumAmount)) {
-        decrement(currentToCreateTotal + currentSplitTotal + amount)
-      } else if (currentToCreateTotal + currentSplitTotal + amount < Math.abs(maximumAmount)) {
-        increment(currentToCreateTotal + currentSplitTotal + amount)
-      }
-    }
-  }, [isEditorOpen, toCreateTransactions, splitTransactions, amount, maximumAmount, decrement, increment])
-
-  const maximumValue = Number(maximumInputValue / 100).toFixed(2)
-  const value = Math.min(Number(maximumValue), Number(Number(amount / 100).toFixed(2)))
 
   return (
     <>
@@ -270,20 +209,17 @@ export function TransactionSplit({
                   <CurrencyTextField
                     size={'small'}
                     disabled={true}
-                    value={value}
+                    value={fromCents(amount)}
                     options={{
                       minimumValue: '0',
-                      maximumValue,
+                      maximumValue: fromCents(totalCents).toFixed(2),
                     }}
                   />
                 </TableCell>
                 <TableCell></TableCell>
               </TableRow>
               {splitTransactions.map((splitTransaction, i) => {
-                const splitTransactionValue = Math.min(
-                  Number(maximumValue),
-                  Number(Number(Math.abs(splitTransaction.amount) / 100).toFixed(2))
-                )
+                const splitTransactionMax = fromCents(maxPartCents(totalCents, otherPartCents(i)))
                 return (
                   <TableRow key={splitTransaction.id}>
                     <TableCell>
@@ -293,11 +229,11 @@ export function TransactionSplit({
                     <TableCell>
                       <CurrencyTextField
                         size={'small'}
-                        value={splitTransactionValue}
+                        value={fromCents(Math.abs(splitTransaction.amount))}
                         onValueChange={(value) => onAmountChangeSplitTransaction(value, i, splitTransaction.nodeId)}
                         options={{
                           minimumValue: '0',
-                          maximumValue,
+                          maximumValue: splitTransactionMax.toFixed(2),
                         }}
                       />
                     </TableCell>
@@ -314,9 +250,8 @@ export function TransactionSplit({
                 )
               })}
               {toCreateTransactions.map((toCreateTransaction, i) => {
-                const toCreateTransactionValue = Math.min(
-                  Number(maximumValue),
-                  Number(Number(Math.abs(toCreateTransaction.amount) / 100).toFixed(2))
+                const toCreateTransactionMax = fromCents(
+                  maxPartCents(totalCents, otherPartCents(splitTransactions.length + i))
                 )
                 return (
                   <TableRow key={toCreateTransaction.nodeId}>
@@ -327,13 +262,13 @@ export function TransactionSplit({
                     <TableCell>
                       <CurrencyTextField
                         size={'small'}
-                        value={toCreateTransactionValue}
+                        value={fromCents(Math.abs(toCreateTransaction.amount))}
                         onValueChange={(value) =>
                           onAmountChangeToCreateTransaction(value, i, toCreateTransaction.nodeId)
                         }
                         options={{
                           minimumValue: '0',
-                          maximumValue,
+                          maximumValue: toCreateTransactionMax.toFixed(2),
                         }}
                       />
                     </TableCell>
@@ -353,7 +288,12 @@ export function TransactionSplit({
                 <TableCell></TableCell>
                 <TableCell></TableCell>
                 <TableCell>
-                  <IconButton size={'small'} color={'secondary'} onClick={addToCreateTransaction}>
+                  <IconButton
+                    size={'small'}
+                    color={'secondary'}
+                    onClick={addToCreateTransaction}
+                    disabled={!canAddPart(totalCents, partCents)}
+                  >
                     <Add />
                   </IconButton>
                 </TableCell>

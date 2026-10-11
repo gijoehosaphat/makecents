@@ -3,15 +3,16 @@
 import { useState } from 'react'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material'
 import { DatePicker } from '@mui/x-date-pickers'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
+import { useRefreshAccountData } from '@/lib/useRefreshAccountData'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import CurrencyTextField from './CurrencyTextField'
 import {
   GetUserAndAccountsAndBankAccountsByEmailDocument,
   UpsertBankAccountReconciliationDocument,
 } from '@/graphql/operations'
+import { fromCents, toCents } from '@/lib/formatMoney'
 
 export default function ReconcileBalanceDialog({
   bankAccountId,
@@ -23,12 +24,12 @@ export default function ReconcileBalanceDialog({
   onClose: () => void
 }) {
   const t = useTranslations('common')
-  const router = useRouter()
+  const refreshAccountData = useRefreshAccountData()
   const { user } = useAppContext()
-  const [balance, setBalance] = useState(currentBalance / 100)
+  const [balance, setBalance] = useState(fromCents(currentBalance))
   const [asOf, setAsOf] = useState(new Date())
 
-  const [upsertBankAccountReconciliation, { loading }] = useMutation(UpsertBankAccountReconciliationDocument, {
+  const [upsertBankAccountReconciliation, { loading }] = useMutationWithToast(UpsertBankAccountReconciliationDocument, {
     refetchQueries: [
       {
         query: GetUserAndAccountsAndBankAccountsByEmailDocument,
@@ -43,12 +44,11 @@ export default function ReconcileBalanceDialog({
     await upsertBankAccountReconciliation({
       variables: {
         bankAccountId,
-        balance: Math.round(balance * 100),
+        balance: toCents(balance),
         asOf,
       },
     })
-    //TODO: This is lame
-    router.refresh()
+    refreshAccountData()
     onClose()
   }
 

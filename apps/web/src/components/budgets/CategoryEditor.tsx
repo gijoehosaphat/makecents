@@ -2,7 +2,8 @@ import { Category, Budget, BudgetCategory } from '@/graphql/types'
 import { Add } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
-import { useLazyQuery, useMutation, useSuspenseQuery } from '@apollo/client/react'
+import { useLazyQuery, useSuspenseQuery } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useAppContext } from '../context/AppContextProvider'
 import CategoryDisplay from '../shared/CategoryDisplay'
 import CategoryMenu from '../shared/CategoryMenu'
@@ -44,8 +45,8 @@ export default function CategoryEditor({
 }) {
   const { currentAccountId } = useAppContext()
   const [getCategories] = useLazyQuery(GetCategoriesDocument)
-  const [createBudgetCategory] = useMutation(CreateBudgetCategoryDocument, refetch(currentAccountId))
-  const [deleteBudgetCategory] = useMutation(DeleteBudgetCategoryDocument, refetch(currentAccountId))
+  const [createBudgetCategory] = useMutationWithToast(CreateBudgetCategoryDocument, refetch(currentAccountId))
+  const [deleteBudgetCategory] = useMutationWithToast(DeleteBudgetCategoryDocument, refetch(currentAccountId))
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const isMenuOpen = Boolean(menuAnchorEl)
   const { categories } = useCategories()

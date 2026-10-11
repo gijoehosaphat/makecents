@@ -14,7 +14,7 @@ import SaveCancel from '../forms/SaveCancel'
 import { Transaction } from '@/graphql/types'
 import { UpdateTransactionDocument } from '@/graphql/operations'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useTranslations } from 'next-intl'
 
 export function TransactionMemoEditor({
@@ -26,7 +26,7 @@ export function TransactionMemoEditor({
   transaction: Transaction
   refetchQuery: InternalRefetchQueryDescriptor
 }) {
-  const [updateTransaction] = useMutation(UpdateTransactionDocument, {
+  const [updateTransaction] = useMutationWithToast(UpdateTransactionDocument, {
     refetchQueries: [refetchQuery],
   })
   const t = useTranslations('common')

@@ -37,8 +37,6 @@ export default function CategoryMatch({
   category: Category
   handleComplete: () => void
 }) {
-  //TODO: Use Apollo query tool!
-  // const [getTransaction] = useLazyQuery(GetTransactionDocument)
   const { hidden } = useAmountVisibility()
   const [getTransactions, getTransactionsResults] = useLazyQuery(TransactionSearchDocument)
   const [fields, setFields] = useState({ regex: category?.regex })

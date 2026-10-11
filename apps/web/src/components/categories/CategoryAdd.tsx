@@ -1,6 +1,6 @@
 'use client'
 
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { Add } from '@mui/icons-material'
 import { Box, Dialog, DialogActions, DialogContent, DialogTitle, Fab, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
@@ -9,7 +9,7 @@ import SaveCancel from '@/components/forms/SaveCancel'
 import { CreateCategoryDocument, GetCategoriesDocument } from '@/graphql/operations'
 
 export default function CategoryAdd({ accountId }: { accountId: number }) {
-  const [createCategory] = useMutation(CreateCategoryDocument, {
+  const [createCategory] = useMutationWithToast(CreateCategoryDocument, {
     refetchQueries: [
       {
         query: GetCategoriesDocument,

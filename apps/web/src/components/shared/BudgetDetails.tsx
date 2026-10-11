@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material'
 import { useTranslations } from 'next-intl'
-import { formatMoney } from '@/lib/formatMoney'
+import { formatMoney, toCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { BudgetItem } from '../reporting/Budgets'
 import { useMemo, useState } from 'react'
@@ -23,7 +23,7 @@ import {
   GetBudgetsByAccountIdDocument,
   UpdateBudgetDocument,
 } from '@/graphql/operations'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 
 interface Fields {
   name: string
@@ -46,7 +46,7 @@ export default function BudgetDetails({
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
   const { dateTo } = useBudgetPeriod()
-  const [updateBudget] = useMutation(UpdateBudgetDocument, {
+  const [updateBudget] = useMutationWithToast(UpdateBudgetDocument, {
     refetchQueries: [
       {
         query: GetBudgetsByAccountIdDocument,
@@ -81,7 +81,7 @@ export default function BudgetDetails({
   function handleChange(field: string, value: string | number) {
     let newValue = value
     if (field === 'amount' || field === 'startingAmount') {
-      newValue = Math.round(Number(newValue) * 100)
+      newValue = toCents(Number(newValue))
     }
     setFields({
       ...fields,

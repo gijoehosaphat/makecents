@@ -1,41 +1,41 @@
 'use client'
 
 import { Category } from '@/graphql/types'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { MoreVert } from '@mui/icons-material'
 import { Chip, IconButton, Menu, MenuItem, Select, TableCell, TableRow, TextField, Typography } from '@mui/material'
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import { useSnackbar } from 'notistack'
 import CategoryMatch from '@/components/categories/CategoryMatch'
 import SaveCancel from '@/components/forms/SaveCancel'
 import { CategoryGroupEditor } from './CategoryGroupEditor'
 import { DeleteCategoryByIdDocument, GetCategoriesDocument, UpdateCategoryDocument } from '@/graphql/operations'
 
 export default function CategoryRow({ category, accountId }: { category: Category | null; accountId: number | null }) {
-  const [deleteCategoryById] = useMutation(DeleteCategoryByIdDocument, {
-    refetchQueries: [
-      {
-        query: GetCategoriesDocument,
-        variables: {
-          accountId: Number(accountId),
-        },
-      },
-    ],
-  })
-  const [updateCategory] = useMutation(UpdateCategoryDocument, {
-    refetchQueries: [
-      {
-        query: GetCategoriesDocument,
-        variables: {
-          accountId: Number(accountId),
-        },
-      },
-    ],
-  })
   const t = useTranslations('common')
-  const { enqueueSnackbar } = useSnackbar()
+  const [deleteCategoryById] = useMutationWithToast(DeleteCategoryByIdDocument, {
+    refetchQueries: [
+      {
+        query: GetCategoriesDocument,
+        variables: {
+          accountId: Number(accountId),
+        },
+      },
+    ],
+  })
+  const [updateCategory] = useMutationWithToast(UpdateCategoryDocument, {
+    showServerMessage: true,
+    errorMessage: t('categories.kind.saveFailed'),
+    refetchQueries: [
+      {
+        query: GetCategoriesDocument,
+        variables: {
+          accountId: Number(accountId),
+        },
+      },
+    ],
+  })
   const [fields, setFields] = useState({ name: '', regex: '', kind: '' })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedCategory, setSelectedCategory] = useState<null | Category>(null)
@@ -80,9 +80,8 @@ export default function CategoryRow({ category, accountId }: { category: Categor
               kind: fields.kind || category?.kind,
             },
           })
-        } catch (error) {
-          // e.g. a payroll category cannot belong to a budget
-          enqueueSnackbar(error instanceof Error ? error.message : t('categories.kind.saveFailed'), { variant: 'error' })
+        } catch {
+          // Reported by the mutation hook, e.g. a payroll category cannot belong to a budget.
         }
       }
     }

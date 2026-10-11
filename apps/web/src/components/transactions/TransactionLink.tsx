@@ -17,7 +17,8 @@ import { useMemo, useState } from 'react'
 import SaveCancel from '../forms/SaveCancel'
 import { useTranslations } from 'next-intl'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
-import { useLazyQuery, useMutation } from '@apollo/client/react'
+import { useLazyQuery } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { formatMoney } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import {
@@ -42,10 +43,10 @@ export function TransactionLink({
 
   const [getTransactionByAmount, getTransactionByAmountResults] = useLazyQuery(TransactionByAmountDocument)
   const [getTransfer, getTransferResults] = useLazyQuery(GetTransferDocument)
-  const [createTransfer] = useMutation(CreateTransferDocument, {
+  const [createTransfer] = useMutationWithToast(CreateTransferDocument, {
     refetchQueries: [refetchQuery],
   })
-  const [deleteTransfer] = useMutation(DeleteTransferDocument, {
+  const [deleteTransfer] = useMutationWithToast(DeleteTransferDocument, {
     refetchQueries: [refetchQuery],
   })
 

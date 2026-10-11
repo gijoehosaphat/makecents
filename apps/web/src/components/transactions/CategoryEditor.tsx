@@ -3,7 +3,7 @@ import { Add } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import CategoryDisplay from '../shared/CategoryDisplay'
 import CategoryMenu from '../shared/CategoryMenu'
 import { UpdateTransactionDocument } from '@/graphql/operations'
@@ -17,7 +17,7 @@ export default function CategoryEditor({
   refetchQuery?: InternalRefetchQueryDescriptor
 }) {
   const { categories } = useCategories()
-  const [updateTransactionCategoryId] = useMutation(UpdateTransactionDocument, {
+  const [updateTransactionCategoryId] = useMutationWithToast(UpdateTransactionDocument, {
     refetchQueries: refetchQuery ? [refetchQuery] : [],
   })
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)

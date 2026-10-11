@@ -2,7 +2,7 @@
 
 import { signIn } from 'next-auth/react'
 import { Alert, Box, Button, Link as MuiLink, TextField } from '@mui/material'
-import { useMutation } from '@apollo/client/react'
+import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import Link from 'next/link'
@@ -15,7 +15,7 @@ export default function SignUp() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [registerUser, { loading }] = useMutation(RegisterUserDocument)
+  const [registerUser, { loading }] = useMutationWithToast(RegisterUserDocument, { reportErrors: false })
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
