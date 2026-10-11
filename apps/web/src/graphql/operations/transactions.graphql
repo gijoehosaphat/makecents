@@ -372,3 +372,15 @@ query GetDailyCashFlowTransactions($filter: TransactionFilter!) {
     }
   }
 }
+
+# Per-category totals for the By Category report, summed in the database instead of fetching every transaction.
+query GetCategoryTotals($filter: TransactionFilter!) {
+  allTransactions(filter: $filter) {
+    groupedAggregates(groupBy: CATEGORY_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+}

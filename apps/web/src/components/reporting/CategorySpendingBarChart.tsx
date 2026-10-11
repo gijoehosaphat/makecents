@@ -7,17 +7,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useAppContext } from '../context/AppContextProvider'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
-import { useTransactions } from '@/lib/useTransactions'
-import { Category, CategoryGroup, Transaction } from '@/graphql/types'
+import { GetCategoryTotalsDocument } from '@/graphql/operations'
+import { useSuspenseQuery } from '@apollo/client/react'
+import { Category, CategoryGroup } from '@/graphql/types'
 import { useMemo } from 'react'
 import { useCategories } from '@/lib/useCategories'
 import { useCategoryGroups } from '@/lib/useCategoryGroups'
 import { groupBy } from '@/lib/groupBy'
-
-interface TransactionsByCategory {
-  category: Category
-  transactions: Transaction[]
-}
 
 interface ChartData {
   value: number
@@ -46,7 +42,14 @@ function CustomizedAxisTick({
   )
 }
 
-function CategoryBarChart({ title, data }: { title: string; data: ChartData[] }) {
+function measureLabelWidth(labels: string[], font: string) {
+  const ctx = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d')
+  if (!ctx) return Math.max(0, ...labels.map((l) => l.length * 8))
+  ctx.font = font
+  return Math.max(0, ...labels.map((l) => ctx.measureText(l).width))
+}
+
+function CategoryBarChart({ title, data, yAxisWidth }: { title: string; data: ChartData[]; yAxisWidth: number }) {
   const t = useTranslations('common')
   const theme = useTheme()
   const { hidden } = useAmountVisibility()
@@ -64,7 +67,7 @@ function CategoryBarChart({ title, data }: { title: string; data: ChartData[] })
             margin={{
               top: 0,
               right: 10,
-              left: 70,
+              left: 0,
               bottom: 10,
             }}
             barSize={10}
@@ -82,6 +85,7 @@ function CategoryBarChart({ title, data }: { title: string; data: ChartData[] })
             </defs>
             <YAxis
               type={'category'}
+              width={yAxisWidth}
               tick={<CustomizedAxisTick />}
               dataKey={'label'}
               stroke={theme.palette.text.primary}
@@ -125,38 +129,43 @@ export function CategorySpendingBarChart() {
   const t = useTranslations('common')
   const { bankAccounts } = useAppContext()
   const { dateFrom, dateTo } = useDateFilterParams()
-  const { transactionsSansTransfers } = useTransactions({
-    dateFrom,
-    dateTo,
-    bankAccountIds: bankAccounts.map((ba) => ba.id),
+  const bankAccountIds = useMemo(() => bankAccounts.map((ba) => ba.id), [bankAccounts])
+  const { data: totalsData } = useSuspenseQuery(GetCategoryTotalsDocument, {
+    variables: {
+      filter: {
+        bankAccountId: { in: bankAccountIds },
+        // Uncategorized rows would group under a null key, which the schema's non-null `keys` can't return.
+        categoryId: { isNull: false },
+        ...(dateFrom !== undefined && dateTo !== undefined
+          ? { posted: { greaterThanOrEqualTo: dateFrom, lessThan: dateTo } }
+          : {}),
+        transferByTransactionSourceIdExists: false,
+        transferByTransactionTargetIdExists: false,
+      },
+    },
   })
   const { categories } = useCategories()
   const { categoryGroups } = useCategoryGroups()
 
-  const transactionsByCategory: TransactionsByCategory[] = useMemo(() => {
-    return categories?.map((category) => {
-      return {
-        category,
-        transactions: transactionsSansTransfers.filter((t) => t.categoryId === category.id),
-      }
-    })
-  }, [categories, transactionsSansTransfers])
-
   const data = useMemo(() => {
-    return transactionsByCategory
-      .map((tbc) => {
-        return {
-          label: tbc.category.name || '',
-          value: Math.abs(tbc.transactions.reduce((partialSum, t) => partialSum + Number(t.amount), 0)),
-          category: tbc.category,
-        }
-      })
+    const totals = new Map<string, number>()
+    for (const group of totalsData.allTransactions?.groupedAggregates ?? []) {
+      const categoryId = group.keys?.[0]
+      if (categoryId == null) continue
+      totals.set(categoryId, Number(group.sum?.amount ?? 0))
+    }
+    return (categories ?? [])
+      .map((category) => ({
+        label: category.name || '',
+        value: Math.abs(totals.get(String(category.id)) ?? 0),
+        category,
+      }))
       .sort((a, b) => {
         if (a.label > b.label) return -1
         if (a.label < b.label) return 1
         return 0
       })
-  }, [transactionsByCategory])
+  }, [categories, totalsData])
 
   const ids = categoryGroups.map((cg) => cg.categoryId)
   const spending: ChartData[] = data.filter((cd) => !ids.includes(cd.category.id))
@@ -174,11 +183,21 @@ export function CategorySpendingBarChart() {
     }
   })
 
+  // Shared across all groupings so every chart's plot area lines up.
+  const fontFamily = useTheme().typography.fontFamily
+  const yAxisWidth =
+    Math.ceil(
+      measureLabelWidth(
+        [...spending, ...chartData.flatMap((cd) => cd.data)].map((d) => d.label),
+        `16px ${fontFamily}`
+      )
+    ) + 16
+
   return (
     <>
-      <CategoryBarChart title={t('reporting.categorySpendingTitle')} data={spending} />
+      <CategoryBarChart title={t('reporting.categorySpendingTitle')} data={spending} yAxisWidth={yAxisWidth} />
       {chartData.map((cd) => (
-        <CategoryBarChart key={cd.group} title={cd.group} data={cd.data} />
+        <CategoryBarChart key={cd.group} title={cd.group} data={cd.data} yAxisWidth={yAxisWidth} />
       ))}
     </>
   )
