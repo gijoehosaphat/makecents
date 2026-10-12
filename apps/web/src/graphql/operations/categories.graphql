@@ -6,16 +6,16 @@ query GetCategories($accountId: Int!) {
   }
 }
 
-mutation CreateCategory($accountId: Int!, $name: String, $regex: String) {
-  createCategory(input: { category: { accountId: $accountId, name: $name, regex: $regex } }) {
+mutation CreateCategory($accountId: Int!, $name: String) {
+  createCategory(input: { category: { accountId: $accountId, name: $name } }) {
     category {
       ...CategoryFragment
     }
   }
 }
 
-mutation UpdateCategory($nodeId: ID!, $name: String, $regex: String, $kind: String) {
-  updateCategory(input: { nodeId: $nodeId, categoryPatch: { name: $name, regex: $regex, kind: $kind } }) {
+mutation UpdateCategory($nodeId: ID!, $name: String, $kind: String) {
+  updateCategory(input: { nodeId: $nodeId, categoryPatch: { name: $name, kind: $kind } }) {
     category {
       ...CategoryFragment
     }

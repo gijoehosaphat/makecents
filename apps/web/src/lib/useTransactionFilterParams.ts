@@ -27,6 +27,8 @@ export function useTransactionFilterParams() {
     return ids.length > 0 ? ids : undefined
   }, [searchParams])
 
+  const autoCategorizedParam = searchParams?.get('auto') === 'true'
+
   const [categorized, setCategorized] = useState<boolean | undefined>(categorizedParam)
   const [categoryIds, setCategoryIds] = useState<number[] | undefined>(categoryIdsParam)
 
@@ -41,5 +43,6 @@ export function useTransactionFilterParams() {
   return {
     categorized,
     categoryIds,
+    autoCategorized: autoCategorizedParam,
   }
 }

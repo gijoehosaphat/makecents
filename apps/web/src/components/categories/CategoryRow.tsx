@@ -7,7 +7,6 @@ import { Chip, IconButton, Menu, MenuItem, Select, TableCell, TableRow, TextFiel
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import CategoryMatch from '@/components/categories/CategoryMatch'
 import SaveCancel from '@/components/forms/SaveCancel'
 import { CategoryGroupEditor } from './CategoryGroupEditor'
 import { DeleteCategoryByIdDocument, GetCategoriesDocument, UpdateCategoryDocument } from '@/graphql/operations'
@@ -36,11 +35,10 @@ export default function CategoryRow({ category, accountId }: { category: Categor
       },
     ],
   })
-  const [fields, setFields] = useState({ name: '', regex: '', kind: '' })
+  const [fields, setFields] = useState({ name: '', kind: '' })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [selectedCategory, setSelectedCategory] = useState<null | Category>(null)
   const [isEditting, setIsEditting] = useState(false)
-  const [isFindOpen, setIsFindOpen] = useState(false)
 
   const open = Boolean(anchorEl)
 
@@ -58,7 +56,6 @@ export default function CategoryRow({ category, accountId }: { category: Categor
 
   function handleClose() {
     setIsEditting(false)
-    setIsFindOpen(false)
     setAnchorEl(null)
     setSelectedCategory(null)
   }
@@ -69,14 +66,13 @@ export default function CategoryRow({ category, accountId }: { category: Categor
   }
 
   async function handleSave() {
-    if (fields.name || fields.regex || fields.kind) {
+    if (fields.name || fields.kind) {
       if (category?.nodeId) {
         try {
           await updateCategory({
             variables: {
               nodeId: category?.nodeId,
               name: fields.name || category?.name,
-              regex: fields.regex || category?.regex,
               kind: fields.kind || category?.kind,
             },
           })
@@ -88,10 +84,6 @@ export default function CategoryRow({ category, accountId }: { category: Categor
     handleClose()
   }
 
-  function handleFind() {
-    setIsFindOpen(true)
-  }
-
   function handleDelete() {
     if (selectedCategory?.id) {
       deleteCategoryById({
@@ -100,10 +92,6 @@ export default function CategoryRow({ category, accountId }: { category: Categor
         },
       })
     }
-    handleClose()
-  }
-
-  function handleMatchComplete() {
     handleClose()
   }
 
@@ -123,20 +111,6 @@ export default function CategoryRow({ category, accountId }: { category: Categor
               />
             ) : (
               <Typography variant={'body2'}>{category.name}</Typography>
-            )}
-          </TableCell>
-          <TableCell size={'small'}>
-            {isEditting ? (
-              <TextField
-                label={t('forms.addRegex')}
-                onChange={(event) => handleChange('regex', event.currentTarget.value)}
-                size={'small'}
-                placeholder={t('forms.regexPlaceholder')}
-                defaultValue={category.regex}
-                sx={{ mr: 2 }}
-              />
-            ) : (
-              <Typography variant={'body2'}>/{category.regex || t('categories.noRegex')}/gmi</Typography>
             )}
           </TableCell>
           <TableCell size={'small'} sx={{ width: '15%' }}>
@@ -194,16 +168,8 @@ export default function CategoryRow({ category, accountId }: { category: Categor
           }}
         >
           <MenuItem onClick={handleEdit}>{t('shared.edit')}</MenuItem>
-          <MenuItem onClick={handleFind}>{t('categories.findTransactions')}</MenuItem>
           <MenuItem onClick={handleDelete}>{t('shared.delete')}</MenuItem>
         </Menu>
-        {selectedCategory && (
-          <CategoryMatch
-            open={isFindOpen}
-            category={selectedCategory}
-            handleComplete={handleMatchComplete}
-          />
-        )}
       </>
     )
   } else {

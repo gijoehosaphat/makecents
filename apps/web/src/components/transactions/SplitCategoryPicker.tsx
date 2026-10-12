@@ -3,6 +3,7 @@ import { Add } from '@mui/icons-material'
 import { Box, IconButton } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
+import { CategoryHint } from '@/lib/categorySuggestions'
 import { useCategories } from '@/lib/useCategories'
 import CategoryDisplay from '../shared/CategoryDisplay'
 import CategoryMenu from '../shared/CategoryMenu'
@@ -11,10 +12,13 @@ import CategoryMenu from '../shared/CategoryMenu'
 export default function SplitCategoryPicker({
   categoryId,
   onChange,
+  hints,
   disabled = false,
 }: {
   categoryId: number | null
   onChange: (categoryId: number | null) => void
+  /** Likely categories for the transaction being split. */
+  hints?: CategoryHint[]
   disabled?: boolean
 }) {
   const t = useTranslations('common')
@@ -48,6 +52,7 @@ export default function SplitCategoryPicker({
         open={Boolean(menuAnchorEl)}
         anchorEl={menuAnchorEl}
         categories={[...categories]}
+        hints={hints}
         onComplete={onMenuComplete}
       />
     </Box>

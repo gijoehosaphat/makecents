@@ -7,6 +7,7 @@ import {
   Checkbox,
   Divider,
   FormControl,
+  FormControlLabel,
   InputLabel,
   ListItemText,
   MenuItem,
@@ -31,6 +32,7 @@ export function TransactionFilter({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [categorized, setCategorized] = useState(searchParams?.get('categorized') || 'any')
+  const [autoOnly, setAutoOnly] = useState(searchParams?.get('auto') === 'true')
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
     searchParams?.get('categoryIds')?.split(',').filter(Boolean) || [],
   )
@@ -39,6 +41,7 @@ export function TransactionFilter({
 
   useEffect(() => {
     setCategorized(searchParams?.get('categorized') || 'any')
+    setAutoOnly(searchParams?.get('auto') === 'true')
     setSelectedCategoryIds(searchParams?.get('categoryIds')?.split(',').filter(Boolean) || [])
   }, [searchParams])
 
@@ -55,6 +58,16 @@ export function TransactionFilter({
         })
       }, 1)
     }
+  }
+
+  function handleAutoChange(checked: boolean) {
+    setAutoOnly(checked)
+    const url = updateSearchParamsUrl(pathname, searchParams, { auto: checked ? 'true' : null })
+    setTimeout(() => {
+      startTransition(() => {
+        router.push(url)
+      })
+    }, 1)
   }
 
   function handleCategoryChange(event: SelectChangeEvent<string[]>) {
@@ -125,6 +138,12 @@ export function TransactionFilter({
               ))}
             </Select>
           </FormControl>
+        </Box>
+        <Box ml={2}>
+          <FormControlLabel
+            control={<Checkbox checked={autoOnly} onChange={(event) => handleAutoChange(event.target.checked)} />}
+            label={t('shared.autoCategorizedOnly')}
+          />
         </Box>
         {children}
       </Box>

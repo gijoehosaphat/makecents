@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import { KeyboardEvent, useState } from 'react'
+import { KeyboardEvent, useMemo, useState } from 'react'
 import SaveCancel from '../forms/SaveCancel'
 import { useTranslations } from 'next-intl'
 import CurrencyTextField from '../shared/CurrencyTextField'
@@ -23,6 +23,7 @@ import { InternalRefetchQueryDescriptor } from '@apollo/client'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { UpsertSplitTransactionsDocument } from '@/graphql/operations'
 import { fromCents, toCents } from '@/lib/formatMoney'
+import { transactionHints } from '@/lib/categorySuggestions'
 import { MIN_PART_CENTS, canAddPart, clampPartCents, maxPartCents, remainingCents } from '@/lib/splitMath'
 
 /** One row split off the original, either already saved or still to be created. */
@@ -66,6 +67,7 @@ export function TransactionSplit({
   const [upsertSplitTransactions] = useMutationWithToast(UpsertSplitTransactionsDocument, {
     refetchQueries: [refetchQuery],
   })
+  const hints = useMemo(() => transactionHints(transaction), [transaction])
   const isWithdrawal = transaction.originalAmount < 0
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [parts, setParts] = useState<SplitPart[]>([])
@@ -233,7 +235,7 @@ export function TransactionSplit({
                   <Typography variant={'caption'}>{transaction.memo}</Typography>
                 </TableCell>
                 <TableCell>
-                  <SplitCategoryPicker categoryId={originalCategoryId} onChange={setOriginalCategoryId} />
+                  <SplitCategoryPicker categoryId={originalCategoryId} onChange={setOriginalCategoryId} hints={hints} />
                 </TableCell>
                 <TableCell sx={{ width: 140 }}>
                   <CurrencyTextField
@@ -264,6 +266,7 @@ export function TransactionSplit({
                       <SplitCategoryPicker
                         categoryId={part.categoryId}
                         onChange={(categoryId) => updatePart(part.key, { categoryId })}
+                        hints={hints}
                         disabled={part.removed}
                       />
                     </TableCell>

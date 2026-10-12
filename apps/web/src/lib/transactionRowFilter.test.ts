@@ -52,3 +52,22 @@ describe('transactionMatchesRowFilter', () => {
     expect(transactionMatchesRowFilter(tx(-100), { categorized: false, direction: 'withdrawals' })).toBe(true)
   })
 })
+
+describe('autoCategorized', () => {
+  it('filters on the category source, alongside other filters', () => {
+    expect(buildTransactionRowFilter({ autoCategorized: true })).toEqual({ categorySource: { equalTo: 'auto' } })
+    expect(buildTransactionRowFilter({ autoCategorized: true, categorized: true })).toEqual({
+      and: [
+        { categoryId: { isNull: false }, transferCount: { equalTo: 0 } },
+        { categorySource: { equalTo: 'auto' } },
+      ],
+    })
+    expect(buildTransactionRowFilter({ autoCategorized: false })).toBeUndefined()
+  })
+
+  it('matches only automatically categorized rows', () => {
+    expect(transactionMatchesRowFilter(tx(-100, { categoryId: 3, categorySource: 'auto' }), { autoCategorized: true })).toBe(true)
+    expect(transactionMatchesRowFilter(tx(-100, { categoryId: 3, categorySource: 'manual' }), { autoCategorized: true })).toBe(false)
+    expect(transactionMatchesRowFilter(tx(-100, { categoryId: 3 }), {})).toBe(true)
+  })
+})

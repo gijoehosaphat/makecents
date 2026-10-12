@@ -40,7 +40,7 @@ export function useUploadHandler() {
     bankAccountId: number,
     transactions: InputTransaction[],
     fileName?: string
-  ): Promise<{ createdCount: number; duplicateCount: number; batchId?: number }> {
+  ): Promise<{ createdCount: number; duplicateCount: number; autoCategorizedCount: number; batchId?: number }> {
     const response = await importTransactions({
       variables: {
         bankAccountId,
@@ -59,6 +59,7 @@ export function useUploadHandler() {
     return {
       createdCount: batch?.createdCount ?? 0,
       duplicateCount: batch?.duplicateCount ?? 0,
+      autoCategorizedCount: batch?.autoCategorizedCount ?? 0,
       // An import that added nothing leaves no batch behind to undo.
       batchId: batch?.createdCount ? batch.id : undefined,
     }
@@ -81,7 +82,8 @@ export function useUploadHandler() {
     createdCount: number,
     duplicateCount: number,
     success: boolean,
-    batchIds: number[] = []
+    batchIds: number[] = [],
+    autoCategorizedCount = 0
   ) {
     if (success) {
       let message = t('upload.successCreated', {
@@ -99,6 +101,9 @@ export function useUploadHandler() {
           numCreated: createdCount,
           numDuplicates: duplicateCount,
         })
+      }
+      if (autoCategorizedCount > 0) {
+        message = `${message} ${t('upload.autoCategorized', { numAuto: autoCategorizedCount })}`
       }
       enqueueSnackbar(message, {
         variant: 'success',
@@ -128,6 +133,7 @@ export function useUploadHandler() {
     let success = true
     let createdCount = 0
     let duplicateCount = 0
+    let autoCategorizedCount = 0
     const batchIds: number[] = []
     for (const accountGroup of accountGroups) {
       const { account, reconciliation, transactions } = accountGroup
@@ -149,6 +155,7 @@ export function useUploadHandler() {
             const result = await createTransactionsForAccount(bankAccountId, transactions, fileName)
             createdCount += result.createdCount
             duplicateCount += result.duplicateCount
+            autoCategorizedCount += result.autoCategorizedCount
             if (result.batchId) {
               batchIds.push(result.batchId)
             }
@@ -161,7 +168,7 @@ export function useUploadHandler() {
     }
 
     await refreshActiveQueries()
-    notifyUploadResult(accountGroups.length, createdCount, duplicateCount, success, batchIds)
+    notifyUploadResult(accountGroups.length, createdCount, duplicateCount, success, batchIds, autoCategorizedCount)
   }
 
   /** Imports a CSV's rows for one or more bank accounts that already exist, with a single result message. */
@@ -171,17 +178,19 @@ export function useUploadHandler() {
   ): Promise<void> {
     let createdCount = 0
     let duplicateCount = 0
+    let autoCategorizedCount = 0
     const batchIds: number[] = []
     try {
       for (const { bankAccountId, transactions } of groups) {
         const result = await createTransactionsForAccount(bankAccountId, transactions, fileName)
         createdCount += result.createdCount
         duplicateCount += result.duplicateCount
+        autoCategorizedCount += result.autoCategorizedCount
         if (result.batchId) {
           batchIds.push(result.batchId)
         }
       }
-      notifyUploadResult(groups.length, createdCount, duplicateCount, true, batchIds)
+      notifyUploadResult(groups.length, createdCount, duplicateCount, true, batchIds, autoCategorizedCount)
     } catch (error) {
       console.error(error)
       notifyUploadResult(groups.length, createdCount, duplicateCount, false)

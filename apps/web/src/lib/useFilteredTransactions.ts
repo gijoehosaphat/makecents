@@ -19,6 +19,7 @@ export interface FilteredTransactionsParams {
   bankAccountIds: number[]
   categorized?: boolean
   categoryIds?: number[]
+  autoCategorized?: boolean
   direction?: TransactionDirection
   amountMin?: number
   amountMax?: number
@@ -38,6 +39,7 @@ export function buildFilteredTransactionsRequest({
   bankAccountIds,
   categorized,
   categoryIds,
+  autoCategorized,
   direction,
   amountMin,
   amountMax,
@@ -53,6 +55,7 @@ export function buildFilteredTransactionsRequest({
       dateTo,
       categorized,
       categoryIds,
+      autoCategorized,
       direction,
       amountMin,
       amountMax,
@@ -86,6 +89,7 @@ export function useFilteredTransactions({
   bankAccountIds,
   categorized,
   categoryIds,
+  autoCategorized,
   direction,
   amountMin,
   amountMax,
@@ -102,13 +106,14 @@ export function useFilteredTransactions({
         bankAccountIds,
         categorized,
         categoryIds,
+        autoCategorized,
         direction,
         amountMin,
         amountMax,
         search,
         sort,
       }),
-    [limit, offset, dateFrom, dateTo, bankAccountIds, categorized, categoryIds, direction, amountMin, amountMax, search, sort],
+    [limit, offset, dateFrom, dateTo, bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, search, sort],
   )
 
   const query = useSuspenseQuery(document as any, {

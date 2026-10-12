@@ -21,7 +21,6 @@ import {
 import { format } from 'date-fns'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
-import CategoryMatch from '@/components/categories/CategoryMatch'
 import SaveCancel from '@/components/forms/SaveCancel'
 import CurrencyTextField from '../shared/CurrencyTextField'
 import { formatMoney, formatMoneyCents, toCents } from '@/lib/formatMoney'

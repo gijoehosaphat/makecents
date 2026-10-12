@@ -20,7 +20,7 @@ export default function CategoryAdd({ accountId }: { accountId: number }) {
     ],
   })
   const t = useTranslations('common')
-  const [fields, setFields] = useState({ name: '', regex: '' })
+  const [fields, setFields] = useState({ name: '' })
   const [isEditting, setIsEditting] = useState(false)
 
   function handleChange(field: string, value: string) {
@@ -61,13 +61,6 @@ export default function CategoryAdd({ accountId }: { accountId: number }) {
               onChange={(event) => handleChange('name', event.currentTarget.value)}
               size={'small'}
               placeholder={t('categories.namePlaceholder')}
-              sx={{ mb: 4 }}
-            />
-            <TextField
-              label={t('forms.addRegex')}
-              onChange={(event) => handleChange('regex', event.currentTarget.value)}
-              size={'small'}
-              placeholder={t('forms.regexPlaceholder')}
               sx={{ mb: 4 }}
             />
           </Box>

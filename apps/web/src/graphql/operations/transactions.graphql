@@ -18,6 +18,7 @@ query GetTransactionsByBankAccounts(
   ) {
     nodes {
       ...TransactionFragment
+      ...TransactionSuggestionsFragment
       transactionsBySplitSourceId {
         nodes {
           ...TransactionFragment
@@ -48,6 +49,7 @@ query GetFilteredTransactionsByBankAccounts(
   ) {
     nodes {
       ...TransactionFragment
+      ...TransactionSuggestionsFragment
       transactionsBySplitSourceId {
         nodes {
           ...TransactionFragment
@@ -78,6 +80,7 @@ query GetFilteredTransactionsBySearch(
   ) {
     nodes {
       ...TransactionFragment
+      ...TransactionSuggestionsFragment
       transactionsBySplitSourceId {
         nodes {
           ...TransactionFragment
@@ -170,6 +173,7 @@ mutation UpdateTransaction(
   $type: String
   $customMemo: String
   $customName: String
+  $categorySource: String
 ) {
   updateTransaction(
     input: {
@@ -187,6 +191,7 @@ mutation UpdateTransaction(
         type: $type
         customMemo: $customMemo
         customName: $customName
+        categorySource: $categorySource
       }
     }
   ) {

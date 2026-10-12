@@ -179,7 +179,7 @@ export function BudgetPlan({
   async function markPayroll(category: Category) {
     try {
       await updateCategory({
-        variables: { nodeId: category.nodeId, name: category.name, regex: category.regex, kind: 'payroll' },
+        variables: { nodeId: category.nodeId, name: category.name, kind: 'payroll' },
       })
     } catch {
       // Reported by the mutation hook.

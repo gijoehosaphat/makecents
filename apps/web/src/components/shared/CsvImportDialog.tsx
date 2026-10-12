@@ -62,6 +62,7 @@ import {
   scoreOverlap,
 } from '@/lib/csvAccountMatching'
 import { ACCOUNT_TYPES } from '@/lib/bankAccountLabel'
+import { countDuplicateRows } from '@/lib/csvDuplicates'
 import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 
 const NEW_ACCOUNT = 'new'
@@ -255,22 +256,25 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
     return { start: new Date(Math.min(...times)), end: new Date(Math.max(...times)) }
   }, [parsedRows])
 
-  // How many of the file's rows the chosen account already has (same id we'd give them on import).
+  // How many of the file's rows the chosen account already has, as the import will decide it.
   const [duplicateCount, setDuplicateCount] = useState(0)
   useEffect(() => {
     if (!selectedAccountId || isMultiAccountFile || !isMappingUsable) {
       setDuplicateCount(0)
       return
     }
-    const existingIds = new Set(
-      existingTransactions
-        .filter((node) => node.bankAccountId === selectedAccountId)
-        .map((node) => node.bankTransactionId)
-    )
+    const existingRows = existingTransactions
+      .filter((node) => node.bankAccountId === selectedAccountId)
+      .map((node) => ({
+        posted: new Date(node.originalPosted ?? node.posted),
+        amount: Number(node.originalAmount ?? node.amount),
+        name: node.name,
+        bankTransactionId: node.bankTransactionId,
+      }))
     let isCancelled = false
     buildTransactions(preview.rows, activeMapping, String(selectedAccountId)).then((transactions) => {
       if (!isCancelled) {
-        setDuplicateCount(transactions.filter((transaction) => existingIds.has(transaction.bankTransactionId)).length)
+        setDuplicateCount(countDuplicateRows(transactions, existingRows))
       }
     })
     return () => {
