@@ -118,6 +118,16 @@
     "reporting": {
       "title": "Reporting",
       "dailySpendingTitle": "Daily Cash Flow",
+      "avgDailySpend": "Avg daily spend",
+      "runningNet": "Running net",
+      "today": "Today",
+      "noActivity": "No transactions in this period",
+      "chartLabel": "Chart of daily deposits, withdrawals and running net cash flow. A table of the same data follows.",
+      "viewAsTable": "View as table",
+      "clickToView": "Click to view transactions",
+      "vsLastMonth": "vs last month",
+      "vsLastYear": "vs last year",
+      "vsPreviousPeriod": "vs previous period",
       "categorySpendingTitle": "By Category",
       "budgetsTitle": "By Budget"
     },
