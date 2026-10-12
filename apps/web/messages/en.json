@@ -7,7 +7,6 @@
       "name": "Name",
       "date": "Date",
       "created": "Created date",
-      "regex": "Regex",
       "actions": "Actions",
       "edit": "Edit",
       "delete": "Delete",
@@ -35,7 +34,9 @@
       "uncategorized": "Uncategorized",
       "revert": "Revert",
       "hideAmounts": "Hide amounts",
-      "showAmounts": "Show amounts"
+      "showAmounts": "Show amounts",
+      "autoCategorized": "Auto-categorized",
+      "autoCategorizedOnly": "Only auto-categorized"
     },
     "dateFilter": {
       "allTime": "All time",
@@ -89,7 +90,8 @@
       "successDuplicates": "All {numDuplicates} transactions for {numAccounts} accounts have already been imported.",
       "undo": "Undo",
       "undone": "Import undone.",
-      "undoError": "The import couldn't be undone. Try again from Settings → Imports."
+      "undoError": "The import couldn't be undone. Try again from Settings → Imports.",
+      "autoCategorized": "{numAuto} were categorized automatically."
     },
     "transactions": {
       "transactions": "Transactions",
@@ -121,12 +123,9 @@
     },
     "categories": {
       "title": "Categories",
-      "description": "Categories label what each transaction was for. Give each one a match pattern and new transactions are filed automatically, or assign them by hand. Aim to get every transaction categorized, because budgets, reports and expected income all depend on it. Mark the categories your pay is deposited into as payroll.",
+      "description": "Categories label what each transaction was for. As you categorize, makecents learns from your choices: it suggests a category for similar transactions, and files the ones it is certain about when you import. Review those and fix any it got wrong. Aim to get every transaction categorized, because budgets, reports and expected income all depend on it. Mark the categories your pay is deposited into as payroll.",
       "namePlaceholder": "Add a name",
-      "noRegex": "none",
-      "regex": "Transaction Match",
       "addCategory": "Add Category",
-      "findTransactions": "Find matching transactions",
       "selectCategory": "Select category",
       "searchCategories": "Search categories",
       "noMatchingCategories": "No matching categories",
@@ -149,15 +148,20 @@
         "payroll": "Payroll (income)",
         "payrollViaGroup": "Payroll (via group)",
         "saveFailed": "Could not save the category type."
-      }
+      },
+      "suggested": "Suggested",
+      "hintPayeeAmount": "{matches} of {total} similar past transactions",
+      "hintPayee": "{matches} of {total} past transactions from this payee",
+      "hintNearby": "{matches} of {total} transactions within 2 days",
+      "acceptSuggestion": "Categorize as {category}",
+      "autoCategorized": "Categorized automatically from your history. Click to confirm.",
+      "allCategories": "All categories"
     },
     "forms": {
       "addName": "Name",
       "addAmount": "Amount",
       "namePlaceholder": "Add a name",
-      "amountPlaceholder": "Add an amount",
-      "regexPlaceholder": "Add a regex expression",
-      "addRegex": "Add Transaction Match"
+      "amountPlaceholder": "Add an amount"
     },
     "budgets": {
       "title": "Budgets",

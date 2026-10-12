@@ -5,6 +5,8 @@ export type TransactionDirection = 'withdrawals' | 'deposits'
 export interface TransactionRowFilterOptions {
   categorized?: boolean
   categoryIds?: number[]
+  /** Only transactions an import categorized automatically, for reviewing them. */
+  autoCategorized?: boolean
   /** Only withdrawals (negative amounts) or only deposits (positive amounts). */
   direction?: TransactionDirection
   /** Bounds on the absolute amount, in cents. */
@@ -23,6 +25,10 @@ function buildCategoryFilter({ categorized, categoryIds }: TransactionRowFilterO
     return { categoryId: { isNull: false }, transferCount: { equalTo: 0 } }
   }
   return undefined
+}
+
+function buildAutoFilter({ autoCategorized }: TransactionRowFilterOptions): TransactionFilter | undefined {
+  return autoCategorized ? { categorySource: { equalTo: 'auto' } } : undefined
 }
 
 function buildAmountFilter({ direction, amountMin, amountMax }: TransactionRowFilterOptions): TransactionFilter | undefined {
@@ -58,7 +64,7 @@ function buildAmountFilter({ direction, amountMin, amountMax }: TransactionRowFi
  * Returns undefined when no row-level filter is active.
  */
 export function buildTransactionRowFilter(options: TransactionRowFilterOptions): TransactionFilter | undefined {
-  const parts = [buildCategoryFilter(options), buildAmountFilter(options)].filter(
+  const parts = [buildCategoryFilter(options), buildAutoFilter(options), buildAmountFilter(options)].filter(
     (part): part is TransactionFilter => part !== undefined,
   )
   if (parts.length === 0) {
@@ -85,6 +91,10 @@ function matchesCategoryFilter(transaction: Transaction, { categorized, category
   return true
 }
 
+function matchesAutoFilter(transaction: Transaction, { autoCategorized }: TransactionRowFilterOptions) {
+  return !autoCategorized || transaction.categorySource === 'auto'
+}
+
 function matchesAmountFilter(
   transaction: Transaction,
   { direction, amountMin, amountMax }: TransactionRowFilterOptions,
@@ -108,5 +118,9 @@ function matchesAmountFilter(
 
 /** Client-side mirror of buildTransactionRowFilter, used to highlight which rows of a split group matched. */
 export function transactionMatchesRowFilter(transaction: Transaction, options: TransactionRowFilterOptions): boolean {
-  return matchesCategoryFilter(transaction, options) && matchesAmountFilter(transaction, options)
+  return (
+    matchesCategoryFilter(transaction, options) &&
+    matchesAutoFilter(transaction, options) &&
+    matchesAmountFilter(transaction, options)
+  )
 }

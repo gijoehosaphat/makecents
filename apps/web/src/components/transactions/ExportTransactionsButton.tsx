@@ -29,7 +29,7 @@ export function ExportTransactionsButton() {
   const accountLabel = useBankAccountLabel()
   const { categories } = useCategories()
   const { dateFrom, dateTo } = useDateFilterParams()
-  const { categorized, categoryIds } = useTransactionFilterParams()
+  const { categorized, categoryIds, autoCategorized } = useTransactionFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
   const { direction, amountMin, amountMax } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
@@ -53,6 +53,7 @@ export function ExportTransactionsButton() {
           dateTo,
           categorized,
           categoryIds,
+          autoCategorized,
           direction,
           amountMin,
           amountMax,

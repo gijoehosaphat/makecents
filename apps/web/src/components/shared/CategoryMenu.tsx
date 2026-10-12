@@ -1,5 +1,6 @@
 import { Category } from '@/graphql/types'
-import { Menu, MenuItem, TextField } from '@mui/material'
+import { CategoryHint, HINT_MESSAGE_KEYS, menuHints } from '@/lib/categorySuggestions'
+import { ListItemText, ListSubheader, Menu, MenuItem, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { KeyboardEvent, useMemo, useRef, useState } from 'react'
 
@@ -7,12 +8,16 @@ export default function CategoryMenu({
   open,
   anchorEl,
   categories,
+  hints,
   onComplete,
 }: {
   open: boolean
   anchorEl: Element | null
   categories: Category[]
-  onComplete: (category?: Category | null) => void
+  /** Likely categories for the transaction, listed first while the search box is empty. */
+  hints?: CategoryHint[]
+  /** `suggested` is true when the category came from the hints rather than the full list. */
+  onComplete: (category?: Category | null, suggested?: boolean) => void
 }) {
   const t = useTranslations('common')
   const [query, setQuery] = useState('')
@@ -30,9 +35,17 @@ export default function CategoryMenu({
     return sortedCategories.filter((category) => (category.name || '').toLowerCase().includes(needle))
   }, [sortedCategories, query])
 
-  function complete(category?: Category | null) {
+  const suggestions = useMemo(() => {
+    if (query.trim()) return []
+    return menuHints(hints ?? []).flatMap((hint) => {
+      const category = categories.find((candidate) => candidate.id === hint.categoryId)
+      return category ? [{ hint, category }] : []
+    })
+  }, [hints, categories, query])
+
+  function complete(category?: Category | null, suggested = false) {
     setQuery('')
-    onComplete(category)
+    onComplete(category, suggested)
   }
 
   function handleSearchKeyDown(event: KeyboardEvent) {
@@ -63,6 +76,16 @@ export default function CategoryMenu({
           slotProps={{ htmlInput: { 'aria-label': t('categories.searchCategories') } }}
         />
       </MenuItem>
+      {suggestions.length > 0 && <ListSubheader sx={{ lineHeight: '32px' }}>{t('categories.suggested')}</ListSubheader>}
+      {suggestions.map(({ hint, category }) => (
+        <MenuItem key={`suggested-${category.nodeId}`} onClick={() => complete(category, true)}>
+          <ListItemText
+            primary={category.name}
+            secondary={t(HINT_MESSAGE_KEYS[hint.tier], { matches: hint.matches, total: hint.total })}
+          />
+        </MenuItem>
+      ))}
+      {suggestions.length > 0 && <ListSubheader sx={{ lineHeight: '32px' }}>{t('categories.allCategories')}</ListSubheader>}
       {matches.map((category) => (
         <MenuItem key={category.nodeId} onClick={() => complete(category)}>
           {category.name}

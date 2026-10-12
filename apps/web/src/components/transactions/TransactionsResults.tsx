@@ -35,7 +35,7 @@ export function TransactionsResults() {
   const { bankAccounts } = useAppContext()
   const t = useTranslations('common')
   const { dateFrom, dateTo } = useDateFilterParams()
-  const { categorized, categoryIds } = useTransactionFilterParams()
+  const { categorized, categoryIds, autoCategorized } = useTransactionFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
   const { direction, amountMin, amountMax } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
@@ -55,6 +55,7 @@ export function TransactionsResults() {
     dateTo,
     categorized,
     categoryIds,
+    autoCategorized,
     direction,
     amountMin,
     amountMax,
@@ -163,7 +164,7 @@ export function TransactionsResults() {
                     transaction={transaction}
                     refetchQuery={refetchQuery}
                     showBankAccount
-                    rowFilter={{ categorized, categoryIds, direction, amountMin, amountMax }}
+                    rowFilter={{ categorized, categoryIds, autoCategorized, direction, amountMin, amountMax }}
                   />
                 ))}
               </TableBody>

@@ -41,7 +41,7 @@ export function TransactionTotals() {
   const { bankAccounts } = useAppContext()
   const t = useTranslations('common')
   const { dateFrom, dateTo } = useDateFilterParams()
-  const { categorized, categoryIds } = useTransactionFilterParams()
+  const { categorized, categoryIds, autoCategorized } = useTransactionFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
   const { direction, amountMin, amountMax } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
@@ -57,6 +57,7 @@ export function TransactionTotals() {
     dateTo,
     categorized,
     categoryIds,
+    autoCategorized,
     direction,
     amountMin,
     amountMax,

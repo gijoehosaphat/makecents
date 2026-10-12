@@ -11,7 +11,8 @@ function replaceOnce(sql: string, search: string, replacement: string): string {
 // The database now assigns CSV rows their bank_transaction_id (app_private.csv_transaction_id),
 // numbering identical rows across the whole file, so it is the single source of those ids. The
 // browser's copy (hashTransactionId in apps/web/src/lib/parsers/Csv.ts) only previews duplicates.
-const IMPORT_TRANSACTIONS_V2 = replaceOnce(
+// Exported so later migrations can extend it and restore it on rollback.
+export const IMPORT_TRANSACTIONS_V2 = replaceOnce(
   IMPORT_TRANSACTIONS_V1,
   `SELECT batch.bank_account_id, batch.id, x.posted, x.posted, x.amount, x.amount, x.name, x.memo, x.type, x."bankTransactionId"
         FROM jsonb_to_recordset(transactions)

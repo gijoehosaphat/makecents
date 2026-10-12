@@ -31,6 +31,7 @@ export function useFilteredTransactionTotals({
   bankAccountIds,
   categorized,
   categoryIds,
+  autoCategorized,
   direction,
   amountMin,
   amountMax,
@@ -41,6 +42,7 @@ export function useFilteredTransactionTotals({
   bankAccountIds: number[]
   categorized?: boolean
   categoryIds?: number[]
+  autoCategorized?: boolean
   direction?: TransactionDirection
   amountMin?: number
   amountMax?: number
@@ -51,7 +53,7 @@ export function useFilteredTransactionTotals({
   const variables = useMemo(() => {
     const and: TransactionFilter[] = [{ bankAccountId: { in: bankAccountIds } }]
 
-    const rowFilter = buildTransactionRowFilter({ categorized, categoryIds, direction, amountMin, amountMax })
+    const rowFilter = buildTransactionRowFilter({ categorized, categoryIds, autoCategorized, direction, amountMin, amountMax })
     if (rowFilter) {
       and.push(rowFilter)
     }
@@ -64,7 +66,7 @@ export function useFilteredTransactionTotals({
       depositFilter: { and: [...and, { amount: { greaterThan: '0' } }] },
       withdrawalFilter: { and: [...and, { amount: { lessThan: '0' } }] },
     }
-  }, [bankAccountIds, categorized, categoryIds, direction, amountMin, amountMax, dateFrom, dateTo])
+  }, [bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, dateFrom, dateTo])
 
   const document = match ? GetFilteredTransactionTotalsBySearchDocument : GetFilteredTransactionTotalsByBankAccountsDocument
   const documentVariables = match ? { ...variables, match } : variables

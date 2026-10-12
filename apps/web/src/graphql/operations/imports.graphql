@@ -4,6 +4,7 @@ mutation ImportTransactions($bankAccountId: Int!, $fileName: String, $transactio
       id
       createdCount
       duplicateCount
+      autoCategorizedCount
     }
   }
 }

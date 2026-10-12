@@ -27,7 +27,7 @@ export function ActiveFilterChips() {
   const { categories } = useCategories()
   const { search } = useTransactionSearchParams()
   const { bankAccountIds } = useBankAccountFilterParams()
-  const { categoryIds } = useTransactionFilterParams()
+  const { categoryIds, autoCategorized } = useTransactionFilterParams()
   const { direction, amountMin, amountMax } = useTransactionAmountParams()
   const [, startTransition] = useTransition()
 
@@ -72,6 +72,13 @@ export function ActiveFilterChips() {
       onDelete: () => navigate({ amountMax: null }),
     })
   }
+  if (autoCategorized) {
+    chips.push({
+      key: 'auto',
+      label: t('shared.autoCategorized'),
+      onDelete: () => navigate({ auto: null }),
+    })
+  }
   for (const id of bankAccountIds || []) {
     const bankAccount = bankAccounts.find((account) => account.id === id)
     if (bankAccount) {
@@ -105,7 +112,7 @@ export function ActiveFilterChips() {
       <Button
         size={'small'}
         onClick={() =>
-          navigate({ search: null, bankAccountIds: null, categoryIds: null, type: null, amountMin: null, amountMax: null })
+          navigate({ search: null, bankAccountIds: null, categoryIds: null, auto: null, type: null, amountMin: null, amountMax: null })
         }
       >
         {t('shared.clearAll')}

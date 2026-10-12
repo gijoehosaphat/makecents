@@ -59,6 +59,21 @@ fragment TransactionFragment on Transaction {
   weightedTsv
   customName
   customMemo
+  categorySource
+}
+
+# Hints for which category a transaction belongs in, learned from how similar ones were categorized.
+fragment TransactionSuggestionsFragment on Transaction {
+  suggestedCategories(maxResults: 3) {
+    nodes {
+      categoryId
+      confidence
+      tier
+      matches
+      total
+      autoApply
+    }
+  }
 }
 
 fragment BankAccountReconciliationFragment on BankAccountReconciliation {
@@ -89,7 +104,6 @@ fragment CategoryFragment on Category {
   nodeId
   updatedAt
   accountId
-  regex
   kind
   # Payroll in its own right or through a payroll group.
   isPayroll

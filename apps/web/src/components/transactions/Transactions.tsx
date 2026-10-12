@@ -31,7 +31,7 @@ export function Transactions() {
   const router = useRouter()
   const t = useTranslations('common')
   const { dateFrom, dateTo } = useDateFilterParams()
-  const { categorized, categoryIds } = useTransactionFilterParams()
+  const { categorized, categoryIds, autoCategorized } = useTransactionFilterParams()
   const { limit, page, offset } = usePaginationParams()
   const { bankAccountIds } = useCurrentBankAccountIds()
 
@@ -43,6 +43,7 @@ export function Transactions() {
     dateTo,
     categorized,
     categoryIds,
+    autoCategorized,
   })
 
   const handlePagination = (event: React.ChangeEvent<unknown>, newPage: number) => {
@@ -103,7 +104,7 @@ export function Transactions() {
                     key={transaction.nodeId}
                     transaction={transaction}
                     refetchQuery={refetchQuery}
-                    rowFilter={{ categorized, categoryIds }}
+                    rowFilter={{ categorized, categoryIds, autoCategorized }}
                   />
                 ))}
               </TableBody>
