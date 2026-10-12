@@ -12,7 +12,8 @@ function replaceOnce(sql: string, search: string, replacement: string): string {
 // amount, 8 or more times, always in the same category (transaction_suggested_categories flags
 // these auto_apply; replayed over the existing history that was right 99.4% of the time). They are
 // marked category_source = 'auto' so they can be reviewed, and never teach later suggestions.
-const IMPORT_TRANSACTIONS_V3 = replaceOnce(
+// Exported so later migrations can restore this version on rollback.
+export const IMPORT_TRANSACTIONS_V3 = replaceOnce(
   IMPORT_TRANSACTIONS_V2,
   `RETURN batch;`,
   `IF inserted > 0 THEN

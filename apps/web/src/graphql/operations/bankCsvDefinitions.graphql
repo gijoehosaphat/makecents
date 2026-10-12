@@ -38,6 +38,7 @@ query GetTransactionsForCsvAccountMatching($filter: TransactionFilter!) {
       id
       bankAccountId
       bankTransactionId
+      name
       amount
       originalAmount
       posted
