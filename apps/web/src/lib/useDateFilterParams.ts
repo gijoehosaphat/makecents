@@ -1,15 +1,15 @@
 import { useSearchParams } from 'next/navigation'
-import { parse, isValid, startOfMonth, endOfMonth, startOfYear, endOfYear, endOfDay } from 'date-fns'
+import { parse, isValid, startOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, endOfDay } from 'date-fns'
 import { useEffect, useMemo, useState } from 'react'
 
-export type DateFilterMode = 'month' | 'year' | 'all'
+export type DateFilterMode = 'month' | 'year' | 'all' | 'custom'
 
 export function useDateFilterParams() {
   const searchParams = useSearchParams()
   const today = useMemo(() => new Date(), [])
 
   const dateRangeParam = searchParams?.get('dateRange')
-  const dateRange: DateFilterMode = dateRangeParam === 'year' || dateRangeParam === 'all' ? dateRangeParam : 'month'
+  const dateRange: DateFilterMode = dateRangeParam === 'year' || dateRangeParam === 'all' || dateRangeParam === 'custom' ? dateRangeParam : 'month'
 
   const dateFromParam = useMemo(() => {
     return parse(String(searchParams?.get('dateFrom')), 'yyyy-MM-dd', new Date())
@@ -20,6 +20,9 @@ export function useDateFilterParams() {
   }, [searchParams])
 
   const defaultDateFrom = useMemo(() => {
+    if (dateRange === 'custom') {
+      return isValid(dateFromParam) ? startOfDay(dateFromParam) : startOfMonth(today)
+    }
     if (dateRange === 'year') {
       return isValid(dateFromParam) ? startOfYear(dateFromParam) : startOfYear(today)
     }
@@ -27,6 +30,9 @@ export function useDateFilterParams() {
   }, [dateRange, dateFromParam, today])
 
   const defaultDateTo = useMemo(() => {
+    if (dateRange === 'custom') {
+      return isValid(dateToParam) ? endOfDay(dateToParam) : endOfMonth(endOfDay(today))
+    }
     if (dateRange === 'year') {
       return isValid(dateToParam) ? endOfYear(dateToParam) : endOfYear(endOfDay(today))
     }

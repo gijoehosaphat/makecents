@@ -196,16 +196,18 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
                 dense={false}
               />
               <Divider />
-              <BankAccountList />
               <MainMenuItem
                 onClick={() => {
                   router.push(`/${currentAccountId}/dashboard/search`)
                 }}
                 primary={t('dashboard.search')}
+                secondary={t('dashboard.searchSubtitle')}
                 icon={<Search fontSize={'large'} />}
                 selected={pathname?.startsWith(`/${currentAccountId}/dashboard/search`) || false}
                 dense={false}
               />
+              <Divider />
+              <BankAccountList />
               <Divider />
               <ReportingList />
               <Divider />

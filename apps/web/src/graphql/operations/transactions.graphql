@@ -384,3 +384,37 @@ query GetCategoryTotals($filter: TransactionFilter!) {
     }
   }
 }
+
+# Row counts for the Search page tabs. Only totalCount is needed, so no rows are fetched.
+query GetTransactionTabCounts(
+  $allFilter: TransactionFilter!
+  $uncategorizedFilter: TransactionFilter!
+  $categorizedFilter: TransactionFilter!
+) {
+  all: allTransactions(first: 0, filter: $allFilter) {
+    totalCount
+  }
+  uncategorized: allTransactions(first: 0, filter: $uncategorizedFilter) {
+    totalCount
+  }
+  categorized: allTransactions(first: 0, filter: $categorizedFilter) {
+    totalCount
+  }
+}
+
+query GetTransactionTabCountsBySearch(
+  $allFilter: TransactionFilter!
+  $uncategorizedFilter: TransactionFilter!
+  $categorizedFilter: TransactionFilter!
+  $match: String!
+) {
+  all: transactionSearch(first: 0, filter: $allFilter, match: $match) {
+    totalCount
+  }
+  uncategorized: transactionSearch(first: 0, filter: $uncategorizedFilter, match: $match) {
+    totalCount
+  }
+  categorized: transactionSearch(first: 0, filter: $categorizedFilter, match: $match) {
+    totalCount
+  }
+}

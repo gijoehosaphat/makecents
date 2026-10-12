@@ -1,5 +1,6 @@
 'use client'
 
+import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
 import {
   Box,
   Pagination,
@@ -46,16 +47,7 @@ export function Transactions() {
 
   const handlePagination = (event: React.ChangeEvent<unknown>, newPage: number) => {
     if (newPage !== page) {
-      let queryParams: string[] = []
-      if (searchParams) {
-        for (let [key, value] of searchParams?.entries()) {
-          if (key !== 'page') {
-            queryParams.push(`${key}=${value}`)
-          }
-        }
-      }
-      queryParams.push(`page=${newPage}`)
-      router.push(`${pathname}?${queryParams.join('&')}`)
+      router.push(updateSearchParamsUrl(pathname, searchParams, { page: String(newPage) }))
     }
   }
 
