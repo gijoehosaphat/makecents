@@ -20,9 +20,12 @@ export default function CurrencyTextField(props: CurrencyTextFieldProps) {
     onKeyUp,
     onKeyDown,
     options,
+    autoFocus,
     ...remainingProps
   } = props
   const inputRef = useRef<HTMLInputElement | null>(null)
+  // Focusing on mount happens before AutoNumeric formats the value, which would leave the caret after the old text.
+  const pendingAutoFocus = useRef(Boolean(autoFocus))
 
   useEffect(() => {
     if (inputRef.current && autonumeric === null) {
@@ -56,6 +59,11 @@ export default function CurrencyTextField(props: CurrencyTextFieldProps) {
         autonumeric?.update(options)
       }
     }
+    if (pendingAutoFocus.current && autonumeric !== null && inputRef.current) {
+      pendingAutoFocus.current = false
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
   }, [value, autonumeric, options, focus])
 
   function getValue() {
@@ -73,8 +81,16 @@ export default function CurrencyTextField(props: CurrencyTextFieldProps) {
       onChange={(e) => {
         onValueChange && onValueChange(getValue())
       }}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
+      onFocus={(e) => {
+        setFocus(true)
+        onFocus?.(e)
+      }}
+      onBlur={(e) => {
+        setFocus(false)
+        onBlur?.(e)
+      }}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
     />
   )
 }

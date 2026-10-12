@@ -1,6 +1,7 @@
 import { Transaction } from '@/graphql/types'
-import { Add, CallSplit, Close, DeleteForever } from '@mui/icons-material'
+import { Add, CallSplit, DeleteForever, Undo } from '@mui/icons-material'
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -10,24 +11,48 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  Tooltip,
   Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { KeyboardEvent, useState } from 'react'
 import SaveCancel from '../forms/SaveCancel'
 import { useTranslations } from 'next-intl'
 import CurrencyTextField from '../shared/CurrencyTextField'
+import SplitCategoryPicker from './SplitCategoryPicker'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { UpsertSplitTransactionsDocument } from '@/graphql/operations'
 import { fromCents, toCents } from '@/lib/formatMoney'
 import { MIN_PART_CENTS, canAddPart, clampPartCents, maxPartCents, remainingCents } from '@/lib/splitMath'
 
-interface SplitTransaction {
-  nodeId: string
-  id: number
+/** One row split off the original, either already saved or still to be created. */
+interface SplitPart {
+  key: string
+  /** Set for parts that already exist; new parts have none. */
+  id?: number
   name?: string | null
   memo?: string | null
-  amount: number
+  /** Unsigned, and not clamped while the user is typing. */
+  cents: number
+  categoryId: number | null
+  /** An existing part marked for deletion on save. */
+  removed?: boolean
+}
+
+function existingParts(transaction: Transaction): SplitPart[] {
+  return (transaction.transactionsBySplitSourceId?.nodes ?? []).map((part) => ({
+    key: part.nodeId,
+    id: part.id,
+    name: part.name,
+    memo: part.memo,
+    cents: Math.abs(part.amount),
+    categoryId: part.categoryId ?? null,
+  }))
+}
+
+/** Unique enough to keep two parts saved in the same instant apart, without needing a secure context. */
+function randomSuffix() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(8)), (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 export function TransactionSplit({
@@ -41,145 +66,143 @@ export function TransactionSplit({
   const [upsertSplitTransactions] = useMutationWithToast(UpsertSplitTransactionsDocument, {
     refetchQueries: [refetchQuery],
   })
-  const [isWithdrawal] = useState(transaction.originalAmount < 0)
+  const isWithdrawal = transaction.originalAmount < 0
   const [isEditorOpen, setIsEditorOpen] = useState(false)
-
-  const [splitTransactions, setSplitTransactions] = useState<SplitTransaction[]>(
-    transaction?.transactionsBySplitSourceId?.nodes?.map((splitTransaction) => ({
-      nodeId: splitTransaction.nodeId,
-      id: splitTransaction.id,
-      name: splitTransaction.name,
-      memo: splitTransaction.memo,
-      amount: splitTransaction.amount,
-    }))
-  )
-  const [toCreateTransactions, setToCreateTransactions] = useState<Transaction[]>([])
-  const [toDelete, setToDelete] = useState<number[]>([])
+  const [parts, setParts] = useState<SplitPart[]>([])
+  const [originalCategoryId, setOriginalCategoryId] = useState<number | null>(transaction.categoryId ?? null)
 
   // The original row keeps whatever the other parts leave, so the parts always add up to the original amount.
   const totalCents = Math.abs(Number(transaction.originalAmount))
-  const partCents = [...splitTransactions, ...toCreateTransactions].map((part) => Math.abs(part.amount))
+  const activeParts = parts.filter((part) => !part.removed)
+  const partCents = activeParts.map((part) => part.cents)
   const amount = remainingCents(totalCents, partCents)
 
+  const isValid =
+    amount >= MIN_PART_CENTS && activeParts.every((part) => part.cents >= MIN_PART_CENTS)
+  const initialParts = existingParts(transaction)
+  const hasChanges =
+    originalCategoryId !== (transaction.categoryId ?? null) ||
+    parts.some((part) => {
+      if (part.removed || part.id === undefined) return true
+      const initial = initialParts.find((p) => p.id === part.id)
+      return initial?.cents !== part.cents || initial?.categoryId !== part.categoryId
+    })
+  const canAdd = canAddPart(totalCents, partCents)
+
+  function money(cents: number) {
+    return `$${fromCents(cents).toFixed(2)}`
+  }
+
+  // Seeded once per opening, so a refetch in the background can't overwrite what the user is editing.
   function openEditor() {
+    setParts(existingParts(transaction))
+    setOriginalCategoryId(transaction.categoryId ?? null)
     setIsEditorOpen(true)
   }
 
   function handleClose() {
-    setToCreateTransactions([])
-    setToDelete([])
+    setParts([])
     setIsEditorOpen(false)
   }
 
-  async function handleSave() {
-    let toUpdate = []
-    let toCreate = []
+  function handleSave() {
+    if (!isValid || !hasChanges) return
+    const sign = isWithdrawal ? -1 : 1
 
-    //Add parent trainsaction
-    toUpdate.push({
-      id: transaction.id,
-      amount: isWithdrawal ? -Math.abs(amount) : Math.abs(amount),
-    })
+    const toUpdate = [
+      { id: transaction.id, amount: sign * amount, categoryId: originalCategoryId },
+      ...activeParts
+        .filter((part) => part.id !== undefined)
+        .map((part) => ({ id: part.id, amount: sign * part.cents, categoryId: part.categoryId })),
+    ]
 
-    //Add existing split transactions
-    for (let splitTransaction of splitTransactions) {
-      toUpdate.push({
-        id: splitTransaction.id,
-        amount: isWithdrawal ? -Math.abs(splitTransaction.amount) : Math.abs(splitTransaction.amount),
-      })
-    }
-
-    //Add new transactions to be created
-    let i = 0
-    for (let toCreateTransaction of toCreateTransactions) {
-      toCreate.push({
+    const toCreate = activeParts
+      .filter((part) => part.id === undefined)
+      .map((part) => ({
         bankAccountId: transaction.bankAccountId,
-        amount: isWithdrawal ? -Math.abs(toCreateTransaction.amount) : Math.abs(toCreateTransaction.amount),
-        originalAmount: isWithdrawal ? -Math.abs(toCreateTransaction.amount) : Math.abs(toCreateTransaction.amount),
+        amount: sign * part.cents,
+        originalAmount: sign * part.cents,
+        categoryId: part.categoryId,
         splitSourceId: transaction.id,
-        bankTransactionId: `${transaction.bankTransactionId}-${i}-${new Date().getTime()}`,
+        bankTransactionId: `${transaction.bankTransactionId}-${randomSuffix()}`,
         memo: transaction.memo,
         name: transaction.name,
         posted: transaction.posted,
         originalPosted: transaction.posted,
         type: transaction.type,
-      })
-      i += 1
-    }
+      }))
 
-    upsertSplitTransactions({
-      variables: {
-        toUpdate,
-        toCreate,
-        toDelete: toDelete.map((toDeleteId) => ({ id: toDeleteId })),
-      },
-    })
+    const toDelete = parts.filter((part) => part.removed && part.id !== undefined).map((part) => ({ id: part.id }))
+
+    upsertSplitTransactions({ variables: { toUpdate, toCreate, toDelete } })
 
     handleClose()
   }
 
-  /** Every part's cents except one, by position in the splits followed by the new parts. */
-  function otherPartCents(partIndex: number) {
-    return partCents.filter((_, i) => i !== partIndex)
+  function updatePart(key: string, changes: Partial<SplitPart>) {
+    setParts((current) => current.map((part) => (part.key === key ? { ...part, ...changes } : part)))
   }
 
-  function onAmountChangeSplitTransaction(value: number, index: number, nodeId: string) {
-    if (splitTransactions[index].nodeId === nodeId) {
-      const newSplitTransactions = [...splitTransactions]
-      newSplitTransactions[index] = {
-        ...newSplitTransactions[index],
-        amount: clampPartCents(toCents(value), totalCents, otherPartCents(index)),
-      }
-      setSplitTransactions(newSplitTransactions)
+  /** The most the part can take while the original row keeps its minimum. */
+  function maxFor(key: string) {
+    return maxPartCents(
+      totalCents,
+      activeParts.filter((part) => part.key !== key).map((part) => part.cents)
+    )
+  }
+
+  /** Fixes up an out-of-range amount once the user leaves the field, not while they are still typing. */
+  function clampPart(key: string) {
+    const part = parts.find((p) => p.key === key)
+    if (!part || part.removed) return
+    const others = activeParts.filter((p) => p.key !== key).map((p) => p.cents)
+    const cents = clampPartCents(part.cents, totalCents, others)
+    if (cents !== part.cents) updatePart(key, { cents })
+  }
+
+  function amountError(part: SplitPart) {
+    if (part.cents < MIN_PART_CENTS) return t('categories.splitMinimum', { min: money(MIN_PART_CENTS) })
+    if (part.cents > maxFor(part.key)) return t('categories.splitMaximum', { max: money(maxFor(part.key)) })
+    return undefined
+  }
+
+  function removePart(part: SplitPart) {
+    if (part.id === undefined) {
+      setParts((current) => current.filter((p) => p.key !== part.key))
+    } else {
+      updatePart(part.key, { removed: true })
     }
   }
-  function onAmountChangeToCreateTransaction(value: number, index: number, nodeId: string) {
-    if (toCreateTransactions[index].nodeId === nodeId) {
-      const newToCreateTransactions = [...toCreateTransactions]
-      newToCreateTransactions[index] = {
-        ...newToCreateTransactions[index],
-        amount: clampPartCents(toCents(value), totalCents, otherPartCents(splitTransactions.length + index)),
-      }
-      setToCreateTransactions(newToCreateTransactions)
-    }
-  }
 
-  async function removeSplitTransaction(nodeId: string) {
-    const toDeleteId = splitTransactions.find((transaction) => transaction.nodeId === nodeId)?.id
-    if (toDeleteId) {
-      setSplitTransactions(splitTransactions.filter((transaction) => transaction.nodeId !== nodeId))
-      setToDelete([...toDelete, toDeleteId])
-    }
-  }
-
-  async function removeToCreateTransaction(nodeId: string) {
-    setToCreateTransactions(toCreateTransactions.filter((t) => t.nodeId !== nodeId))
-  }
-
-  function addToCreateTransaction() {
-    setToCreateTransactions([
-      ...toCreateTransactions,
+  function addPart() {
+    if (!canAdd) return
+    setParts((current) => [
+      ...current,
       {
-        nodeId: `pending-${new Date().getTime()}`,
-        name: 'Pending',
-        amount: MIN_PART_CENTS,
-      } as Transaction,
+        key: `new-${randomSuffix()}`,
+        name: transaction.name,
+        memo: transaction.memo,
+        cents: MIN_PART_CENTS,
+        categoryId: null,
+      },
     ])
   }
 
-  useEffect(() => {
-    if (isEditorOpen) {
-      setSplitTransactions(
-        transaction?.transactionsBySplitSourceId?.nodes?.map((splitTransaction) => ({
-          nodeId: splitTransaction.nodeId,
-          id: splitTransaction.id,
-          name: splitTransaction.name,
-          memo: splitTransaction.memo,
-          amount: splitTransaction.amount,
-        }))
-      )
+  // "+" adds a part and Enter saves, so a split can be entered without the mouse.
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    // Ignores keys from the category menu, which renders in a portal outside the dialog.
+    if (!event.currentTarget.contains(event.target as Node)) return
+    if (event.key === '+') {
+      event.preventDefault()
+      addPart()
+    } else if (event.key === 'Enter') {
+      // Enter activates other buttons as usual; the remove/undo toggle saves so Enter works right after a click on it.
+      const button = (event.target as HTMLElement).closest('button, a, [role="button"]')
+      if (button && !button.hasAttribute('data-enter-saves')) return
+      event.preventDefault()
+      handleSave()
     }
-  }, [isEditorOpen, transaction?.transactionsBySplitSourceId?.nodes])
+  }
 
   return (
     <>
@@ -192,13 +215,17 @@ export function TransactionSplit({
       >
         <CallSplit />
       </IconButton>
-      <Dialog open={isEditorOpen} onClose={handleClose}>
+      <Dialog open={isEditorOpen} onClose={handleClose} onKeyDown={handleKeyDown} fullWidth maxWidth={'sm'} PaperProps={{ tabIndex: -1 }}>
         <DialogTitle sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
           <CallSplit sx={{ mr: 2 }} />
           {t('categories.splitTransaction')}
         </DialogTitle>
         <DialogContent>
-          <Table>
+          <Typography variant={'body2'}>{t('categories.splitTotal', { total: money(totalCents) })}</Typography>
+          <Typography variant={'caption'} color={amount < MIN_PART_CENTS ? 'error' : 'text.secondary'}>
+            {t('categories.splitRemainder', { remaining: money(Math.max(amount, 0)) })}
+          </Typography>
+          <Table size={'small'}>
             <TableBody>
               <TableRow>
                 <TableCell>
@@ -206,103 +233,96 @@ export function TransactionSplit({
                   <Typography variant={'caption'}>{transaction.memo}</Typography>
                 </TableCell>
                 <TableCell>
+                  <SplitCategoryPicker categoryId={originalCategoryId} onChange={setOriginalCategoryId} />
+                </TableCell>
+                <TableCell sx={{ width: 140 }}>
                   <CurrencyTextField
                     size={'small'}
+                    fullWidth
                     disabled={true}
-                    value={fromCents(amount)}
+                    label={t('categories.splitOriginal')}
+                    value={fromCents(Math.max(amount, 0))}
                     options={{
                       minimumValue: '0',
                       maximumValue: fromCents(totalCents).toFixed(2),
                     }}
                   />
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell sx={{ width: 48, px: 0 }}></TableCell>
               </TableRow>
-              {splitTransactions.map((splitTransaction, i) => {
-                const splitTransactionMax = fromCents(maxPartCents(totalCents, otherPartCents(i)))
+              {parts.map((part) => {
+                const error = part.removed ? undefined : amountError(part)
                 return (
-                  <TableRow key={splitTransaction.id}>
+                  <TableRow key={part.key} sx={part.removed ? { opacity: 0.5 } : undefined}>
                     <TableCell>
-                      <Typography variant={'body2'}>{splitTransaction.name}</Typography>
-                      <Typography variant={'caption'}>{splitTransaction.memo}</Typography>
+                      <Typography variant={'body2'} sx={{ textDecoration: part.removed ? 'line-through' : undefined }}>
+                        {part.name}
+                      </Typography>
+                      <Typography variant={'caption'}>{part.memo}</Typography>
                     </TableCell>
                     <TableCell>
+                      <SplitCategoryPicker
+                        categoryId={part.categoryId}
+                        onChange={(categoryId) => updatePart(part.key, { categoryId })}
+                        disabled={part.removed}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ width: 140 }}>
                       <CurrencyTextField
                         size={'small'}
-                        value={fromCents(Math.abs(splitTransaction.amount))}
-                        onValueChange={(value) => onAmountChangeSplitTransaction(value, i, splitTransaction.nodeId)}
+                        fullWidth
+                        disabled={part.removed}
+                        autoFocus={part.id === undefined}
+                        value={fromCents(part.cents)}
+                        error={Boolean(error)}
+                        helperText={error}
+                        onFocus={(event) => event.target.select()}
+                        onBlur={() => clampPart(part.key)}
+                        onValueChange={(value) => updatePart(part.key, { cents: Math.abs(toCents(value)) })}
                         options={{
                           minimumValue: '0',
-                          maximumValue: splitTransactionMax.toFixed(2),
+                          maximumValue: fromCents(totalCents).toFixed(2),
                         }}
                       />
                     </TableCell>
-                    <TableCell>
-                      <IconButton
-                        size={'small'}
-                        onClick={() => removeSplitTransaction(splitTransaction.nodeId)}
-                        aria-label="Remove"
-                      >
-                        <DeleteForever />
-                      </IconButton>
+                    <TableCell sx={{ width: 48, px: 0 }}>
+                      {/* One button for both states, so it keeps focus after being clicked. */}
+                      <Tooltip title={part.removed ? t('categories.splitUndoRemove') : t('categories.splitRemove')}>
+                        <IconButton
+                          size={'small'}
+                          data-enter-saves
+                          onClick={(event) => {
+                            if (part.removed) {
+                              updatePart(part.key, { removed: false })
+                              return
+                            }
+                            // A new part's row disappears with its button, so hand focus to the dialog to keep Enter working.
+                            const dialog = event.currentTarget.closest<HTMLElement>('[role="dialog"]')
+                            removePart(part)
+                            if (part.id === undefined) setTimeout(() => dialog?.focus())
+                          }}
+                          aria-label={part.removed ? t('categories.splitUndoRemove') : t('categories.splitRemove')}
+                        >
+                          {part.removed ? <Undo /> : <DeleteForever />}
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 )
               })}
-              {toCreateTransactions.map((toCreateTransaction, i) => {
-                const toCreateTransactionMax = fromCents(
-                  maxPartCents(totalCents, otherPartCents(splitTransactions.length + i))
-                )
-                return (
-                  <TableRow key={toCreateTransaction.nodeId}>
-                    <TableCell>
-                      <Typography variant={'body2'}>{toCreateTransaction.name}</Typography>
-                      <Typography variant={'caption'}>{toCreateTransaction.memo}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <CurrencyTextField
-                        size={'small'}
-                        value={fromCents(Math.abs(toCreateTransaction.amount))}
-                        onValueChange={(value) =>
-                          onAmountChangeToCreateTransaction(value, i, toCreateTransaction.nodeId)
-                        }
-                        options={{
-                          minimumValue: '0',
-                          maximumValue: toCreateTransactionMax.toFixed(2),
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        size={'small'}
-                        onClick={() => removeToCreateTransaction(toCreateTransaction.nodeId)}
-                        aria-label="Remove"
-                      >
-                        <Close />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-              <TableRow>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
-                <TableCell>
-                  <IconButton
-                    size={'small'}
-                    color={'secondary'}
-                    onClick={addToCreateTransaction}
-                    disabled={!canAddPart(totalCents, partCents)}
-                  >
-                    <Add />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
+          <Tooltip title={canAdd ? t('categories.splitAddPartHint') : t('categories.splitNoRoom')}>
+            {/* The span lets the tooltip show while the button is disabled. */}
+            <span>
+              <Button color={'secondary'} startIcon={<Add />} onClick={addPart} disabled={!canAdd} sx={{ mt: 1 }}>
+                {t('categories.splitAddPart')}
+              </Button>
+            </span>
+          </Tooltip>
         </DialogContent>
         <DialogActions>
-          <SaveCancel saveDisabled={false} handleSave={handleSave} handleCancel={handleClose} />
+          <SaveCancel saveDisabled={!isValid || !hasChanges} handleSave={handleSave} handleCancel={handleClose} />
         </DialogActions>
       </Dialog>
     </>
