@@ -1,5 +1,6 @@
 'use client'
 
+import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
 import {
   Box,
   Pagination,
@@ -9,6 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TableSortLabel,
   Typography,
 } from '@mui/material'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -19,6 +21,9 @@ import { useDateFilterParams } from '@/lib/useDateFilterParams'
 import { usePaginationParams } from '@/lib/usePaginationParams'
 import { useTransactionFilterParams } from '@/lib/useTransactionFilterParams'
 import { useBankAccountFilterParams } from '@/lib/useBankAccountFilterParams'
+import { useTransactionAmountParams } from '@/lib/useTransactionAmountParams'
+import { useTransactionSortParams } from '@/lib/useTransactionSortParams'
+import { TransactionSort } from '@/lib/transactionSort'
 import { useTransactionSearchParams } from '@/lib/useTransactionSearchParams'
 import { useFilteredTransactions } from '@/lib/useFilteredTransactions'
 import { useAppContext } from '../context/AppContextProvider'
@@ -32,7 +37,9 @@ export function TransactionsResults() {
   const { dateFrom, dateTo } = useDateFilterParams()
   const { categorized, categoryIds } = useTransactionFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
+  const { direction, amountMin, amountMax } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
+  const { sort } = useTransactionSortParams()
   const { limit, page, offset } = usePaginationParams()
   const [, startTransition] = useTransition()
 
@@ -48,25 +55,30 @@ export function TransactionsResults() {
     dateTo,
     categorized,
     categoryIds,
+    direction,
+    amountMin,
+    amountMax,
     search,
+    sort,
   })
+
+  // Text search results come back newest first from the database and can't be re-sorted.
+  const sortDisabled = search.trim() !== ''
+
+  const handleSort = (next: TransactionSort) => {
+    startTransition(() => {
+      router.push(updateSearchParamsUrl(pathname, searchParams, { sort: next === 'posted_desc' ? null : next }))
+    })
+  }
 
   const handlePagination = (
     event: React.ChangeEvent<unknown>,
     newPage: number,
   ) => {
     if (newPage !== page) {
-      let queryParams: string[] = []
-      if (searchParams) {
-        for (let [key, value] of searchParams?.entries()) {
-          if (key !== 'page') {
-            queryParams.push(`${key}=${value}`)
-          }
-        }
-      }
-      queryParams.push(`page=${newPage}`)
+      const url = updateSearchParamsUrl(pathname, searchParams, { page: String(newPage) })
       startTransition(() => {
-        router.push(`${pathname}?${queryParams.join('&')}`)
+        router.push(url)
       })
     }
   }
@@ -92,9 +104,16 @@ export function TransactionsResults() {
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
-                      {t('shared.date')}
-                    </Typography>
+                    <TableSortLabel
+                      active={!sortDisabled && (sort === 'posted_desc' || sort === 'posted_asc')}
+                      direction={sort === 'posted_asc' ? 'asc' : 'desc'}
+                      disabled={sortDisabled}
+                      onClick={() => handleSort(sort === 'posted_desc' ? 'posted_asc' : 'posted_desc')}
+                    >
+                      <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
+                        {t('shared.date')}
+                      </Typography>
+                    </TableSortLabel>
                   </TableCell>
                   <TableCell>
                     <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
@@ -112,14 +131,28 @@ export function TransactionsResults() {
                     </Typography>
                   </TableCell>
                   <TableCell align={'right'}>
-                    <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
-                      {t('transactions.withdrawals')}
-                    </Typography>
+                    <TableSortLabel
+                      active={!sortDisabled && sort === 'amount_asc'}
+                      direction={'desc'}
+                      disabled={sortDisabled}
+                      onClick={() => handleSort(sort === 'amount_asc' ? 'posted_desc' : 'amount_asc')}
+                    >
+                      <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
+                        {t('transactions.withdrawals')}
+                      </Typography>
+                    </TableSortLabel>
                   </TableCell>
                   <TableCell align={'right'}>
-                    <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
-                      {t('transactions.deposits')}
-                    </Typography>
+                    <TableSortLabel
+                      active={!sortDisabled && sort === 'amount_desc'}
+                      direction={'desc'}
+                      disabled={sortDisabled}
+                      onClick={() => handleSort(sort === 'amount_desc' ? 'posted_desc' : 'amount_desc')}
+                    >
+                      <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
+                        {t('transactions.deposits')}
+                      </Typography>
+                    </TableSortLabel>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -130,7 +163,7 @@ export function TransactionsResults() {
                     transaction={transaction}
                     refetchQuery={refetchQuery}
                     showBankAccount
-                    rowFilter={{ categorized, categoryIds }}
+                    rowFilter={{ categorized, categoryIds, direction, amountMin, amountMax }}
                   />
                 ))}
               </TableBody>

@@ -1,5 +1,6 @@
 'use client'
 
+import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
 import { Box, InputAdornment, TextField } from '@mui/material'
 import { Search } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
@@ -29,19 +30,9 @@ export function TransactionSearchFilter() {
     }
 
     debounceRef.current = setTimeout(() => {
-      let queryParams: string[] = []
-      if (searchParams) {
-        for (let [key, existingValue] of searchParams.entries()) {
-          if (key !== 'search' && key !== 'page') {
-            queryParams.push(`${key}=${encodeURIComponent(existingValue)}`)
-          }
-        }
-      }
-      if (search.trim()) {
-        queryParams.push(`search=${encodeURIComponent(search.trim())}`)
-      }
+      const url = updateSearchParamsUrl(pathname, searchParams, { search: search.trim() })
       startTransition(() => {
-        router.push(`${pathname}?${queryParams.join('&')}`)
+        router.push(url)
       })
     }, 300)
   }

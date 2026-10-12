@@ -7,7 +7,76 @@ import {
   GetFilteredTransactionsBySearchDocument,
 } from '@/graphql/operations'
 import { buildTransactionSearchQuery } from './buildTransactionSearchQuery'
-import { buildTransactionRowFilter } from './transactionRowFilter'
+import { buildTransactionListFilter } from './buildTransactionListFilter'
+import { TransactionDirection } from './transactionRowFilter'
+import { DEFAULT_TRANSACTION_SORT, TransactionSort, transactionSortToOrderBy } from './transactionSort'
+
+export interface FilteredTransactionsParams {
+  limit?: number
+  offset?: number
+  dateFrom?: Date
+  dateTo?: Date
+  bankAccountIds: number[]
+  categorized?: boolean
+  categoryIds?: number[]
+  direction?: TransactionDirection
+  amountMin?: number
+  amountMax?: number
+  search?: string
+  sort?: TransactionSort
+}
+
+/**
+ * The document and variables for the transaction list. Text search results are always newest first (the
+ * search function orders them itself and takes no orderBy), so `sort` only applies without a search.
+ */
+export function buildFilteredTransactionsRequest({
+  limit,
+  offset,
+  dateFrom,
+  dateTo,
+  bankAccountIds,
+  categorized,
+  categoryIds,
+  direction,
+  amountMin,
+  amountMax,
+  search,
+  sort = DEFAULT_TRANSACTION_SORT,
+}: FilteredTransactionsParams) {
+  const match = buildTransactionSearchQuery(search || '')
+
+  const variables: GetTransactionsByBankAccountsVariables = {
+    filter: buildTransactionListFilter({
+      bankAccountIds,
+      dateFrom,
+      dateTo,
+      categorized,
+      categoryIds,
+      direction,
+      amountMin,
+      amountMax,
+    }),
+  }
+
+  if (limit !== undefined) {
+    variables.first = limit
+  }
+
+  if (offset !== undefined) {
+    variables.offset = offset
+  }
+
+  if (!match) {
+    variables.orderBy = transactionSortToOrderBy(sort)
+  }
+
+  return {
+    match,
+    document: match ? GetFilteredTransactionsBySearchDocument : GetFilteredTransactionsByBankAccountsDocument,
+    variables: match ? { ...variables, match } : variables,
+  }
+}
 
 export function useFilteredTransactions({
   limit,
@@ -17,58 +86,30 @@ export function useFilteredTransactions({
   bankAccountIds,
   categorized,
   categoryIds,
+  direction,
+  amountMin,
+  amountMax,
   search,
-}: {
-  limit?: number
-  offset?: number
-  dateFrom?: Date
-  dateTo?: Date
-  bankAccountIds: number[]
-  categorized?: boolean
-  categoryIds?: number[]
-  search?: string
-}) {
-  const match = useMemo(() => buildTransactionSearchQuery(search || ''), [search])
-
-  const variables = useMemo(() => {
-    let tempVariables: GetTransactionsByBankAccountsVariables = {
-      filter: {
-        bankAccountId: { in: bankAccountIds },
-      },
-    }
-
-    if (limit !== undefined) {
-      tempVariables.first = limit
-    }
-
-    if (offset !== undefined) {
-      tempVariables.offset = offset
-    }
-
-    // Split transactions are always returned nested under their parent. A parent is included when it,
-    // or any of its splits, matches the row-level filter.
-    const rowFilter = buildTransactionRowFilter({ categorized, categoryIds })
-    tempVariables.filter.splitSourceId = { isNull: true }
-    if (rowFilter) {
-      tempVariables.filter.or = [rowFilter, { transactionsBySplitSourceId: { some: rowFilter } }]
-    }
-
-    if (dateFrom !== undefined && dateTo !== undefined) {
-      tempVariables.filter.posted = {
-        greaterThanOrEqualTo: dateFrom,
-        lessThan: dateTo,
-      }
-    }
-
-    if (!match) {
-      tempVariables.orderBy = 'POSTED_DESC'
-    }
-
-    return tempVariables
-  }, [bankAccountIds, limit, offset, categorized, categoryIds, dateFrom, dateTo, match])
-
-  const document = match ? GetFilteredTransactionsBySearchDocument : GetFilteredTransactionsByBankAccountsDocument
-  const documentVariables = match ? { ...variables, match } : variables
+  sort,
+}: FilteredTransactionsParams) {
+  const { match, document, variables: documentVariables } = useMemo(
+    () =>
+      buildFilteredTransactionsRequest({
+        limit,
+        offset,
+        dateFrom,
+        dateTo,
+        bankAccountIds,
+        categorized,
+        categoryIds,
+        direction,
+        amountMin,
+        amountMax,
+        search,
+        sort,
+      }),
+    [limit, offset, dateFrom, dateTo, bankAccountIds, categorized, categoryIds, direction, amountMin, amountMax, search, sort],
+  )
 
   const query = useSuspenseQuery(document as any, {
     variables: documentVariables as any,

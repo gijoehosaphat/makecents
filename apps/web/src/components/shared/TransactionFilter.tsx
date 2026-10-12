@@ -1,5 +1,6 @@
 'use client'
 
+import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
 import { useCategories } from '@/lib/useCategories'
 import {
   Box,
@@ -17,7 +18,14 @@ import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, useTransition } from 'react'
 
-export function TransactionFilter({ children }: { children?: React.ReactNode }) {
+export function TransactionFilter({
+  children,
+  hideCategorized,
+}: {
+  children?: React.ReactNode
+  /** Hides the categorized dropdown when the page offers its own tabs for it. */
+  hideCategorized?: boolean
+}) {
   const t = useTranslations('common')
   const router = useRouter()
   const pathname = usePathname()
@@ -38,20 +46,12 @@ export function TransactionFilter({ children }: { children?: React.ReactNode }) 
     const categorized = event.target.value as string
     const categorizedParam = searchParams?.get('categorized') || 'any'
     if (categorizedParam !== categorized) {
-      let queryParams: string[] = []
-      if (searchParams) {
-        for (let [key, value] of searchParams?.entries()) {
-          if (key !== 'categorized' && key !== 'page') {
-            queryParams.push(`${key}=${value}`)
-          }
-        }
-      }
-      if (categorized !== 'any') {
-        queryParams.push(`categorized=${categorized}`)
-      }
+      const url = updateSearchParamsUrl(pathname, searchParams, {
+        categorized: categorized === 'any' ? null : categorized,
+      })
       setTimeout(() => {
         startTransition(() => {
-          router.push(`${pathname}?${queryParams.join('&')}`)
+          router.push(url)
         })
       }, 1)
     }
@@ -61,28 +61,27 @@ export function TransactionFilter({ children }: { children?: React.ReactNode }) 
     const value = event.target.value
     const categoryIds = typeof value === 'string' ? value.split(',').filter(Boolean) : value
 
-    let queryParams: string[] = []
-    if (searchParams) {
-      for (let [key, value] of searchParams.entries()) {
-        if (key !== 'categoryIds' && key !== 'page') {
-          queryParams.push(`${key}=${value}`)
-        }
-      }
-    }
-    if (categoryIds.length > 0) {
-      queryParams.push(`categoryIds=${categoryIds.join(',')}`)
-    }
+    const url = updateSearchParamsUrl(pathname, searchParams, { categoryIds: categoryIds.join(',') })
     setTimeout(() => {
       startTransition(() => {
-        router.push(`${pathname}?${queryParams.join('&')}`)
+        router.push(url)
       })
     }, 1)
   }
 
   return (
     <Box>
-      <Box p={4} display={'flex'} flexDirection={'row'} justifyContent={'flex-end'} alignItems={'center'}>
+      <Box
+        p={4}
+        display={'flex'}
+        flexDirection={'row'}
+        flexWrap={'wrap'}
+        rowGap={2}
+        justifyContent={'flex-end'}
+        alignItems={'center'}
+      >
         <Typography>{t('shared.filter')}</Typography>
+        {!hideCategorized && (
         <Box ml={2}>
           <FormControl size={'small'} sx={{ minWidth: 8 }}>
             <InputLabel>{t('shared.categorized')}: </InputLabel>
@@ -98,6 +97,7 @@ export function TransactionFilter({ children }: { children?: React.ReactNode }) 
             </Select>
           </FormControl>
         </Box>
+        )}
         <Box ml={2}>
           <FormControl size={'small'}>
             <InputLabel>{t('shared.category')}: </InputLabel>

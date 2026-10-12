@@ -8,6 +8,7 @@ import { Money } from '../shared/Money'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
 import { useTransactionFilterParams } from '@/lib/useTransactionFilterParams'
 import { useBankAccountFilterParams } from '@/lib/useBankAccountFilterParams'
+import { useTransactionAmountParams } from '@/lib/useTransactionAmountParams'
 import { useTransactionSearchParams } from '@/lib/useTransactionSearchParams'
 import { useFilteredTransactionTotals } from '@/lib/useFilteredTransactionTotals'
 
@@ -42,6 +43,7 @@ export function TransactionTotals() {
   const { dateFrom, dateTo } = useDateFilterParams()
   const { categorized, categoryIds } = useTransactionFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
+  const { direction, amountMin, amountMax } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
   const [selectedCurrency, setSelectedCurrency] = useState<string>()
 
@@ -55,6 +57,9 @@ export function TransactionTotals() {
     dateTo,
     categorized,
     categoryIds,
+    direction,
+    amountMin,
+    amountMax,
     search,
   })
 

@@ -1,5 +1,6 @@
 'use client'
 
+import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { Box, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent } from '@mui/material'
 import { useTranslations } from 'next-intl'
@@ -28,20 +29,10 @@ export function BankAccountFilter() {
     const value = event.target.value
     const bankAccountIds = typeof value === 'string' ? value.split(',').filter(Boolean) : value
 
-    let queryParams: string[] = []
-    if (searchParams) {
-      for (let [key, value] of searchParams.entries()) {
-        if (key !== 'bankAccountIds' && key !== 'page') {
-          queryParams.push(`${key}=${value}`)
-        }
-      }
-    }
-    if (bankAccountIds.length > 0) {
-      queryParams.push(`bankAccountIds=${bankAccountIds.join(',')}`)
-    }
+    const url = updateSearchParamsUrl(pathname, searchParams, { bankAccountIds: bankAccountIds.join(',') })
     setTimeout(() => {
       startTransition(() => {
-        router.push(`${pathname}?${queryParams.join('&')}`)
+        router.push(url)
       })
     }, 1)
   }

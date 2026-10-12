@@ -23,6 +23,13 @@
       "noGroup": "No group",
       "filter": "Filter",
       "any": "Any",
+      "all": "All",
+      "minAmount": "Min amount",
+      "maxAmount": "Max amount",
+      "minAmountChip": "At least {amount}",
+      "maxAmountChip": "At most {amount}",
+      "clearAll": "Clear all",
+      "searchChip": "Search: {term}",
       "category": "Category",
       "categorized": "Categorized",
       "uncategorized": "Uncategorized",
@@ -33,7 +40,8 @@
     "dateFilter": {
       "allTime": "All time",
       "currentYear": "Current year",
-      "currentMonth": "Current month"
+      "currentMonth": "Current month",
+      "customRange": "Custom range"
     },
     "auth": {
       "signInWith": "Sign in with {name}",
@@ -62,6 +70,7 @@
       "accountName": "Account name",
       "bankAccountGroup": "{count, plural, =1 {Transactions from 1 bank account} other {Transactions from # bank accounts}}",
       "search": "Search",
+      "searchSubtitle": "All accounts, find & categorize",
       "closed": "Closed",
       "closeAccount": "Close account",
       "reopenAccount": "Reopen account",
@@ -85,6 +94,9 @@
     "transactions": {
       "transactions": "Transactions",
       "none": "No transactions found",
+      "exportCsv": "Export CSV",
+      "exporting": "Exporting…",
+      "exportFailed": "Export failed, retry",
       "showMore": "Show more ({remaining} remaining)",
       "category": "Category",
       "withdrawals": "Withdrawals",
