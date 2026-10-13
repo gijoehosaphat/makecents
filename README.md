@@ -102,3 +102,7 @@ There are two applications in this repository: the API and the Client (frontend)
 ## Thanks
 
 Special thanks to Connor & Mike for listening to me blab on about this for... years.
+
+## License
+
+Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). You are free to use, modify, and share this software for any noncommercial purpose. Commercial use requires a separate license from the author.

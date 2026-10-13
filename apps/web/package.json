@@ -2,7 +2,7 @@
   "name": "makecents-web",
   "version": "0.1.0",
   "private": true,
-  "license": "ISC",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Joe Leonard <joeleonard@gmail.com>",
   "dependencies": {
     "@apollo/client": "^4.1.6",
