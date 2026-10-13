@@ -2,7 +2,7 @@
   "name": "makecents-api",
   "version": "0.1.0",
   "private": true,
-  "license": "ISC",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Joe Leonard <joeleonard@gmail.com>",
   "dependencies": {
     "@auth/core": "0.41.0",
