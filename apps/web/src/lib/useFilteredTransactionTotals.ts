@@ -7,6 +7,7 @@ import {
   GetFilteredTransactionTotalsBySearchDocument,
 } from '@/graphql/operations'
 import { buildTransactionSearchQuery } from './buildTransactionSearchQuery'
+import { EXCLUDE_TRANSFERS_FILTER, ONLY_TRANSFERS_FILTER } from '@/components/shared/CurrencyTotals'
 import { TransactionDirection, buildTransactionRowFilter } from './transactionRowFilter'
 
 type GroupedSums = NonNullable<GetFilteredTransactionTotalsByBankAccounts['deposits']>['groupedAggregates']
@@ -21,7 +22,7 @@ function sumsByBankAccount(groups: GroupedSums): Record<number, number> {
 }
 
 /**
- * Deposit and withdrawal totals (in cents, per bank account) across every transaction matching the filters,
+ * Deposit and withdrawal totals (in cents, per bank account), with transfers between accounts reported separately, across every transaction matching the filters,
  * ignoring pagination. Every row is summed on its own, splits included: a split parent's amount is only the
  * remainder not covered by its splits, so nothing is double counted.
  */
@@ -62,9 +63,14 @@ export function useFilteredTransactionTotals({
       and.push({ posted: { greaterThanOrEqualTo: dateFrom, lessThan: dateTo } })
     }
 
+    const deposit: TransactionFilter = { amount: { greaterThan: '0' } }
+    const withdrawal: TransactionFilter = { amount: { lessThan: '0' } }
+
     return {
-      depositFilter: { and: [...and, { amount: { greaterThan: '0' } }] },
-      withdrawalFilter: { and: [...and, { amount: { lessThan: '0' } }] },
+      depositFilter: { and: [...and, EXCLUDE_TRANSFERS_FILTER, deposit] },
+      withdrawalFilter: { and: [...and, EXCLUDE_TRANSFERS_FILTER, withdrawal] },
+      transferDepositFilter: { and: [...and, ONLY_TRANSFERS_FILTER, deposit] },
+      transferWithdrawalFilter: { and: [...and, ONLY_TRANSFERS_FILTER, withdrawal] },
     }
   }, [bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, dateFrom, dateTo])
 
@@ -80,5 +86,11 @@ export function useFilteredTransactionTotals({
   const deposits = useMemo(() => sumsByBankAccount(data?.deposits?.groupedAggregates), [data?.deposits])
   const withdrawals = useMemo(() => sumsByBankAccount(data?.withdrawals?.groupedAggregates), [data?.withdrawals])
 
-  return { deposits, withdrawals }
+  const transferDeposits = useMemo(() => sumsByBankAccount(data?.transferDeposits?.groupedAggregates), [data?.transferDeposits])
+  const transferWithdrawals = useMemo(
+    () => sumsByBankAccount(data?.transferWithdrawals?.groupedAggregates),
+    [data?.transferWithdrawals],
+  )
+
+  return { deposits, withdrawals, transferDeposits, transferWithdrawals }
 }
