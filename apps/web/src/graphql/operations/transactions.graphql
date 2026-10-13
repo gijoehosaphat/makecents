@@ -271,14 +271,14 @@ query GetTransactionAggregatesByBankAccount(
   $bankAccountIds: [Int!]
   $dateFrom: Datetime
   $dateTo: Datetime
-  $transferFilter: TransactionFilter!
 ) {
   deposits: allTransactions(
     filter: {
       bankAccountId: { in: $bankAccountIds }
       posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
       categoryId: { isNull: false }
-      and: [$transferFilter]
+      transferByTransactionSourceIdExists: false
+      transferByTransactionTargetIdExists: false
       amount: { greaterThan: "0" }
     }
   ) {
@@ -293,8 +293,39 @@ query GetTransactionAggregatesByBankAccount(
       bankAccountId: { in: $bankAccountIds }
       posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
       categoryId: { isNull: false }
-      and: [$transferFilter]
+      transferByTransactionSourceIdExists: false
+      transferByTransactionTargetIdExists: false
       amount: { lessThan: "0" }
+    }
+  ) {
+    aggregates {
+      sum {
+        amount
+      }
+    }
+  }
+  transferDeposits: allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      categoryId: { isNull: false }
+      amount: { greaterThan: "0" }
+      or: [{ transferByTransactionSourceIdExists: true }, { transferByTransactionTargetIdExists: true }]
+    }
+  ) {
+    aggregates {
+      sum {
+        amount
+      }
+    }
+  }
+  transferWithdrawals: allTransactions(
+    filter: {
+      bankAccountId: { in: $bankAccountIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      categoryId: { isNull: false }
+      amount: { lessThan: "0" }
+      or: [{ transferByTransactionSourceIdExists: true }, { transferByTransactionTargetIdExists: true }]
     }
   ) {
     aggregates {
@@ -327,7 +358,12 @@ mutation UpsertSplitTransactions(
   }
 }
 
-query GetFilteredTransactionTotalsByBankAccounts($depositFilter: TransactionFilter!, $withdrawalFilter: TransactionFilter!) {
+query GetFilteredTransactionTotalsByBankAccounts(
+  $depositFilter: TransactionFilter!
+  $withdrawalFilter: TransactionFilter!
+  $transferDepositFilter: TransactionFilter!
+  $transferWithdrawalFilter: TransactionFilter!
+) {
   deposits: allTransactions(filter: $depositFilter) {
     groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
       keys
@@ -344,11 +380,29 @@ query GetFilteredTransactionTotalsByBankAccounts($depositFilter: TransactionFilt
       }
     }
   }
+  transferDeposits: allTransactions(filter: $transferDepositFilter) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+  transferWithdrawals: allTransactions(filter: $transferWithdrawalFilter) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
 }
 
 query GetFilteredTransactionTotalsBySearch(
   $depositFilter: TransactionFilter!
   $withdrawalFilter: TransactionFilter!
+  $transferDepositFilter: TransactionFilter!
+  $transferWithdrawalFilter: TransactionFilter!
   $match: String!
 ) {
   deposits: transactionSearch(filter: $depositFilter, match: $match) {
@@ -360,6 +414,22 @@ query GetFilteredTransactionTotalsBySearch(
     }
   }
   withdrawals: transactionSearch(filter: $withdrawalFilter, match: $match) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+  transferDeposits: transactionSearch(filter: $transferDepositFilter, match: $match) {
+    groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
+      keys
+      sum {
+        amount
+      }
+    }
+  }
+  transferWithdrawals: transactionSearch(filter: $transferWithdrawalFilter, match: $match) {
     groupedAggregates(groupBy: BANK_ACCOUNT_ID) {
       keys
       sum {

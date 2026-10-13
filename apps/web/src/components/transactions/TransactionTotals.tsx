@@ -18,13 +18,12 @@ export function TransactionTotals() {
   const { direction, amountMin, amountMax } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
   const [selectedCurrency, setSelectedCurrency] = useState<string>()
-  const [includeTransfers, setIncludeTransfers] = useState(false)
 
   const filteredBankAccountIds = useMemo(() => {
     return selectedBankAccountIds || bankAccounts.map((bankAccount) => bankAccount.id)
   }, [selectedBankAccountIds, bankAccounts])
 
-  const { deposits, withdrawals } = useFilteredTransactionTotals({
+  const { deposits, withdrawals, transferDeposits, transferWithdrawals } = useFilteredTransactionTotals({
     bankAccountIds: filteredBankAccountIds,
     dateFrom,
     dateTo,
@@ -35,23 +34,24 @@ export function TransactionTotals() {
     amountMin,
     amountMax,
     search,
-    includeTransfers,
   })
 
   // Amounts in different currencies can't be added together, so totals are kept per currency.
   const totalsByCurrency = useMemo(() => {
-    const totals: Record<string, { deposits: number; withdrawals: number }> = {}
+    const totals: Record<string, { deposits: number; withdrawals: number; transferDeposits: number; transferWithdrawals: number }> = {}
     for (const bankAccount of bankAccounts) {
       if (!filteredBankAccountIds.includes(bankAccount.id)) {
         continue
       }
       const currency = bankAccount.currency || DEFAULT_CURRENCY
-      totals[currency] ||= { deposits: 0, withdrawals: 0 }
+      totals[currency] ||= { deposits: 0, withdrawals: 0, transferDeposits: 0, transferWithdrawals: 0 }
       totals[currency].deposits += deposits[bankAccount.id] || 0
       totals[currency].withdrawals += withdrawals[bankAccount.id] || 0
+      totals[currency].transferDeposits += transferDeposits[bankAccount.id] || 0
+      totals[currency].transferWithdrawals += transferWithdrawals[bankAccount.id] || 0
     }
     return totals
-  }, [bankAccounts, filteredBankAccountIds, deposits, withdrawals])
+  }, [bankAccounts, filteredBankAccountIds, deposits, withdrawals, transferDeposits, transferWithdrawals])
 
   const currencies = Object.keys(totalsByCurrency).sort((a, b) => a.localeCompare(b))
 
@@ -66,11 +66,11 @@ export function TransactionTotals() {
     <CurrencyTotals
       deposits={totals.deposits}
       withdrawals={totals.withdrawals}
+      transferDeposits={totals.transferDeposits}
+      transferWithdrawals={totals.transferWithdrawals}
       currency={currency}
       currencies={currencies}
       onCurrencyChange={setSelectedCurrency}
-      includeTransfers={includeTransfers}
-      onIncludeTransfersChange={setIncludeTransfers}
     />
   )
 }

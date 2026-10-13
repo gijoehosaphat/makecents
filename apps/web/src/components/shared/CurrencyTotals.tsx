@@ -1,8 +1,9 @@
 'use client'
 
-import { Box, FormControlLabel, Switch, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import Grid from '@mui/material/Grid'
+import { Box, Divider, Paper, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
+import { useAmountVisibility } from '@/components/context/AmountVisibilityContext'
+import { formatMoneyCents } from '@/lib/formatMoney'
 import { Money } from './Money'
 
 export const DEFAULT_CURRENCY = 'CAD'
@@ -15,16 +16,34 @@ export function resolveCurrency(currencies: string[], selected?: string) {
   return currencies.includes(DEFAULT_CURRENCY) ? DEFAULT_CURRENCY : currencies[0]
 }
 
-function MoneyGridItem({ label, amountInCents, currency }: { label: string; amountInCents: number; currency: string }) {
+function TotalColumn({
+  label,
+  amountInCents,
+  transferInCents,
+  currency,
+}: {
+  label: string
+  amountInCents: number
+  transferInCents: number
+  currency: string
+}) {
+  const t = useTranslations('common')
+  const { hidden } = useAmountVisibility()
+
   return (
-    <>
-      <Typography variant={'h1'} sx={{ display: 'inline', fontSize: 50 }}>
-        <Money amountInCents={amountInCents} currency={currency} colored />
-      </Typography>
-      <Typography variant={'h1'} sx={{ textTransform: 'uppercase' }}>
+    <Box sx={{ flex: 1, minWidth: 0, p: 3 }}>
+      <Typography variant={'overline'} color={'text.secondary'} sx={{ lineHeight: 1.5 }}>
         {label}
       </Typography>
-    </>
+      <Typography variant={'h1'} sx={{ fontSize: { xs: 32, md: 44 }, wordBreak: 'break-word' }}>
+        <Money amountInCents={amountInCents} currency={currency} colored />
+      </Typography>
+      {transferInCents !== 0 && (
+        <Typography variant={'caption'} color={'text.secondary'} component={'div'}>
+          {t('shared.transfersSubtitle', { amount: formatMoneyCents(transferInCents, currency, hidden) })}
+        </Typography>
+      )}
+    </Box>
   )
 }
 
@@ -34,8 +53,9 @@ export const EXCLUDE_TRANSFERS_FILTER = {
   transferByTransactionTargetIdExists: false,
 } as const
 
-// The filter input rejects empty objects, so "no restriction" is a condition every row satisfies.
-export const ANY_TRANSACTION_FILTER = { id: { isNull: false } } as const
+export const ONLY_TRANSFERS_FILTER = {
+  or: [{ transferByTransactionSourceIdExists: true }, { transferByTransactionTargetIdExists: true }],
+} as const
 
 export function CurrencySwitcher({
   currencies,
@@ -55,6 +75,7 @@ export function CurrencySwitcher({
       exclusive
       size={'small'}
       onChange={(event, value: string | null) => value && onChange(value)}
+      sx={{ '& .MuiToggleButton-root': { py: 0, px: 1, fontSize: 12, border: 0 } }}
     >
       {currencies.map((option) => (
         <ToggleButton key={option} value={option}>
@@ -68,48 +89,65 @@ export function CurrencySwitcher({
 export function CurrencyTotals({
   deposits,
   withdrawals,
+  transferDeposits,
+  transferWithdrawals,
   currency,
   currencies,
   onCurrencyChange,
-  includeTransfers,
-  onIncludeTransfersChange,
 }: {
   deposits: number
   withdrawals: number
+  transferDeposits: number
+  transferWithdrawals: number
   currency: string
   currencies: string[]
   onCurrencyChange: (currency: string) => void
-  includeTransfers: boolean
-  onIncludeTransfersChange: (includeTransfers: boolean) => void
 }) {
   const t = useTranslations('common')
 
   return (
-    <Box sx={{ py: 2 }}>
-      <Grid container>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <MoneyGridItem label={t('transactions.deposits')} amountInCents={deposits} currency={currency} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <MoneyGridItem label={t('transactions.withdrawals')} amountInCents={withdrawals} currency={currency} />
-        </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <MoneyGridItem label={t('shared.net')} amountInCents={deposits + withdrawals} currency={currency} />
-        </Grid>
-      </Grid>
-      <Box sx={{ pt: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center', columnGap: 4 }}>
-        <CurrencySwitcher currencies={currencies} currency={currency} onChange={onCurrencyChange} />
-        <FormControlLabel
-          control={
-            <Switch
-              size={'small'}
-              checked={includeTransfers}
-              onChange={(event) => onIncludeTransfersChange(event.target.checked)}
-            />
-          }
-          label={t('shared.includeTransfers')}
+    <Paper variant={'outlined'} className={'CurrencyTotals-card'} sx={{ my: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
+        <TotalColumn
+          label={t('transactions.deposits')}
+          amountInCents={deposits}
+          transferInCents={transferDeposits}
+          currency={currency}
+        />
+        <Divider orientation={'vertical'} flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
+        <Divider sx={{ display: { xs: 'block', md: 'none' } }} />
+        <TotalColumn
+          label={t('transactions.withdrawals')}
+          amountInCents={withdrawals}
+          transferInCents={transferWithdrawals}
+          currency={currency}
+        />
+        <Divider orientation={'vertical'} flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
+        <Divider sx={{ display: { xs: 'block', md: 'none' } }} />
+        <TotalColumn
+          label={t('shared.net')}
+          amountInCents={deposits + withdrawals}
+          transferInCents={transferDeposits + transferWithdrawals}
+          currency={currency}
         />
       </Box>
-    </Box>
+      {currencies.length > 1 && (
+        // Dimmed until the card is hovered or focused, so the switcher hints at itself without adding noise.
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            px: 3,
+            pb: 0.5,
+            opacity: 0.3,
+            transition: 'opacity 150ms',
+            '@media (hover: none)': { opacity: 1 },
+            '.CurrencyTotals-card:hover > &, .CurrencyTotals-card:focus-within > &': { opacity: 1 },
+          }}
+        >
+          <CurrencySwitcher currencies={currencies} currency={currency} onChange={onCurrencyChange} />
+        </Box>
+      )}
+    </Paper>
   )
 }
