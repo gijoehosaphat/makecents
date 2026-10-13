@@ -271,12 +271,14 @@ query GetTransactionAggregatesByBankAccount(
   $bankAccountIds: [Int!]
   $dateFrom: Datetime
   $dateTo: Datetime
+  $transferFilter: TransactionFilter!
 ) {
   deposits: allTransactions(
     filter: {
       bankAccountId: { in: $bankAccountIds }
       posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
       categoryId: { isNull: false }
+      and: [$transferFilter]
       amount: { greaterThan: "0" }
     }
   ) {
@@ -291,6 +293,7 @@ query GetTransactionAggregatesByBankAccount(
       bankAccountId: { in: $bankAccountIds }
       posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
       categoryId: { isNull: false }
+      and: [$transferFilter]
       amount: { lessThan: "0" }
     }
   ) {

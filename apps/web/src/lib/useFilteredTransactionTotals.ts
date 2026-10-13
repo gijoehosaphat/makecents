@@ -7,6 +7,7 @@ import {
   GetFilteredTransactionTotalsBySearchDocument,
 } from '@/graphql/operations'
 import { buildTransactionSearchQuery } from './buildTransactionSearchQuery'
+import { EXCLUDE_TRANSFERS_FILTER } from '@/components/shared/CurrencyTotals'
 import { TransactionDirection, buildTransactionRowFilter } from './transactionRowFilter'
 
 type GroupedSums = NonNullable<GetFilteredTransactionTotalsByBankAccounts['deposits']>['groupedAggregates']
@@ -36,6 +37,7 @@ export function useFilteredTransactionTotals({
   amountMin,
   amountMax,
   search,
+  includeTransfers = true,
 }: {
   dateFrom?: Date
   dateTo?: Date
@@ -47,11 +49,15 @@ export function useFilteredTransactionTotals({
   amountMin?: number
   amountMax?: number
   search?: string
+  includeTransfers?: boolean
 }) {
   const match = useMemo(() => buildTransactionSearchQuery(search || ''), [search])
 
   const variables = useMemo(() => {
     const and: TransactionFilter[] = [{ bankAccountId: { in: bankAccountIds } }]
+    if (!includeTransfers) {
+      and.push(EXCLUDE_TRANSFERS_FILTER)
+    }
 
     const rowFilter = buildTransactionRowFilter({ categorized, categoryIds, autoCategorized, direction, amountMin, amountMax })
     if (rowFilter) {
@@ -66,7 +72,7 @@ export function useFilteredTransactionTotals({
       depositFilter: { and: [...and, { amount: { greaterThan: '0' } }] },
       withdrawalFilter: { and: [...and, { amount: { lessThan: '0' } }] },
     }
-  }, [bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, dateFrom, dateTo])
+  }, [bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, dateFrom, dateTo, includeTransfers])
 
   const document = match ? GetFilteredTransactionTotalsBySearchDocument : GetFilteredTransactionTotalsByBankAccountsDocument
   const documentVariables = match ? { ...variables, match } : variables

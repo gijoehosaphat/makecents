@@ -16,6 +16,7 @@
       "amount": "Amount",
       "dismiss": "Dismiss",
       "net": "Net",
+      "includeTransfers": "Include transfers",
       "balance": "Balance",
       "group": "Group",
       "ungrouped": "Ungrouped",
