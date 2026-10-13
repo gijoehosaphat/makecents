@@ -20,6 +20,14 @@ import { BudgetPlan } from './BudgetPlan'
 import { format, getDate, getDaysInMonth, isSameMonth } from 'date-fns'
 import { availableBalance, isWithin, spendProgress, spentInPeriod } from '@/lib/budgetMath'
 
+// Blue and vermillion (Okabe-Ito) stay distinguishable with the common kinds of colour blindness, unlike green and
+// red. The bar colours keep the white amount label on top of them at 4.5:1 or better; the text colours are the
+// lighter siblings for use directly on the dark page background.
+const BAR_UNDER = '#0072B2'
+const BAR_OVER = '#C85200'
+const TEXT_UNDER = '#56B4E9'
+const TEXT_OVER = '#FF8A4C'
+
 const MIN = 0
 const MAX = 150
 
@@ -64,7 +72,8 @@ function BudgetItem({
   const percentage = Math.min(99, Math.max(0.5, normalize(progress)))
   // Going over a category is information, not failure: the plan as a whole decides whether the month is on track,
   // so over-budget items are amber and red is kept for the plan.
-  const color = progress > 100 ? theme.palette.warning.main : theme.palette.money.positive
+  const over = progress > 100
+  const color = over ? BAR_OVER : BAR_UNDER
 
   // Where an even spend would be by today, so a bar can be read as ahead of or behind pace. Only meaningful for a
   // monthly budget while its month is under way.
@@ -188,7 +197,7 @@ function BudgetItem({
         <Grid size={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Typography
             variant={'h4'}
-            sx={{ color: budgetItem.remaining < 0 ? theme.palette.warning.main : theme.palette.money.positive }}
+            sx={{ color: budgetItem.remaining < 0 ? TEXT_OVER : TEXT_UNDER }}
           >
             {formatMoneyCents(isAccruing ? budgetItem.remaining : Math.abs(budgetItem.remaining), currency, hidden)}
           </Typography>
