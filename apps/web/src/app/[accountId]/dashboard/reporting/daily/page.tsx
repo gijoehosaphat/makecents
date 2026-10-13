@@ -1,12 +1,14 @@
 import { DailySpendingLineChart } from '@/components/reporting/DailySpendingLineChart'
 import { Loading } from '@/components/shared/Loading'
 import TitleSetter from '@/components/TitleSetter'
+import { getTranslations } from 'next-intl/server'
 import { Suspense } from 'react'
 
-export default function Page() {
+export default async function Page() {
+  const t = await getTranslations('common')
   return (
     <Suspense fallback={<Loading />}>
-      <TitleSetter>Daily Cash Flow</TitleSetter>
+      <TitleSetter>{t('reporting.dailySpendingTitle')}</TitleSetter>
       <DailySpendingLineChart />
     </Suspense>
   )
