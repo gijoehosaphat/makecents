@@ -32,8 +32,8 @@ services:
       BETTER_AUTH_SECRET: ${AUTH_SECRET:-atruesecretkeythatshouldbechanged}
       NEXT_PUBLIC_GRAPH_URL: http://localhost:3001/api/graphql
       NEXT_PUBLIC_CODEGEN_GRAPH_URL: http://localhost:3002/api/graphql
-    # Apply migrations (idempotent) before starting
-    command: sh -c "pnpm --dir apps/api migrate && ./script/start"
+    # Apply migrations (idempotent) and load the demo seed into an empty database before starting
+    command: sh -c "pnpm --dir apps/api migrate && ./apps/api/script/seed-demo && ./script/start"
 
 volumes:
   pgdata:

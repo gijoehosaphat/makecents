@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 set -ex
 
-pnpm install
+# Dependencies are already installed in the Docker image (SKIP_INSTALL=1)
+[ -n "$SKIP_INSTALL" ] || pnpm install

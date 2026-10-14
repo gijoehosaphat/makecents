@@ -14,7 +14,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '452346',
-      account_id: 1,
+      bank_account_id: 1,
       category_id: null,
     },
     {
@@ -25,7 +25,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '459876',
-      account_id: 1,
+      bank_account_id: 1,
       category_id: null,
     },
     {
@@ -36,7 +36,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '4234556',
-      account_id: 1,
+      bank_account_id: 1,
       category_id: null,
     },
     {
@@ -47,7 +47,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '450696',
-      account_id: 2,
+      bank_account_id: 2,
       category_id: null,
     },
     {
@@ -58,7 +58,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '453456',
-      account_id: 2,
+      bank_account_id: 2,
       category_id: null,
     },
     {
@@ -69,7 +69,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '48756',
-      account_id: 2,
+      bank_account_id: 2,
       category_id: null,
     },
     {
@@ -80,7 +80,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '456756',
-      account_id: 3,
+      bank_account_id: 3,
       category_id: null,
     },
     {
@@ -91,7 +91,7 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '476556',
-      account_id: 3,
+      bank_account_id: 3,
       category_id: null,
     },
     {
@@ -102,8 +102,13 @@ export async function seed(knex: Knex): Promise<void> {
       name: 'Checking',
       memo: 'E-TRANSFER RECEIVED',
       bank_transaction_id: '4567',
-      account_id: 3,
+      bank_account_id: 3,
       category_id: null,
     },
   ])
+
+  // Seeds use explicit ids, so move the sequence past them for rows created later
+  await knex.raw(
+    "SELECT setval(pg_get_serial_sequence('app_private.transaction', 'id'), (SELECT MAX(id) FROM app_private.transaction))",
+  )
 }

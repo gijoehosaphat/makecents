@@ -18,5 +18,8 @@ COPY src ./src
 
 EXPOSE 3001
 
+# Skips future pnpm install calls that can run on start
+ENV SKIP_INSTALL=1
+
 # Runs the API and the web client
 CMD ["./script/start"]
