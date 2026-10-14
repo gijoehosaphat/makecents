@@ -82,7 +82,7 @@ function SummaryTile({
   cents,
   previousCents,
   currency,
-  higherIsBetter,
+  isSpending,
   colored,
   comparisonLabel,
 }: {
@@ -90,15 +90,20 @@ function SummaryTile({
   cents: number
   previousCents?: number
   currency: string
-  /** Spending is stored negative, so a bigger (less negative) number is always better. */
-  higherIsBetter: boolean
+  /** Spending is stored negative; compare its magnitude so "up" means more spent, and less spending is better. */
+  isSpending?: boolean
   colored?: boolean
   comparisonLabel: string
 }) {
   const theme = useTheme()
   const { hidden } = useAmountVisibility()
-  const delta = previousCents === undefined ? undefined : cents - previousCents
-  const improved = delta === undefined ? undefined : higherIsBetter ? delta > 0 : delta < 0
+  const delta =
+    previousCents === undefined
+      ? undefined
+      : isSpending
+        ? Math.abs(cents) - Math.abs(previousCents)
+        : cents - previousCents
+  const improved = delta === undefined ? undefined : isSpending ? delta < 0 : delta > 0
   const deltaColor =
     delta === 0 || improved === undefined
       ? theme.palette.text.secondary
@@ -198,7 +203,8 @@ export function DailySpendingLineChart() {
     return Math.max(0, Math.min(total, differenceInCalendarDays(today, rangeStart) + 1))
   }, [rangeStart, rangeEnd, today])
 
-  // The period immediately before the selected one, truncated to the same number of elapsed days.
+  // The period immediately before the selected one. A finished period is compared against the whole previous
+  // period (months differ in length); one in progress is truncated to the same number of elapsed days.
   const previousRange = useMemo(() => {
     if (!dateFrom || !dateTo || elapsedDays === 0) return undefined
     const totalDays = differenceInCalendarDays(startOfDay(dateTo), startOfDay(dateFrom)) + 1
@@ -208,7 +214,10 @@ export function DailySpendingLineChart() {
         : dateRange === 'year'
           ? sub(dateFrom, { years: 1 })
           : addDays(dateFrom, -totalDays)
-    return { from, to: addDays(from, elapsedDays) }
+    const fullEnd = startOfDay(dateFrom)
+    const truncatedEnd = addDays(from, elapsedDays)
+    const to = elapsedDays >= totalDays || truncatedEnd > fullEnd ? fullEnd : truncatedEnd
+    return { from, to, days: differenceInCalendarDays(to, from) }
   }, [dateRange, dateFrom, dateTo, elapsedDays])
 
   const { data: previousData } = useSuspenseQuery(
@@ -227,7 +236,7 @@ export function DailySpendingLineChart() {
 
   const totals = useMemo(() => sumTransactions(transactions, elapsedDays), [transactions, elapsedDays])
   const previousTotals = useMemo(
-    () => (previousRange ? sumTransactions(previousData?.allTransactions?.nodes ?? [], elapsedDays) : undefined),
+    () => (previousRange ? sumTransactions(previousData?.allTransactions?.nodes ?? [], previousRange.days) : undefined),
     [previousRange, previousData, elapsedDays],
   )
 
@@ -303,7 +312,6 @@ export function DailySpendingLineChart() {
           cents={totals.net}
           previousCents={previousTotals?.net}
           currency={currency}
-          higherIsBetter
           colored
           comparisonLabel={comparisonLabel}
         />
@@ -312,7 +320,6 @@ export function DailySpendingLineChart() {
           cents={totals.deposits}
           previousCents={previousTotals?.deposits}
           currency={currency}
-          higherIsBetter
           comparisonLabel={comparisonLabel}
         />
         <SummaryTile
@@ -320,7 +327,7 @@ export function DailySpendingLineChart() {
           cents={totals.withdrawals}
           previousCents={previousTotals?.withdrawals}
           currency={currency}
-          higherIsBetter
+          isSpending
           comparisonLabel={comparisonLabel}
         />
         <SummaryTile
@@ -328,7 +335,7 @@ export function DailySpendingLineChart() {
           cents={totals.avgDailySpend}
           previousCents={previousTotals?.avgDailySpend}
           currency={currency}
-          higherIsBetter
+          isSpending
           comparisonLabel={comparisonLabel}
         />
       </Box>
