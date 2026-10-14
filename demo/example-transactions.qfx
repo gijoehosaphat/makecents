@@ -1,0 +1,1321 @@
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <DTSERVER>20261014120000[-5]
+      <LANGUAGE>ENG
+    </SONRS>
+  </SIGNONMSGSRSV1>
+  
+  <BANKMSGSRSV1>
+    <STMTTRNRS>
+      <TRNUID>1001
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <STMTRS>
+        <CURDEF>USD
+        <BANKACCTFROM>
+          <BANKID>123456789
+          <ACCTID>1111222233334444
+          <ACCTTYPE>CHECKING
+        </BANKACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART>20260714120000[-5]
+          <DTEND>20261014120000[-5]
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260714120000[-5]
+          <TRNAMT>-40.26
+          <FITID>CHK1784048694392740
+          <NAME>GAS STATION
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260715120000[-5]
+          <TRNAMT>-96.19
+          <FITID>CHK1784135094392963
+          <NAME>HARDWARE STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260717120000[-5]
+          <TRNAMT>-50.74
+          <FITID>CHK1784307894392610
+          <NAME>WATER UTILITY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260718120000[-5]
+          <TRNAMT>-84.95
+          <FITID>CHK178439429439232
+          <NAME>ONLINE MARKETPLACE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260719120000[-5]
+          <TRNAMT>-86.48
+          <FITID>CHK1784480694392961
+          <NAME>MOBILE PHONE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260720120000[-5]
+          <TRNAMT>-75.84
+          <FITID>CHK1784567094392469
+          <NAME>INTERNET SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260721120000[-5]
+          <TRNAMT>-78.57
+          <FITID>CHK1784653494392669
+          <NAME>GROCERY STORE #123
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260722120000[-5]
+          <TRNAMT>-61.19
+          <FITID>CHK1784739894392326
+          <NAME>PET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260723120000[-5]
+          <TRNAMT>-42.31
+          <FITID>CHK1784826294392441
+          <NAME>RESTAURANT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260724120000[-5]
+          <TRNAMT>-52.77
+          <FITID>CHK178491269439218
+          <NAME>GYM MEMBERSHIP
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260725120000[-5]
+          <TRNAMT>-30.93
+          <FITID>CHK178499909439288
+          <NAME>BOOKSTORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260726120000[-5]
+          <TRNAMT>-51.94
+          <FITID>CHK1785085494392730
+          <NAME>GAS STATION
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260727120000[-5]
+          <TRNAMT>-33.59
+          <FITID>CHK1785171894392556
+          <NAME>RESTAURANT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260728120000[-5]
+          <TRNAMT>2507.59
+          <FITID>CHK178525829439297
+          <NAME>PAYROLL DEPOSIT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260729120000[-5]
+          <TRNAMT>-61.05
+          <FITID>CHK1785344694392954
+          <NAME>WATER UTILITY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260730120000[-5]
+          <TRNAMT>-8.92
+          <FITID>CHK1785431094392577
+          <NAME>STREAMING SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260802120000[-5]
+          <TRNAMT>-87.99
+          <FITID>CHK1785690294392372
+          <NAME>ONLINE MARKETPLACE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260803120000[-5]
+          <TRNAMT>-40.30
+          <FITID>CHK1785776694392222
+          <NAME>RESTAURANT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260804120000[-5]
+          <TRNAMT>-82.88
+          <FITID>CHK178586309439216
+          <NAME>INTERNET SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260805120000[-5]
+          <TRNAMT>-15.82
+          <FITID>CHK1785949494392908
+          <NAME>STREAMING SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260806120000[-5]
+          <TRNAMT>-83.02
+          <FITID>CHK1786035894392936
+          <NAME>HARDWARE STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260807120000[-5]
+          <TRNAMT>-88.08
+          <FITID>CHK1786122294392436
+          <NAME>ONLINE MARKETPLACE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260808120000[-5]
+          <TRNAMT>-76.14
+          <FITID>CHK1786208694392418
+          <NAME>MOBILE PHONE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260809120000[-5]
+          <TRNAMT>-115.05
+          <FITID>CHK1786295094392742
+          <NAME>DEPARTMENT STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260810120000[-5]
+          <TRNAMT>-92.79
+          <FITID>CHK1786381494392672
+          <NAME>ONLINE MARKETPLACE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260811120000[-5]
+          <TRNAMT>-44.91
+          <FITID>CHK1786467894392468
+          <NAME>RESTAURANT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260812120000[-5]
+          <TRNAMT>-101.08
+          <FITID>CHK1786554294392739
+          <NAME>HARDWARE STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260813120000[-5]
+          <TRNAMT>-120.32
+          <FITID>CHK1786640694392593
+          <NAME>DEPARTMENT STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260814120000[-5]
+          <TRNAMT>-82.95
+          <FITID>CHK1786727094392187
+          <NAME>GROCERY STORE #123
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260816120000[-5]
+          <TRNAMT>-117.29
+          <FITID>CHK1786899894392603
+          <NAME>DEPARTMENT STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260817120000[-5]
+          <TRNAMT>-2.23
+          <FITID>CHK1786986294392526
+          <NAME>COFFEE SHOP
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260818120000[-5]
+          <TRNAMT>-3.73
+          <FITID>CHK1787072694392715
+          <NAME>COFFEE SHOP
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260819120000[-5]
+          <TRNAMT>-31.10
+          <FITID>CHK17871590943922
+          <NAME>BOOKSTORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260820120000[-5]
+          <TRNAMT>-134.76
+          <FITID>CHK1787245494392142
+          <NAME>DEPARTMENT STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260822120000[-5]
+          <TRNAMT>-58.82
+          <FITID>CHK1787418294392178
+          <NAME>PET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260823120000[-5]
+          <TRNAMT>-35.43
+          <FITID>CHK1787504694392861
+          <NAME>BOOKSTORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260824120000[-5]
+          <TRNAMT>-159.95
+          <FITID>CHK1787591094392132
+          <NAME>INSURANCE PAYMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260825120000[-5]
+          <TRNAMT>-45.63
+          <FITID>CHK1787677494392957
+          <NAME>RESTAURANT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260826120000[-5]
+          <TRNAMT>-84.93
+          <FITID>CHK1787763894392802
+          <NAME>INTERNET SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260827120000[-5]
+          <TRNAMT>-63.70
+          <FITID>CHK1787850294392476
+          <NAME>PET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260829120000[-5]
+          <TRNAMT>-79.71
+          <FITID>CHK1788023094392289
+          <NAME>MOBILE PHONE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260830120000[-5]
+          <TRNAMT>-92.86
+          <FITID>CHK1788109494392760
+          <NAME>MOBILE PHONE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260831120000[-5]
+          <TRNAMT>-46.89
+          <FITID>CHK1788195894392580
+          <NAME>GAS STATION
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260901120000[-5]
+          <TRNAMT>-146.28
+          <FITID>CHK1788282294392120
+          <NAME>INSURANCE PAYMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260902120000[-5]
+          <TRNAMT>-142.17
+          <FITID>CHK1788368694392917
+          <NAME>INSURANCE PAYMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260904120000[-5]
+          <TRNAMT>-45.46
+          <FITID>CHK178854149439277
+          <NAME>GAS STATION
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260906120000[-5]
+          <TRNAMT>-67.23
+          <FITID>CHK178871429439259
+          <NAME>GROCERY STORE #123
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260907120000[-5]
+          <TRNAMT>-122.00
+          <FITID>CHK1788800694392661
+          <NAME>DEPARTMENT STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260908120000[-5]
+          <TRNAMT>-36.61
+          <FITID>CHK1788887094392935
+          <NAME>MOVIE THEATER
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260909120000[-5]
+          <TRNAMT>2503.14
+          <FITID>CHK1788973494392759
+          <NAME>PAYROLL DEPOSIT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260910120000[-5]
+          <TRNAMT>-32.61
+          <FITID>CHK1789059894392712
+          <NAME>PHARMACY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260911120000[-5]
+          <TRNAMT>-45.02
+          <FITID>CHK1789146294392305
+          <NAME>WATER UTILITY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260912120000[-5]
+          <TRNAMT>-72.99
+          <FITID>CHK1789232694392286
+          <NAME>INTERNET SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260913120000[-5]
+          <TRNAMT>-76.83
+          <FITID>CHK1789319094392309
+          <NAME>INTERNET SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260914120000[-5]
+          <TRNAMT>-153.37
+          <FITID>CHK1789405494392135
+          <NAME>INSURANCE PAYMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260915120000[-5]
+          <TRNAMT>-62.22
+          <FITID>CHK1789491894392324
+          <NAME>WATER UTILITY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260916120000[-5]
+          <TRNAMT>-83.62
+          <FITID>CHK1789578294392154
+          <NAME>INTERNET SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260917120000[-5]
+          <TRNAMT>-46.54
+          <FITID>CHK1789664694392252
+          <NAME>GYM MEMBERSHIP
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260918120000[-5]
+          <TRNAMT>-53.69
+          <FITID>CHK1789751094392543
+          <NAME>GAS STATION
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260920120000[-5]
+          <TRNAMT>-74.67
+          <FITID>CHK178992389439219
+          <NAME>PET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260921120000[-5]
+          <TRNAMT>-41.65
+          <FITID>CHK1790010294392359
+          <NAME>RESTAURANT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260922120000[-5]
+          <TRNAMT>-72.80
+          <FITID>CHK1790096694392382
+          <NAME>GROCERY STORE #123
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260923120000[-5]
+          <TRNAMT>-23.34
+          <FITID>CHK1790183094392946
+          <NAME>BOOKSTORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260924120000[-5]
+          <TRNAMT>-12.83
+          <FITID>CHK1790269494392128
+          <NAME>STREAMING SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260925120000[-5]
+          <TRNAMT>-25.30
+          <FITID>CHK1790355894392632
+          <NAME>MOVIE THEATER
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260926120000[-5]
+          <TRNAMT>2507.86
+          <FITID>CHK1790442294392857
+          <NAME>PAYROLL DEPOSIT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260927120000[-5]
+          <TRNAMT>-51.43
+          <FITID>CHK179052869439247
+          <NAME>GAS STATION
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260928120000[-5]
+          <TRNAMT>-22.14
+          <FITID>CHK1790615094392769
+          <NAME>BOOKSTORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260929120000[-5]
+          <TRNAMT>-146.68
+          <FITID>CHK1790701494392694
+          <NAME>INSURANCE PAYMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260930120000[-5]
+          <TRNAMT>-130.63
+          <FITID>CHK179078789439267
+          <NAME>DEPARTMENT STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261002120000[-5]
+          <TRNAMT>-88.09
+          <FITID>CHK1790960694392395
+          <NAME>MOBILE PHONE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261003120000[-5]
+          <TRNAMT>-128.34
+          <FITID>CHK1791047094392720
+          <NAME>ELECTRIC COMPANY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261004120000[-5]
+          <TRNAMT>-89.65
+          <FITID>CHK1791133494392216
+          <NAME>HARDWARE STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261006120000[-5]
+          <TRNAMT>-100.93
+          <FITID>CHK1791306294392620
+          <NAME>HARDWARE STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261007120000[-5]
+          <TRNAMT>-61.13
+          <FITID>CHK1791392694392800
+          <NAME>WATER UTILITY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261009120000[-5]
+          <TRNAMT>-70.76
+          <FITID>CHK179156549439245
+          <NAME>INTERNET SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261010120000[-5]
+          <TRNAMT>-47.67
+          <FITID>CHK1791651894392646
+          <NAME>WATER UTILITY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261011120000[-5]
+          <TRNAMT>-14.00
+          <FITID>CHK1791738294392116
+          <NAME>STREAMING SERVICE
+          </STMTTRN>
+          
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT>3542.75
+          <DTASOF>20261014120000[-5]
+        </LEDGERBAL>
+      </STMTRS>
+    </STMTTRNRS>
+    <STMTTRNRS>
+      <TRNUID>1002
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <STMTRS>
+        <CURDEF>USD
+        <BANKACCTFROM>
+          <BANKID>123456789
+          <ACCTID>5555666677778888
+          <ACCTTYPE>SAVINGS
+        </BANKACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART>20260714120000[-5]
+          <DTEND>20261014120000[-5]
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260715120000[-5]
+          <TRNAMT>-313.32
+          <FITID>SAV178413509439220
+          <NAME>TRANSFER TO CHECKING
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260721120000[-5]
+          <TRNAMT>0.05
+          <FITID>SAV1784653494392445
+          <NAME>DIVIDEND PAYMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260806120000[-5]
+          <TRNAMT>-275.66
+          <FITID>SAV1786035894392366
+          <NAME>TRANSFER TO CHECKING
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260829120000[-5]
+          <TRNAMT>-307.22
+          <FITID>SAV1788023094392520
+          <NAME>TRANSFER TO CHECKING
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260902120000[-5]
+          <TRNAMT>196.39
+          <FITID>SAV1788368694392129
+          <NAME>MONTHLY AUTO SAVE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260903120000[-5]
+          <TRNAMT>-11.48
+          <FITID>SAV178845509439278
+          <NAME>INTEREST PAYMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260908120000[-5]
+          <TRNAMT>207.87
+          <FITID>SAV1788887094392307
+          <NAME>MONTHLY AUTO SAVE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260914120000[-5]
+          <TRNAMT>498.11
+          <FITID>SAV1789405494392315
+          <NAME>TRANSFER FROM CHECKING
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260918120000[-5]
+          <TRNAMT>18.46
+          <FITID>SAV1789751094392645
+          <NAME>DIVIDEND PAYMENT
+          </STMTTRN>
+          
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT>15789.32
+          <DTASOF>20261014120000[-5]
+        </LEDGERBAL>
+      </STMTRS>
+    </STMTTRNRS>
+  </BANKMSGSRSV1>
+  <CREDITCARDMSGSRSV1>
+    <CCSTMTTRNRS>
+      <TRNUID>1003
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <CCSTMTRS>
+        <CURDEF>USD
+        <CCACCTFROM>
+          <ACCTID>9999888877776666
+        </CCACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART>20260714120000[-5]
+          <DTEND>20261014120000[-5]
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260714120000[-5]
+          <TRNAMT>-362.05
+          <FITID>CC1784048694392140
+          <NAME>AIRLINE TICKETS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260716120000[-5]
+          <TRNAMT>-96.75
+          <FITID>CC1784221494392593
+          <NAME>TARGET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260717120000[-5]
+          <TRNAMT>-64.68
+          <FITID>CC1784307894392607
+          <NAME>FLORIST
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260718120000[-5]
+          <TRNAMT>1.10
+          <FITID>CC1784394294392973
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260720120000[-5]
+          <TRNAMT>-12.60
+          <FITID>CC1784567094392608
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260722120000[-5]
+          <TRNAMT>-53.67
+          <FITID>CC1784739894392972
+          <NAME>FLORIST
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260723120000[-5]
+          <TRNAMT>-6.09
+          <FITID>CC1784826294392642
+          <NAME>NETFLIX
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260725120000[-5]
+          <TRNAMT>-118.06
+          <FITID>CC1784999094392993
+          <NAME>CLOTHING STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260727120000[-5]
+          <TRNAMT>-349.29
+          <FITID>CC178517189439295
+          <NAME>AIRLINE TICKETS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260731120000[-5]
+          <TRNAMT>-14.98
+          <FITID>CC1785517494392758
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260801120000[-5]
+          <TRNAMT>-8.91
+          <FITID>CC1785603894392113
+          <NAME>STARBUCKS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260802120000[-5]
+          <TRNAMT>-11.65
+          <FITID>CC1785690294392540
+          <NAME>UBER RIDE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260803120000[-5]
+          <TRNAMT>-9.43
+          <FITID>CC1785776694392874
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260804120000[-5]
+          <TRNAMT>-337.95
+          <FITID>CC1785863094392149
+          <NAME>AIRLINE TICKETS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260805120000[-5]
+          <TRNAMT>-6.02
+          <FITID>CC1785949494392888
+          <NAME>NETFLIX
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260806120000[-5]
+          <TRNAMT>-32.21
+          <FITID>CC1786035894392814
+          <NAME>UBER RIDE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260807120000[-5]
+          <TRNAMT>-135.46
+          <FITID>CC1786122294392116
+          <NAME>DENTAL OFFICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260809120000[-5]
+          <TRNAMT>-72.92
+          <FITID>CC1786295094392396
+          <NAME>AMAZON.COM
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260810120000[-5]
+          <TRNAMT>-118.60
+          <FITID>CC1786381494392779
+          <NAME>CLOTHING STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260811120000[-5]
+          <TRNAMT>-111.09
+          <FITID>CC1786467894392422
+          <NAME>CLOTHING STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260813120000[-5]
+          <TRNAMT>1.54
+          <FITID>CC1786640694392844
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260818120000[-5]
+          <TRNAMT>3.19
+          <FITID>CC1787072694392678
+          <NAME>SUBSCRIPTION SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260819120000[-5]
+          <TRNAMT>-99.37
+          <FITID>CC178715909439285
+          <NAME>TARGET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260820120000[-5]
+          <TRNAMT>506.70
+          <FITID>CC1787245494392423
+          <NAME>PAYMENT - THANK YOU
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260821120000[-5]
+          <TRNAMT>-166.09
+          <FITID>CC1787331894392737
+          <NAME>HOME IMPROVEMENT
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260822120000[-5]
+          <TRNAMT>-56.87
+          <FITID>CC1787418294392517
+          <NAME>AMAZON.COM
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260823120000[-5]
+          <TRNAMT>-30.10
+          <FITID>CC1787504694392648
+          <NAME>OFFICE SUPPLIES
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260824120000[-5]
+          <TRNAMT>-36.16
+          <FITID>CC1787591094392794
+          <NAME>OFFICE SUPPLIES
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260825120000[-5]
+          <TRNAMT>-13.32
+          <FITID>CC1787677494392623
+          <NAME>STARBUCKS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260826120000[-5]
+          <TRNAMT>-11.00
+          <FITID>CC1787763894392339
+          <NAME>SUBSCRIPTION SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260827120000[-5]
+          <TRNAMT>-83.06
+          <FITID>CC178785029439233
+          <NAME>AUTO PARTS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260829120000[-5]
+          <TRNAMT>-6.97
+          <FITID>CC1788023094392860
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260830120000[-5]
+          <TRNAMT>-197.18
+          <FITID>CC1788109494392841
+          <NAME>HOTEL BOOKING
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260831120000[-5]
+          <TRNAMT>-102.49
+          <FITID>CC178819589439233
+          <NAME>WALMART
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260901120000[-5]
+          <TRNAMT>-87.77
+          <FITID>CC1788282294392731
+          <NAME>RESTAURANT AND BAR
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260903120000[-5]
+          <TRNAMT>-11.34
+          <FITID>CC1788455094392824
+          <NAME>UBER RIDE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260904120000[-5]
+          <TRNAMT>-88.46
+          <FITID>CC1788541494392800
+          <NAME>AUTO PARTS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260905120000[-5]
+          <TRNAMT>-107.18
+          <FITID>CC1788627894392798
+          <NAME>WALMART
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260906120000[-5]
+          <TRNAMT>-33.11
+          <FITID>CC1788714294392695
+          <NAME>DOORDASH
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260907120000[-5]
+          <TRNAMT>-33.92
+          <FITID>CC1788800694392127
+          <NAME>DOORDASH
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260909120000[-5]
+          <TRNAMT>-88.59
+          <FITID>CC178897349439243
+          <NAME>AUTO PARTS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260911120000[-5]
+          <TRNAMT>-33.62
+          <FITID>CC1789146294392711
+          <NAME>DOORDASH
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260912120000[-5]
+          <TRNAMT>-81.13
+          <FITID>CC1789232694392760
+          <NAME>TARGET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260914120000[-5]
+          <TRNAMT>-344.82
+          <FITID>CC178940549439267
+          <NAME>AIRLINE TICKETS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260915120000[-5]
+          <TRNAMT>-98.91
+          <FITID>CC1789491894392528
+          <NAME>TARGET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260916120000[-5]
+          <TRNAMT>-86.24
+          <FITID>CC1789578294392880
+          <NAME>TARGET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260918120000[-5]
+          <TRNAMT>-130.67
+          <FITID>CC1789751094392107
+          <NAME>DENTAL OFFICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260919120000[-5]
+          <TRNAMT>-92.44
+          <FITID>CC1789837494392919
+          <NAME>WALMART
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260920120000[-5]
+          <TRNAMT>494.47
+          <FITID>CC1789923894392622
+          <NAME>PAYMENT - THANK YOU
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20260921120000[-5]
+          <TRNAMT>3.86
+          <FITID>CC1790010294392546
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260922120000[-5]
+          <TRNAMT>-51.06
+          <FITID>CC1790096694392647
+          <NAME>OFFICE SUPPLIES
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260923120000[-5]
+          <TRNAMT>-85.87
+          <FITID>CC1790183094392958
+          <NAME>AUTO PARTS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260924120000[-5]
+          <TRNAMT>-118.10
+          <FITID>CC1790269494392777
+          <NAME>WALMART
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260926120000[-5]
+          <TRNAMT>-7.92
+          <FITID>CC1790442294392512
+          <NAME>UBER RIDE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260929120000[-5]
+          <TRNAMT>-82.81
+          <FITID>CC1790701494392640
+          <NAME>TARGET STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20260930120000[-5]
+          <TRNAMT>-2.13
+          <FITID>CC1790787894392205
+          <NAME>SUBSCRIPTION SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261001120000[-5]
+          <TRNAMT>-112.56
+          <FITID>CC1790874294392314
+          <NAME>WALMART
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261002120000[-5]
+          <TRNAMT>-9.38
+          <FITID>CC1790960694392951
+          <NAME>SUBSCRIPTION SERVICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261003120000[-5]
+          <TRNAMT>-236.94
+          <FITID>CC1791047094392900
+          <NAME>ELECTRONICS STORE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261004120000[-5]
+          <TRNAMT>-115.24
+          <FITID>CC1791133494392932
+          <NAME>WALMART
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261005120000[-5]
+          <TRNAMT>-359.40
+          <FITID>CC1791219894392640
+          <NAME>AIRLINE TICKETS
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>CREDIT
+          <DTPOSTED>20261006120000[-5]
+          <TRNAMT>3.53
+          <FITID>CC1791306294392874
+          <NAME>SPOTIFY
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261008120000[-5]
+          <TRNAMT>-52.38
+          <FITID>CC1791479094392518
+          <NAME>OFFICE SUPPLIES
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261009120000[-5]
+          <TRNAMT>-134.62
+          <FITID>CC1791565494392991
+          <NAME>DENTAL OFFICE
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261010120000[-5]
+          <TRNAMT>-36.53
+          <FITID>CC1791651894392842
+          <NAME>OFFICE SUPPLIES
+          </STMTTRN>
+          
+          <STMTTRN>
+          <TRNTYPE>DEBIT
+          <DTPOSTED>20261011120000[-5]
+          <TRNAMT>-0.26
+          <FITID>CC1791738294392178
+          <NAME>STARBUCKS
+          </STMTTRN>
+          
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT>-1245.68
+          <DTASOF>20261014120000[-5]
+        </LEDGERBAL>
+      </CCSTMTRS>
+    </CCSTMTTRNRS>
+  </CREDITCARDMSGSRSV1>
+</OFX>
