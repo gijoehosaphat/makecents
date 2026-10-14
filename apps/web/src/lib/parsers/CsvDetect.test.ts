@@ -4,7 +4,11 @@ import { detectMapping } from './CsvDetect'
 describe('detectMapping', () => {
   it('reads a plain header + single amount file', () => {
     const { mapping, isComplete } = detectMapping(
-      ['Date,Description,Amount,Balance', '01/15/2024,Coffee Shop,-4.50,995.50', '01/16/2024,Paycheck,1000.00,1995.50'].join('\n')
+      [
+        'Date,Description,Amount,Balance',
+        '01/15/2024,Coffee Shop,-4.50,995.50',
+        '01/16/2024,Paycheck,1000.00,1995.50',
+      ].join('\n'),
     )
     expect(isComplete).toBe(true)
     expect(mapping).toMatchObject({
@@ -22,7 +26,9 @@ describe('detectMapping', () => {
 
   it('never mistakes a running balance for the amount', () => {
     const { mapping } = detectMapping(
-      ['Date,Description,Balance,Amount', '01/15/2024,Coffee,995.50,-4.50', '01/16/2024,Pay,1995.50,1000.00'].join('\n')
+      ['Date,Description,Balance,Amount', '01/15/2024,Coffee,995.50,-4.50', '01/16/2024,Pay,1995.50,1000.00'].join(
+        '\n',
+      ),
     )
     expect(mapping.amountColumn).toBe('Amount')
   })
@@ -37,7 +43,7 @@ describe('detectMapping', () => {
         'Date,Description,Amount,Running Bal.',
         '01/15/2024,Coffee Shop,-4.50,995.50',
         '01/16/2024,Paycheck,1000.00,1995.50',
-      ].join('\n')
+      ].join('\n'),
     )
     expect(isComplete).toBe(true)
     expect(mapping.skipRows).toBe(4)
@@ -48,7 +54,7 @@ describe('detectMapping', () => {
 
   it('detects separate debit and credit columns', () => {
     const { mapping, isComplete } = detectMapping(
-      ['Date,Description,Debit,Credit', '2024-01-15,Coffee Shop,4.50,', '2024-01-16,Paycheck,,1000.00'].join('\n')
+      ['Date,Description,Debit,Credit', '2024-01-15,Coffee Shop,4.50,', '2024-01-16,Paycheck,,1000.00'].join('\n'),
     )
     expect(isComplete).toBe(true)
     expect(mapping).toMatchObject({
@@ -61,7 +67,7 @@ describe('detectMapping', () => {
 
   it('detects other delimiters', () => {
     const { mapping } = detectMapping(
-      ['Date;Description;Amount', '15.01.2024;Coffee;-4.50', '16.01.2024;Pay;1000.00'].join('\n')
+      ['Date;Description;Amount', '15.01.2024;Coffee;-4.50', '16.01.2024;Pay;1000.00'].join('\n'),
     )
     expect(mapping.delimiter).toBe(';')
     expect(mapping.dateFormat).toBe('d.M.yyyy')
@@ -69,7 +75,7 @@ describe('detectMapping', () => {
 
   it('handles files with no header row', () => {
     const { mapping, isComplete } = detectMapping(
-      ['01/15/2024,Coffee Shop,-4.50', '01/16/2024,Paycheck,1000.00'].join('\n')
+      ['01/15/2024,Coffee Shop,-4.50', '01/16/2024,Paycheck,1000.00'].join('\n'),
     )
     expect(isComplete).toBe(true)
     expect(mapping.hasHeaderRow).toBe(false)
@@ -84,7 +90,7 @@ describe('detectMapping', () => {
         'Date,Description,Card Member,Amount',
         '01/15/2024,COFFEE SHOP,JOE LEONARD,4.50',
         '01/16/2024,GROCERY,JOE LEONARD,82.10',
-      ].join('\n')
+      ].join('\n'),
     )
     expect(mapping.amountSign).toBe('flipped')
   })
@@ -97,7 +103,7 @@ describe('detectMapping', () => {
         '01/11/2024,Grocery,82.10',
         '01/12/2024,Gas,40.00',
         '01/13/2024,PAYMENT - THANK YOU,-200.00',
-      ].join('\n')
+      ].join('\n'),
     )
     expect(mapping.amountSign).toBe('flipped')
   })
@@ -110,7 +116,7 @@ describe('detectMapping', () => {
         '01/11/2024,Gift,50.00',
         '01/12/2024,Interest,0.10',
         '01/13/2024,Toy,-15.00',
-      ].join('\n')
+      ].join('\n'),
     )
     expect(mapping.amountSign).toBe('asIs')
   })

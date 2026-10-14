@@ -1,14 +1,6 @@
 'use client'
 
-import {
-  Box,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Box, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { formatMoney, toCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
@@ -19,10 +11,7 @@ import { availableBalance } from '@/lib/budgetMath'
 import CurrencyTextField from './CurrencyTextField'
 import SaveCancel from '../forms/SaveCancel'
 import { DatePicker } from '@mui/x-date-pickers'
-import {
-  GetBudgetsByAccountIdDocument,
-  UpdateBudgetDocument,
-} from '@/graphql/operations'
+import { GetBudgetsByAccountIdDocument, UpdateBudgetDocument } from '@/graphql/operations'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
 
 interface Fields {
@@ -60,9 +49,7 @@ export default function BudgetDetails({
     name: '',
     amount: budgetItem?.budget.amount || 0,
     startingAmount: budgetItem?.budget.startingAmount || 0,
-    effectiveDate: budgetItem?.budget.effectiveDate
-      ? new Date(budgetItem.budget.effectiveDate)
-      : null,
+    effectiveDate: budgetItem?.budget.effectiveDate ? new Date(budgetItem.budget.effectiveDate) : null,
   })
 
   const total = useMemo(() => {
@@ -123,9 +110,7 @@ export default function BudgetDetails({
           <Box display={'flex'} flexDirection={'column'} sx={{ pt: 4 }}>
             <TextField
               label={t('forms.addName')}
-              onChange={(event) =>
-                handleChange('name', event.currentTarget.value)
-              }
+              onChange={(event) => handleChange('name', event.currentTarget.value)}
               size={'small'}
               placeholder={t('forms.namePlaceholder')}
               defaultValue={budgetItem.budget.name}
@@ -151,17 +136,9 @@ export default function BudgetDetails({
               sx={{ mb: 4 }}
             />
             <Box sx={{ input: { padding: '8px' } }}>
-              <DatePicker
-                value={new Date(fields.effectiveDate || new Date())}
-                onChange={handleDateChange}
-              />
+              <DatePicker value={new Date(fields.effectiveDate || new Date())} onChange={handleDateChange} />
             </Box>
-            <Box
-              display={'flex'}
-              justifyContent={'space-between'}
-              alignItems={'center'}
-              mt={4}
-            >
+            <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mt={4}>
               <Typography>Total: </Typography>
               <Typography>{formatMoney(total / 100, 'CAD', hidden)}</Typography>
             </Box>

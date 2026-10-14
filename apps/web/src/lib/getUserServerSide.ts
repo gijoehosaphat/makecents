@@ -3,7 +3,7 @@ import { getClient } from '@/lib/apollo-client'
 import { Account, BankAccount, User } from '@/graphql/types'
 import { GetUserAndAccountsAndBankAccountsByEmailDocument } from '@/graphql/operations'
 
-export async function useUserServerSide(currentAccountId?: number): Promise<{
+export async function getUserServerSide(currentAccountId?: number): Promise<{
   user: User | null
   accounts: Account[]
   bankAccounts: BankAccount[]
@@ -36,7 +36,7 @@ export async function useUserServerSide(currentAccountId?: number): Promise<{
   if (query?.data?.userByEmail) {
     const { accountMembersByUserId, ...rest } = query?.data?.userByEmail
     const accountsWithBankAccounts = accountMembersByUserId.nodes.flatMap((member) =>
-      member.accountByAccountId ? [member.accountByAccountId] : []
+      member.accountByAccountId ? [member.accountByAccountId] : [],
     )
     const currentAccount = accountsWithBankAccounts.find((account) => account.id === currentAccountId)
     data = {

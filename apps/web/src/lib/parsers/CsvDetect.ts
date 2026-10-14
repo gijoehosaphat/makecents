@@ -102,11 +102,17 @@ function findHeader(headers: string[], patterns: RegExp[], exclude: Set<string>)
 export function detectMapping(text: string): DetectedMapping {
   const delimiter = Papa.parse<string[]>(text, { preview: MAX_PREAMBLE_LINES }).meta.delimiter || ','
   // Empty lines are kept so row indexes line up with the line numbers skipRows counts.
-  const lines = Papa.parse<string[]>(text, { delimiter, skipEmptyLines: false, preview: MAX_PREAMBLE_LINES + SAMPLE_ROWS })
-    .data
+  const lines = Papa.parse<string[]>(text, {
+    delimiter,
+    skipEmptyLines: false,
+    preview: MAX_PREAMBLE_LINES + SAMPLE_ROWS,
+  }).data
 
   const firstDataIndex = lines.findIndex(
-    (row, index) => index < MAX_PREAMBLE_LINES && isDataRow(row) && (!lines[index + 1] || lines[index + 1].length < 2 || isDataRow(lines[index + 1]))
+    (row, index) =>
+      index < MAX_PREAMBLE_LINES &&
+      isDataRow(row) &&
+      (!lines[index + 1] || lines[index + 1].length < 2 || isDataRow(lines[index + 1])),
   )
   if (firstDataIndex === -1) {
     return {
@@ -135,9 +141,7 @@ export function detectMapping(text: string): DetectedMapping {
   const skipRows = hasHeaderRow ? firstDataIndex - 1 : firstDataIndex
   const headers = hasHeaderRow ? headerCandidate : Array.from({ length: columnCount }, (_, index) => String(index))
 
-  const dataRows = lines
-    .slice(firstDataIndex, firstDataIndex + SAMPLE_ROWS)
-    .filter((row) => row.length >= 2)
+  const dataRows = lines.slice(firstDataIndex, firstDataIndex + SAMPLE_ROWS).filter((row) => row.length >= 2)
   const columnValues = (index: number) => dataRows.map((row) => row[index] ?? '')
 
   // Date: a column whose values all parse with one format, preferring the posted date (what OFX
@@ -189,7 +193,11 @@ export function detectMapping(text: string): DetectedMapping {
   }
   const descriptionColumn =
     (hasHeaderRow
-      ? findHeader(textHeaders, [/^description$/, /description/, /payee/, /^name$/, /merchant/, /narrative/, /details/], used)
+      ? findHeader(
+          textHeaders,
+          [/^description$/, /description/, /payee/, /^name$/, /merchant/, /narrative/, /details/],
+          used,
+        )
       : undefined) ?? [...textHeaders].sort((a, b) => averageLength(b) - averageLength(a))[0]
   if (descriptionColumn) {
     used.add(descriptionColumn)
@@ -219,9 +227,14 @@ export function detectMapping(text: string): DetectedMapping {
     // A file that's mostly positive is either a card listing charges as positive or an account
     // that mostly receives money (savings, a kid's account). Only the card also shows its
     // payments ("PAYMENT - THANK YOU") as negative, so flip only when both are true.
-    const records = dataRows.map((row) => Object.fromEntries(headers.map((header, index) => [header, row[index] ?? ''])))
+    const records = dataRows.map((row) =>
+      Object.fromEntries(headers.map((header, index) => [header, row[index] ?? ''])),
+    )
     const rows = records
-      .map((record) => ({ amount: computeAmount(record, mapping), description: record[mapping.descriptionColumn] ?? '' }))
+      .map((record) => ({
+        amount: computeAmount(record, mapping),
+        description: record[mapping.descriptionColumn] ?? '',
+      }))
       .filter((row) => row.amount !== 0)
     const positiveShare = rows.filter((row) => row.amount > 0).length / Math.max(rows.length, 1)
     const hasNegativePayment = rows.some((row) => row.amount < 0 && /payment|thank you|autopay/i.test(row.description))

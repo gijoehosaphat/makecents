@@ -50,7 +50,9 @@ mutation UpdateBudget(
 }
 
 mutation CreateBudgetCategory($accountId: Int!, $budgetId: Int!, $categoryId: Int!) {
-  createBudgetCategory(input: { budgetCategory: { accountId: $accountId, budgetId: $budgetId, categoryId: $categoryId } }) {
+  createBudgetCategory(
+    input: { budgetCategory: { accountId: $accountId, budgetId: $budgetId, categoryId: $categoryId } }
+  ) {
     budgetCategory {
       ...BudgetCategoryFragment
     }

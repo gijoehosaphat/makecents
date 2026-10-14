@@ -35,7 +35,7 @@ export default function CurrencyTextField(props: CurrencyTextFieldProps) {
             currencySymbol: '',
             ...options,
             ...remainingProps,
-          })
+          }),
         )
       }
     }
@@ -79,7 +79,7 @@ export default function CurrencyTextField(props: CurrencyTextFieldProps) {
       }}
       {...remainingProps}
       onChange={(e) => {
-        onValueChange && onValueChange(getValue())
+        onValueChange?.(getValue())
       }}
       onFocus={(e) => {
         setFocus(true)

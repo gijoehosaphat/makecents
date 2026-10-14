@@ -2,7 +2,16 @@
 
 import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
 import { useAppContext } from '@/components/context/AppContextProvider'
-import { Box, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, Select, SelectChangeEvent } from '@mui/material'
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'

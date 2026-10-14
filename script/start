@@ -3,4 +3,4 @@ set -ex
 
 ./script/prepare-env
 
-npx concurrently "cd ./apps/api/ && ./script/start" "npx wait-on tcp:3002 && cd ./apps/web/ && ./script/start"
+pnpm exec concurrently -k -n api,web "pnpm --dir apps/api start" "pnpm exec wait-on tcp:3002 && pnpm --dir apps/web start"

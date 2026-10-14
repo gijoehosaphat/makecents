@@ -112,7 +112,15 @@ export function ActiveFilterChips() {
       <Button
         size={'small'}
         onClick={() =>
-          navigate({ search: null, bankAccountIds: null, categoryIds: null, auto: null, type: null, amountMin: null, amountMax: null })
+          navigate({
+            search: null,
+            bankAccountIds: null,
+            categoryIds: null,
+            auto: null,
+            type: null,
+            amountMin: null,
+            amountMax: null,
+          })
         }
       >
         {t('shared.clearAll')}

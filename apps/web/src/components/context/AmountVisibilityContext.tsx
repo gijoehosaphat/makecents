@@ -29,7 +29,9 @@ export function AmountVisibilityProvider({ children }: { children?: React.ReactN
     })
   }, [])
 
-  return <AmountVisibilityContext.Provider value={{ hidden, toggleHidden }}>{children}</AmountVisibilityContext.Provider>
+  return (
+    <AmountVisibilityContext.Provider value={{ hidden, toggleHidden }}>{children}</AmountVisibilityContext.Provider>
+  )
 }
 
 export function useAmountVisibility() {

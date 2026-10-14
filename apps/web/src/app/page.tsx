@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import { useUserServerSide } from '@/lib/useUserServerSide'
+import { getUserServerSide } from '@/lib/getUserServerSide'
 
 export default async function Page() {
-  const data = await useUserServerSide()
+  const data = await getUserServerSide()
 
   if (data?.user && data?.accounts.length) {
     redirect(`/${data?.accounts[0].id}/dashboard`)

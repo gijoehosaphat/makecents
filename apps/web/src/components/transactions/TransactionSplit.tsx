@@ -79,8 +79,7 @@ export function TransactionSplit({
   const partCents = activeParts.map((part) => part.cents)
   const amount = remainingCents(totalCents, partCents)
 
-  const isValid =
-    amount >= MIN_PART_CENTS && activeParts.every((part) => part.cents >= MIN_PART_CENTS)
+  const isValid = amount >= MIN_PART_CENTS && activeParts.every((part) => part.cents >= MIN_PART_CENTS)
   const initialParts = existingParts(transaction)
   const hasChanges =
     originalCategoryId !== (transaction.categoryId ?? null) ||
@@ -149,7 +148,7 @@ export function TransactionSplit({
   function maxFor(key: string) {
     return maxPartCents(
       totalCents,
-      activeParts.filter((part) => part.key !== key).map((part) => part.cents)
+      activeParts.filter((part) => part.key !== key).map((part) => part.cents),
     )
   }
 
@@ -217,7 +216,14 @@ export function TransactionSplit({
       >
         <CallSplit />
       </IconButton>
-      <Dialog open={isEditorOpen} onClose={handleClose} onKeyDown={handleKeyDown} fullWidth maxWidth={'sm'} PaperProps={{ tabIndex: -1 }}>
+      <Dialog
+        open={isEditorOpen}
+        onClose={handleClose}
+        onKeyDown={handleKeyDown}
+        fullWidth
+        maxWidth={'sm'}
+        PaperProps={{ tabIndex: -1 }}
+      >
         <DialogTitle sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
           <CallSplit sx={{ mr: 2 }} />
           {t('categories.splitTransaction')}

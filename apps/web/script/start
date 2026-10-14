@@ -3,11 +3,11 @@ set -ex
 
 ./script/prepare-env
 
-pnpm graphql-codegen
-
-source .env
+# Load .env if present (Docker supplies variables via the environment instead)
+# (xtrace off so secrets in .env aren't echoed)
+if [ -f .env ]; then set +x; set -a; . ./.env; set +a; set -x; fi
 
 rm -rf .next
 pnpm next build
 
-PORT=$WEB_PORT pnpm next start
+PORT=${WEB_PORT:-3001} pnpm next start

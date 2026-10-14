@@ -92,7 +92,15 @@ function defaultAccountName(fileName: string): string {
  * asked for an account only when the file gives no clear evidence, and the column editor stays
  * hidden unless detection failed or they ask for it.
  */
-export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: string; csvText: string; onClose: () => void }) {
+export function CsvImportDialog({
+  fileName,
+  csvText,
+  onClose,
+}: {
+  fileName: string
+  csvText: string
+  onClose: () => void
+}) {
   const t = useTranslations('common')
   const { currentAccountId, bankAccounts, user } = useAppContext()
   const { importCsvTransactions } = useUploadHandler()
@@ -122,13 +130,15 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
     variables: { accountId: Number(currentAccountId) },
     skip: !currentAccountId,
   })
-  const definitionsRefetch = [{ query: GetBankCsvDefinitionsDocument, variables: { accountId: Number(currentAccountId) } }]
+  const definitionsRefetch = [
+    { query: GetBankCsvDefinitionsDocument, variables: { accountId: Number(currentAccountId) } },
+  ]
   const fittingDefinitions = useMemo(
     () =>
       ((definitionsData?.allBankCsvDefinitions?.nodes as BankCsvDefinition[]) ?? []).filter((definition) =>
-        definitionFitsFile(definition, csvText)
+        definitionFitsFile(definition, csvText),
       ),
-    [definitionsData, csvText]
+    [definitionsData, csvText],
   )
 
   const detected = useMemo(() => detectMapping(csvText), [csvText])
@@ -144,7 +154,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
   const accountIdColumn = useMemo(() => findAccountIdColumn(basePreview.headers), [basePreview.headers])
   const distinctAccountIds = useMemo(
     () => (accountIdColumn ? Array.from(groupRowsByAccountId(basePreview.rows, accountIdColumn).keys()) : []),
-    [accountIdColumn, basePreview.rows]
+    [accountIdColumn, basePreview.rows],
   )
 
   // When the file references more than one account, there's no single account to select at
@@ -156,7 +166,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
       basePreview.rows
         .map((row) => parseRowDateAndAmount(row, baseMapping))
         .filter((row): row is DatedAmount => Boolean(row)),
-    [basePreview.rows, baseMapping]
+    [basePreview.rows, baseMapping],
   )
 
   // Existing transactions in the file's date range, to recognize the account by overlap and to
@@ -184,7 +194,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
   })
   const existingTransactions = useMemo(
     () => (existingData?.allTransactions?.nodes ?? []).flatMap((node) => (node ? [node] : [])),
-    [existingData]
+    [existingData],
   )
 
   const isDetecting = isLoadingDefinitions || (!!overlapFilter && !existingData && !existingError)
@@ -208,7 +218,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
 
   const matchedAccount = useMemo(
     () => (accountMatch ? bankAccounts?.find((account) => account.id === accountMatch.accountId) : undefined),
-    [accountMatch, bankAccounts]
+    [accountMatch, bankAccounts],
   )
 
   const effectiveChoice: AccountChoice = accountChoice !== '' ? accountChoice : (matchedAccount?.id ?? '')
@@ -232,7 +242,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
       (selectedAccountId
         ? fittingDefinitions.find((definition) => definition.bankAccountId === selectedAccountId)
         : undefined) ?? fittingDefinitions[0],
-    [fittingDefinitions, selectedAccountId]
+    [fittingDefinitions, selectedAccountId],
   )
   const activeMapping: CsvColumnMapping =
     editedMapping ?? (sourceDefinition?.mapping as CsvColumnMapping | undefined) ?? detected.mapping
@@ -243,7 +253,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
       preview.rows
         .map((row) => parseRowDateAndAmount(row, activeMapping))
         .filter((row): row is DatedAmount => Boolean(row)),
-    [preview.rows, activeMapping]
+    [preview.rows, activeMapping],
   )
   const isMappingUsable = parsedRows.length > 0 && !!activeMapping.descriptionColumn && hasAmountColumns(activeMapping)
   const isColumnsOpen = showColumns || !isMappingUsable
@@ -290,7 +300,9 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
   const [upsertBankAccount] = useMutationWithToast(UpsertBankAccountDocument, { reportErrors: false })
   const [updateBankAccountName] = useMutationWithToast(UpdateBankAccountNameDocument, {
     reportErrors: false,
-    refetchQueries: [{ query: GetUserAndAccountsAndBankAccountsByEmailDocument, variables: { email: user?.email || '' } }],
+    refetchQueries: [
+      { query: GetUserAndAccountsAndBankAccountsByEmailDocument, variables: { email: user?.email || '' } },
+    ],
   })
 
   const accountLabel = useBankAccountLabel()
@@ -339,14 +351,20 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
         const groups = groupRowsByAccountId(preview.rows, accountIdColumn)
         const importGroups: { bankAccountId: number; transactions: InputTransaction[] }[] = []
         for (const [accountId, rows] of groups) {
-          const identifierMatches = bankAccounts?.filter((account) => identifierMatchesAccount(accountId, account)) ?? []
+          const identifierMatches =
+            bankAccounts?.filter((account) => identifierMatchesAccount(accountId, account)) ?? []
           const existingAccount =
             bankAccounts?.find((account) => account.bankAccountId === accountId) ??
             (identifierMatches.length === 1 ? identifierMatches[0] : undefined)
           let bankAccountId = existingAccount?.id
           if (!bankAccountId) {
             const response = await upsertBankAccount({
-              variables: { accountId: currentAccountId, type: 'CHECKING', currency: defaultCurrency, bankAccountId: accountId },
+              variables: {
+                accountId: currentAccountId,
+                type: 'CHECKING',
+                currency: defaultCurrency,
+                bankAccountId: accountId,
+              },
             })
             bankAccountId = response.data?.upsertBankAccount?.bankAccount?.id
           }
@@ -383,7 +401,9 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
         bankAccountId = response.data?.upsertBankAccount?.bankAccount?.id
         accountName = newAccountName.trim()
         if (bankAccountId && accountName) {
-          await updateBankAccountName({ variables: { id: bankAccountId, accountId: currentAccountId, name: accountName } })
+          await updateBankAccountName({
+            variables: { id: bankAccountId, accountId: currentAccountId, name: accountName },
+          })
         }
       } else {
         bankAccountId = selectedAccountId
@@ -399,7 +419,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
       await importCsvTransactions([{ bankAccountId, transactions }], fileName)
       // After the import, so a template that fails to save never blocks the transactions.
       await saveTemplate(currentAccountId, bankAccountId, accountName || fileName.replace(/\.csv$/i, '')).catch(
-        console.error
+        console.error,
       )
       onClose()
     } catch (error) {
@@ -410,8 +430,7 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
     }
   }
 
-  const canImport =
-    !isProcessing && !isDetecting && isMappingUsable && (isMultiAccountFile || effectiveChoice !== '')
+  const canImport = !isProcessing && !isDetecting && isMappingUsable && (isMultiAccountFile || effectiveChoice !== '')
 
   return (
     <Dialog open maxWidth={'md'} fullWidth onClose={onClose}>
@@ -442,7 +461,9 @@ export function CsvImportDialog({ fileName, csvText, onClose }: { fileName: stri
                   fullWidth
                   label={t('csvImport.account')}
                   value={effectiveChoice}
-                  onChange={(e) => setAccountChoice(e.target.value === NEW_ACCOUNT ? NEW_ACCOUNT : Number(e.target.value))}
+                  onChange={(e) =>
+                    setAccountChoice(e.target.value === NEW_ACCOUNT ? NEW_ACCOUNT : Number(e.target.value))
+                  }
                 >
                   {bankAccounts?.map((account) => (
                     <MenuItem key={account.id} value={account.id}>

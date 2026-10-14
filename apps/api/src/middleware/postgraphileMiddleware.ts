@@ -24,7 +24,9 @@ async function getSessionToken(req: IncomingMessage | undefined) {
   })
 }
 
-function getPostgraphileOptions() {
+export const POSTGRAPHILE_SCHEMAS = ['app_private', 'public']
+
+export function getPostgraphileOptions() {
   const postgraphileOptions: PostGraphileOptions = {
     subscriptions: true,
     watchPg: isDev,
@@ -114,5 +116,5 @@ function getPostgraphileOptions() {
 }
 
 export function postgraphileMiddleware() {
-  return postgraphile(process.env.DATABASE_URL, ['app_private', 'public'], getPostgraphileOptions())
+  return postgraphile(process.env.DATABASE_URL, POSTGRAPHILE_SCHEMAS, getPostgraphileOptions())
 }

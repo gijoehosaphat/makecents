@@ -18,7 +18,10 @@ function stripSkippedRows(text: string, skipRows: number): string {
  * header row, columns are keyed by their stringified index (e.g. "0", "1")
  * instead, so downstream code can always look columns up by name.
  */
-export function parsePreview(text: string, mapping: Pick<CsvColumnMapping, 'delimiter' | 'hasHeaderRow' | 'skipRows'>): CsvPreview {
+export function parsePreview(
+  text: string,
+  mapping: Pick<CsvColumnMapping, 'delimiter' | 'hasHeaderRow' | 'skipRows'>,
+): CsvPreview {
   const content = stripSkippedRows(text, mapping.skipRows)
 
   if (mapping.hasHeaderRow) {
@@ -48,7 +51,10 @@ export function parsePreview(text: string, mapping: Pick<CsvColumnMapping, 'deli
 }
 
 /** Just the column names a file has when read with these settings, without parsing every row. */
-export function parseHeaders(text: string, mapping: Pick<CsvColumnMapping, 'delimiter' | 'hasHeaderRow' | 'skipRows'>): string[] {
+export function parseHeaders(
+  text: string,
+  mapping: Pick<CsvColumnMapping, 'delimiter' | 'hasHeaderRow' | 'skipRows'>,
+): string[] {
   const result = Papa.parse<string[]>(stripSkippedRows(text, mapping.skipRows), {
     delimiter: mapping.delimiter,
     header: false,
@@ -88,7 +94,10 @@ const ACCOUNT_ID_HEADER_ALIASES = new Set([
 
 export function normalizeHeader(header: string): string {
   // "Card No.", "Account #", "account_number" all normalize to their bare letters.
-  return header.trim().toLowerCase().replace(/[\s_.#-]+/g, '')
+  return header
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_.#-]+/g, '')
 }
 
 /** Finds a header that looks like it holds the bank's own account identifier (e.g. "account_id"). */
@@ -99,7 +108,7 @@ export function findAccountIdColumn(headers: string[]): string | undefined {
 /** Splits rows into per-account groups using an account id column, preserving first-seen order. */
 export function groupRowsByAccountId(
   rows: Record<string, string>[],
-  column: string
+  column: string,
 ): Map<string, Record<string, string>[]> {
   const groups = new Map<string, Record<string, string>[]>()
   for (const row of rows) {
@@ -152,7 +161,7 @@ async function hashTransactionId(
   posted: Date,
   amount: number,
   name: string,
-  occurrence: number
+  occurrence: number,
 ): Promise<string> {
   const input = `${bankAccountId}|${posted.toISOString()}|${amount}|${name}${occurrence > 1 ? `|${occurrence}` : ''}`
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input))
@@ -165,7 +174,7 @@ async function hashTransactionId(
 /** The row's posted date and signed amount in cents, or undefined when it has no usable date. */
 export function parseRowDateAndAmount(
   row: Record<string, string>,
-  mapping: CsvColumnMapping
+  mapping: CsvColumnMapping,
 ): { posted: Date; amount: number } | undefined {
   const dateValue = row[mapping.dateColumn]
   const amountColumns =
@@ -181,7 +190,7 @@ export function parseRowDateAndAmount(
 export async function buildTransactions(
   rows: Record<string, string>[],
   mapping: CsvColumnMapping,
-  bankAccountId: string
+  bankAccountId: string,
 ): Promise<InputTransaction[]> {
   const transactions: InputTransaction[] = []
   const occurrences = new Map<string, number>()

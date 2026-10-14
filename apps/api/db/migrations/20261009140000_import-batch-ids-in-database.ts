@@ -28,7 +28,7 @@ export const IMPORT_TRANSACTIONS_V2 = replaceOnce(
             e.value->>'name' AS name, e.value->>'memo' AS memo, e.value->>'type' AS type,
             e.value->>'bankTransactionId' AS bank_transaction_id, e.ordinal
           FROM jsonb_array_elements(transactions) WITH ORDINALITY AS e(value, ordinal)
-        ) AS x`
+        ) AS x`,
 )
 
 // A row's occurrence comes from the id it was stored with, not its position within the batch: the
@@ -37,7 +37,7 @@ const MOVE_IMPORT_BATCH_V2 = replaceOnce(
   MOVE_IMPORT_BATCH_V1,
   `(row_number() OVER (PARTITION BY t.original_posted, t.original_amount, t.name ORDER BY t.id))::int)`,
   `app_private.csv_transaction_occurrence(
-                  t.bank_account_id, t.original_posted, t.original_amount, t.name, t.bank_transaction_id))`
+                  t.bank_account_id, t.original_posted, t.original_amount, t.name, t.bank_transaction_id))`,
 )
 
 export async function up(knex: Knex): Promise<void> {
@@ -57,7 +57,7 @@ export async function up(knex: Knex): Promise<void> {
     IMMUTABLE;
   `)
   await knex.raw(
-    `COMMENT ON FUNCTION app_private.csv_transaction_occurrence(int, timestamptz, bigint, text, text) IS '@omit'`
+    `COMMENT ON FUNCTION app_private.csv_transaction_occurrence(int, timestamptz, bigint, text, text) IS '@omit'`,
   )
   await knex.raw(IMPORT_TRANSACTIONS_V2)
   await knex.raw(MOVE_IMPORT_BATCH_V2)

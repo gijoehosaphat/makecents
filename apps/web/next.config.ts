@@ -4,6 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Don't generate AGENTS.md on every dev start
+  agentRules: false,
   async redirects() {
     return [
       {
@@ -14,8 +16,8 @@ const nextConfig: NextConfig = {
     ]
   },
   turbopack: {
-    // options
-    root: path.join(__dirname, './'),
+    // The workspace root, so dependencies hoisted into the root node_modules (pnpm workspace) resolve
+    root: path.join(__dirname, '../../'),
   },
 }
 

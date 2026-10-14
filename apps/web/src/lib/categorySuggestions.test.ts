@@ -34,7 +34,9 @@ describe('transactionHints', () => {
 
 describe('menuHints', () => {
   it('drops weak hints', () => {
-    const hints = transactionHints(withNodes([node(1, '0.8839', 'payee', 312, 352), node(3, '0.0453', 'payee', 16, 352)]))
+    const hints = transactionHints(
+      withNodes([node(1, '0.8839', 'payee', 312, 352), node(3, '0.0453', 'payee', 16, 352)]),
+    )
     expect(menuHints(hints).map((hint) => hint.categoryId)).toEqual([1])
   })
 })

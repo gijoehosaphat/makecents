@@ -2,7 +2,19 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Alert, AlertTitle, Box, Button, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
 import { useSuspenseQuery } from '@apollo/client/react'
 import { useTranslations } from 'next-intl'
 import { Category, Transaction } from '@/graphql/types'
@@ -158,9 +170,12 @@ export function BudgetPlan({
   const incomeSourceNames = useMemo(() => {
     const names = new Map<number, string>()
     for (const transaction of payroll.data.allTransactions?.nodes ?? []) {
-      if (transaction.categoryByCategoryId) names.set(transaction.categoryByCategoryId.id, transaction.categoryByCategoryId.name ?? '')
+      if (transaction.categoryByCategoryId)
+        names.set(transaction.categoryByCategoryId.id, transaction.categoryByCategoryId.name ?? '')
     }
-    return (income?.sources ?? []).map((source) => (source.categoryId == null ? '' : names.get(source.categoryId) ?? '')).filter(Boolean)
+    return (income?.sources ?? [])
+      .map((source) => (source.categoryId == null ? '' : (names.get(source.categoryId) ?? '')))
+      .filter(Boolean)
   }, [payroll.data.allTransactions?.nodes, income?.sources])
 
   // Deposit categories that could be payroll, biggest first, so the right ones can be marked explicitly.
@@ -334,7 +349,12 @@ export function BudgetPlan({
           sx={{ mt: 2 }}
           action={
             unbudgetedCategories.length > 0 && (
-              <Button color={'inherit'} size={'small'} component={Link} href={`/${currentAccountId}/dashboard/settings/budgets`}>
+              <Button
+                color={'inherit'}
+                size={'small'}
+                component={Link}
+                href={`/${currentAccountId}/dashboard/settings/budgets`}
+              >
                 {t('budgets.plan.openBudgetSettings')}
               </Button>
             )
@@ -359,7 +379,10 @@ export function BudgetPlan({
             <Box key={category.id} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography sx={{ flex: 1 }}>{category.name}</Typography>
               <Money amountInCents={category.total} currency={currency} colored={false} />
-              <Button size={'small'} onClick={() => setPreview(category.transactions.map((transaction) => transaction.nodeId))}>
+              <Button
+                size={'small'}
+                onClick={() => setPreview(category.transactions.map((transaction) => transaction.nodeId))}
+              >
                 {t('budgets.viewTransactions')}
               </Button>
             </Box>

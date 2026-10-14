@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { ClientProviders } from '@/components/ClientProviders'
-import { useUserServerSide } from '@/lib/useUserServerSide'
+import { getUserServerSide } from '@/lib/getUserServerSide'
 
 export default async function RootLayout({
   children,
@@ -10,7 +10,7 @@ export default async function RootLayout({
   params: Promise<{ accountId: string }>
 }) {
   const { accountId } = await params
-  const data = await useUserServerSide(Number(accountId))
+  const data = await getUserServerSide(Number(accountId))
 
   if (!data.user) {
     redirect('/account/signIn')

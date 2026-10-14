@@ -96,7 +96,11 @@ export function useFilteredTransactions({
   search,
   sort,
 }: FilteredTransactionsParams) {
-  const { match, document, variables: documentVariables } = useMemo(
+  const {
+    match,
+    document,
+    variables: documentVariables,
+  } = useMemo(
     () =>
       buildFilteredTransactionsRequest({
         limit,
@@ -113,7 +117,21 @@ export function useFilteredTransactions({
         search,
         sort,
       }),
-    [limit, offset, dateFrom, dateTo, bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, search, sort],
+    [
+      limit,
+      offset,
+      dateFrom,
+      dateTo,
+      bankAccountIds,
+      categorized,
+      categoryIds,
+      autoCategorized,
+      direction,
+      amountMin,
+      amountMax,
+      search,
+      sort,
+    ],
   )
 
   const query = useSuspenseQuery(document as any, {

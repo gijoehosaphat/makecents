@@ -3,4 +3,4 @@ set -ex
 
 ./script/prepare-env
 
-pnpm dlx tsx src/index.ts
+pnpm tsx src/index.ts

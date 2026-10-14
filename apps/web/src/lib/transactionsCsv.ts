@@ -27,7 +27,10 @@ function hasTransfer(transaction: Transaction) {
  */
 export function buildTransactionsCsv(
   transactions: Transaction[],
-  lookups: { accountLabel: (bankAccountId?: number | null) => string; categoryName: (categoryId?: number | null) => string },
+  lookups: {
+    accountLabel: (bankAccountId?: number | null) => string
+    categoryName: (categoryId?: number | null) => string
+  },
 ): string {
   const lines: string[][] = [HEADERS]
 

@@ -34,7 +34,11 @@ export default function SignIn() {
   }
 
   return (
-    <Box component={'form'} onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 320 }}>
+    <Box
+      component={'form'}
+      onSubmit={handleSubmit}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 320 }}
+    >
       {error && <Alert severity={'error'}>{t('auth.invalidCredentials')}</Alert>}
       <TextField
         label={t('auth.email')}

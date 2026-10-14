@@ -85,7 +85,9 @@ export default function CategoryMenu({
           />
         </MenuItem>
       ))}
-      {suggestions.length > 0 && <ListSubheader sx={{ lineHeight: '32px' }}>{t('categories.allCategories')}</ListSubheader>}
+      {suggestions.length > 0 && (
+        <ListSubheader sx={{ lineHeight: '32px' }}>{t('categories.allCategories')}</ListSubheader>
+      )}
       {matches.map((category) => (
         <MenuItem key={category.nodeId} onClick={() => complete(category)}>
           {category.name}

@@ -82,12 +82,16 @@ export async function up(knex: Knex): Promise<void> {
 
   // Record who created a row now that the database knows who is asking.
   for (const tableName of CREATOR_TABLES) {
-    await knex.raw(`ALTER TABLE app_private.${tableName} ALTER COLUMN user_id SET DEFAULT app_private.current_user_id()`)
+    await knex.raw(
+      `ALTER TABLE app_private.${tableName} ALTER COLUMN user_id SET DEFAULT app_private.current_user_id()`,
+    )
   }
 
   // Members can see and use data in their accounts. Nothing is granted by default, so a new
   // table stays inaccessible until a migration grants it and gives it a policy.
-  await knex.raw(`GRANT SELECT (id, created_at, updated_at, name, email, image, "emailVerified") ON app_private.user TO ${MEMBER_ROLE}`)
+  await knex.raw(
+    `GRANT SELECT (id, created_at, updated_at, name, email, image, "emailVerified") ON app_private.user TO ${MEMBER_ROLE}`,
+  )
   await knex.raw(`GRANT SELECT, UPDATE (name) ON app_private.account TO ${MEMBER_ROLE}`)
   await knex.raw(`GRANT SELECT ON app_private.account_member TO ${MEMBER_ROLE}`)
   for (const tableName of [...ACCOUNT_TABLES, ...Object.keys(CHILD_TABLES)]) {
@@ -129,7 +133,9 @@ export async function up(knex: Knex): Promise<void> {
   ]
   for (const [tableName, condition] of tablePolicies) {
     await knex.raw(`ALTER TABLE app_private.${tableName} ENABLE ROW LEVEL SECURITY`)
-    await knex.raw(`CREATE POLICY ${tableName}_select ON app_private.${tableName} FOR SELECT USING (${condition(false)})`)
+    await knex.raw(
+      `CREATE POLICY ${tableName}_select ON app_private.${tableName} FOR SELECT USING (${condition(false)})`,
+    )
     // Viewers only match the select policy; owners and editors can also write.
     await knex.raw(`
       CREATE POLICY ${tableName}_write ON app_private.${tableName} FOR ALL
@@ -144,7 +150,7 @@ export async function down(knex: Knex): Promise<void> {
   for (const tableName of tableNames) {
     const policies = await knex.raw(
       `SELECT policyname FROM pg_policies WHERE schemaname = 'app_private' AND tablename = ?`,
-      [tableName]
+      [tableName],
     )
     for (const { policyname } of policies.rows) {
       await knex.raw(`DROP POLICY ${policyname} ON app_private.${tableName}`)

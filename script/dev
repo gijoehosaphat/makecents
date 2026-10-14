@@ -3,4 +3,4 @@ set -ex
 
 ./script/prepare-env
 
-pnpm dlx concurrently "cd ./apps/api/ && ./script/dev" "pnpm dlx wait-on tcp:3002 && cd ./apps/web/ && ./script/dev"
+pnpm exec concurrently -k -n api,web "pnpm --dir apps/api dev" "pnpm exec wait-on tcp:3002 && pnpm --dir apps/web dev"

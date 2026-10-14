@@ -59,7 +59,7 @@ export function useBankAccountLabel() {
       }
       return bankAccountLabel(account, t)
     },
-    [hidden, genericNames, t]
+    [hidden, genericNames, t],
   )
 }
 

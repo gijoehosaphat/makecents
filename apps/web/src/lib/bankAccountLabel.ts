@@ -5,7 +5,7 @@ type Translate = (key: string) => string
 /** Accounts created from a CSV have random ids, so fall back to "Credit card ••1a2b" rather than a bare id. */
 export function bankAccountLabel(
   account: { name?: string | null; type?: string | null; bankAccountId?: string | null },
-  t: Translate
+  t: Translate,
 ): string {
   if (account.name) {
     return account.name

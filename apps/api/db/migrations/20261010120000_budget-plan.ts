@@ -47,7 +47,9 @@ export async function down(knex: Knex): Promise<void> {
     `budget_id IN (SELECT id FROM app_private.budget WHERE account_id IN (SELECT app_private.current_user_account_ids(${writable})))`
   await knex.raw(`GRANT SELECT, INSERT, UPDATE, DELETE ON app_private.budget_reconsiliation TO ${MEMBER_ROLE}`)
   await knex.raw(`ALTER TABLE app_private.budget_reconsiliation ENABLE ROW LEVEL SECURITY`)
-  await knex.raw(`CREATE POLICY budget_reconsiliation_select ON app_private.budget_reconsiliation FOR SELECT USING (${visible(false)})`)
+  await knex.raw(
+    `CREATE POLICY budget_reconsiliation_select ON app_private.budget_reconsiliation FOR SELECT USING (${visible(false)})`,
+  )
   await knex.raw(`
     CREATE POLICY budget_reconsiliation_write ON app_private.budget_reconsiliation FOR ALL
     USING (${visible(true)}) WITH CHECK (${visible(true)})

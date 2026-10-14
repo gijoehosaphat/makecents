@@ -8,7 +8,9 @@ query GetBankCsvDefinitions($accountId: Int!) {
 
 mutation CreateBankCsvDefinition($accountId: Int!, $name: String!, $mapping: JSON!, $bankAccountId: Int) {
   createBankCsvDefinition(
-    input: { bankCsvDefinition: { accountId: $accountId, name: $name, mapping: $mapping, bankAccountId: $bankAccountId } }
+    input: {
+      bankCsvDefinition: { accountId: $accountId, name: $name, mapping: $mapping, bankAccountId: $bankAccountId }
+    }
   ) {
     bankCsvDefinition {
       ...BankCsvDefinitionFragment
@@ -18,7 +20,10 @@ mutation CreateBankCsvDefinition($accountId: Int!, $name: String!, $mapping: JSO
 
 mutation UpdateBankCsvDefinition($nodeId: ID!, $name: String, $mapping: JSON, $bankAccountId: Int) {
   updateBankCsvDefinition(
-    input: { nodeId: $nodeId, bankCsvDefinitionPatch: { name: $name, mapping: $mapping, bankAccountId: $bankAccountId } }
+    input: {
+      nodeId: $nodeId
+      bankCsvDefinitionPatch: { name: $name, mapping: $mapping, bankAccountId: $bankAccountId }
+    }
   ) {
     bankCsvDefinition {
       ...BankCsvDefinitionFragment

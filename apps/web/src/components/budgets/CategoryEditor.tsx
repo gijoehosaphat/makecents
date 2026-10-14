@@ -51,11 +51,14 @@ export default function CategoryEditor({
   const isMenuOpen = Boolean(menuAnchorEl)
   const { categories } = useCategories()
 
-  const queryBudgetCategories = useSuspenseQuery<GetBudgetCategoriesByAccountId>(GetBudgetCategoriesByAccountIdDocument, {
-    variables: {
-      accountId: Number(currentAccountId),
+  const queryBudgetCategories = useSuspenseQuery<GetBudgetCategoriesByAccountId>(
+    GetBudgetCategoriesByAccountIdDocument,
+    {
+      variables: {
+        accountId: Number(currentAccountId),
+      },
     },
-  })
+  )
 
   async function handleAddBudgetCategory(categoryId: number) {
     if (currentAccountId) {
@@ -106,7 +109,7 @@ export default function CategoryEditor({
   }, [budgetCategories])
 
   const usedCategories: Category[] = useMemo(() => {
-    let tempCategories: Category[] = []
+    const tempCategories: Category[] = []
     queryBudgetCategories?.data?.allBudgetCategories?.nodes.forEach((budgetCategory) => {
       if (budgetCategory.categoryByCategoryId) {
         tempCategories.push(budgetCategory.categoryByCategoryId as Category)

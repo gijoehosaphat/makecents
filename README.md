@@ -20,22 +20,22 @@ This app is intended to help you manage your personal finances by importing, cat
   - I personally use postgres:17.4 Docker image
 - If utilizing Docker, you will need Docker and Docker Compose installed on your machine. See https://docs.docker.com/get-docker/ for installation instructions.
 - This repository uses Mise. See installation instructions for your platform at https://mise.jdx.dev/getting-started.html
-  - Please ensure you `mist trust` and `mist install` to ensure you are using the correct versions of Node, etc.
+  - Please ensure you `mise trust` and `mise install` to ensure you are using the correct versions of Node, etc.
 
 ## DB migrations
 
 We need to create the schema, tables, etc in the database. We do this using Knex migrations.
 
-- Change directory to the `app/api` directory.
+- Ensure you are at the root directory and have created `apps/api/.env` from `apps/api/.env.example`.
 
 ### Run all migrations or...
 
-- To execute all the migrations: `npx knex migrate:latest`
+- To execute all the migrations: `pnpm migrate`
 
 ### ...run migrations one at a time
 
-- You can run `npx knex migrate:up` and keep re-running the above command until all the migrations have run successfully if you prefer to see them happen one at a time.
-- To rollback the last migration, you can run: `npx knex migrate:down`
+- From `apps/api`, you can run `pnpm migrate:up` repeatedly until all the migrations have run successfully if you prefer to see them happen one at a time.
+- To rollback the last migration, run `pnpm migrate:down` from `apps/api`.
 
 ## Getting transactions prepared
 
@@ -49,7 +49,7 @@ It is best to use YOUR real data, but for testing purposes there is a seed file 
 ### ...generate example data
 
 - Ensure you are at the root directory.
-- Run: `npx tsx src/generateExampleData.ts`
+- Run: `pnpm example-data`
 - Note the `dist/example-transactions.qfx` file that is created, we will reference it later.
 
 ## Running the application
@@ -61,22 +61,27 @@ There are two applications in this repository: the API and the Client (frontend)
 #### Run both, at the same time or...
 
 - Ensure you are at the root directory.
-- Run: `./script/dev` or `./script/start` (Production)
+- Run: `pnpm setup` once, then `pnpm dev` or `pnpm start` (Production)
 
 #### Running the API individually and...
 
-- Change directory to: `cd app/api`
-- Run the API: `./script/dev` or `./script/start` (Production)
+- Change directory to: `cd apps/api`
+- Run the API: `pnpm dev` or `pnpm start` (Production)
 
 #### ...running the Client individually
 
-- Change directory to: `cd app/web`
-- Run the Client: `./script/dev` or `./script/start` (Production)
+- Change directory to: `cd apps/web`
+- Run the Client: `pnpm dev` or `pnpm start` (Production)
 
 ### Running using Docker Compose
 
 - Ensure you are at the root directory.
-- Run: `docker-compose up --build`
+- Run: `docker compose up --build`
+- This starts PostgreSQL, applies migrations and runs the app on `http://localhost:3001`. Set `AUTH_SECRET` in your shell to override the default secret.
+
+## Checks
+
+From the root directory: `pnpm typecheck` and `pnpm test`. These also run in CI (GitHub Actions). The API tests create (and drop) a temporary database on the PostgreSQL server in `apps/api/.env`, so that role needs `CREATEDB`. Typechecking needs the generated GraphQL types, so run the API and `pnpm --dir apps/web codegen` first (`pnpm dev` does this for you).
 
 ## Accessing the application
 
@@ -98,6 +103,10 @@ There are two applications in this repository: the API and the Client (frontend)
 - Closely monitor postgraphile and their upcoming v5 release for new features and improvements we can take advantage of. Seems like this is a rather large change and I would be fearful of it breaking schema.
 - Better handling of multiple currencies? I primarily use CAD but have accounts with USD. All the bank accounts are marked as such, but there is little else in the app that respects currency differences and no concept of exchange rates. Maybe this is OK?
 - The API layer doesn't really get "built" into a deployable artifact. We should have a proper build step that compiles the TS into JS and outputs to a dist/ folder. Probably w/ vite.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the architecture, how the import flow works, and how to run the tests.
 
 ## Thanks
 

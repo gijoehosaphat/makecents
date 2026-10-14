@@ -27,7 +27,7 @@ export function countDuplicateRows(incoming: ImportRow[], existing: ExistingRow[
   const freshByKey = groupBy(fresh, keyOf)
   const unmatchedByKey = groupBy(
     existing.filter((row) => !incomingIds.has(row.bankTransactionId ?? '')),
-    keyOf
+    keyOf,
   )
 
   for (const [key, freshRows] of freshByKey) {

@@ -10,7 +10,7 @@ export function useTransactionsGroupedByBudgets() {
   // The context fills in after mount; without an account there is nothing to ask for.
   const query = useSuspenseQuery(
     GetTransactionsGroupedByBudgetDocument,
-    currentAccountId ? { variables: { accountId: currentAccountId } } : skipToken
+    currentAccountId ? { variables: { accountId: currentAccountId } } : skipToken,
   )
 
   const budgets: Budget[] = useMemo(() => {
@@ -19,7 +19,7 @@ export function useTransactionsGroupedByBudgets() {
 
   const transactionsGroupedByBudget = useMemo(() => {
     return budgets.map((budget) => {
-      let transactions: Transaction[] = []
+      const transactions: Transaction[] = []
       budget?.budgetCategoriesByBudgetId?.nodes.forEach((budgetCategory) => {
         budgetCategory?.categoryByCategoryId?.transactionsByCategoryId?.nodes?.forEach((transaction) => {
           transactions.push(transaction)

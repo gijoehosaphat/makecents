@@ -69,7 +69,9 @@ export function DateFilter({ allowCustom }: { allowCustom?: boolean }) {
       return
     }
     startTransition(() => {
-      router.push(updateSearchParamsUrl(pathname, searchParams, { dateRange: 'custom', [key]: format(value, 'yyyy-MM-dd') }))
+      router.push(
+        updateSearchParamsUrl(pathname, searchParams, { dateRange: 'custom', [key]: format(value, 'yyyy-MM-dd') }),
+      )
     })
   }
 

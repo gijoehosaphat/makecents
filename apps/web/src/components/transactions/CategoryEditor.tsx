@@ -118,7 +118,12 @@ export default function CategoryEditor({
       </Box>
       {isAuto && (
         <Tooltip title={t('categories.autoCategorized')}>
-          <IconButton size={'small'} color={'secondary'} aria-label={t('shared.autoCategorized')} onClick={handleConfirmAuto}>
+          <IconButton
+            size={'small'}
+            color={'secondary'}
+            aria-label={t('shared.autoCategorized')}
+            onClick={handleConfirmAuto}
+          >
             <AutoAwesome fontSize={'small'} />
           </IconButton>
         </Tooltip>

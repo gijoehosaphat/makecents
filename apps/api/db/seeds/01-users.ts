@@ -9,9 +9,7 @@ export async function seed(knex: Knex): Promise<void> {
     {
       id: 1,
       email: 'admin@somewhere.com',
-      password: knex.raw(
-        "public.crypt('devpassword123', public.gen_salt('bf'))",
-      ),
+      password: knex.raw("public.crypt('devpassword123', public.gen_salt('bf'))"),
     },
   ])
 }
