@@ -2,7 +2,11 @@
 
 This app is intended to help you manage your personal finances by importing, categorizing your bank transactions and creating budgets to assist you in managing your money.
 
-![makecents personal budgeting software](https://github.com/gijoehosaphat/makecents/blob/main/screenshot.png 'makecents personal budgeting software')
+![makecents personal budgeting software](https://github.com/gijoehosaphat/makecents/blob/main/screenshot1.png 'makecents personal budgeting software')
+![makecents personal budgeting software](https://github.com/gijoehosaphat/makecents/blob/main/screenshot2.png 'makecents personal budgeting software')
+![makecents personal budgeting software](https://github.com/gijoehosaphat/makecents/blob/main/screenshot3.png 'makecents personal budgeting software')
+![makecents personal budgeting software](https://github.com/gijoehosaphat/makecents/blob/main/screenshot4.png 'makecents personal budgeting software')
+![makecents personal budgeting software](https://github.com/gijoehosaphat/makecents/blob/main/screenshot5.png 'makecents personal budgeting software')
 
 **WARNING**: Please do not deploy your instance to the public. Maybe that goes without saying, but this is intended to be run for your own personal use.
 
