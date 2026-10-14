@@ -21,13 +21,13 @@ You only need [Docker](https://docs.docker.com/get-docker/) with Compose.
 docker compose up --build
 ```
 
-This starts PostgreSQL, applies the database migrations and runs the app (the first start is slow while the web app builds). Then:
+This starts PostgreSQL, applies the database migrations, loads demo data and runs the app (the first start is slow while the web app builds). Then:
 
-1. Open <http://localhost:3001> and sign up with any email and password.
-2. Drag [`demo/example-transactions.qfx`](demo/example-transactions.qfx) onto the upload area. It contains a checking account, a savings account and a credit card with a few months of fake transactions.
-3. Explore the dashboard, reports and budgets. Import your own QFX or CSV export from your bank the same way.
+1. Open <http://localhost:3001> and sign in with `admin@somewhere.com` / `devpassword123`.
+2. Explore the dashboard, reports and budgets. The demo has a checking account, a savings account and a credit card with six months of fake transactions, plus categories, groups, budgets, transfers and split transactions. The dates are generated relative to the day the demo first starts, so the current month always has data.
+3. Import your own QFX or CSV export from your bank by dragging it onto the upload area. To try an import without one, run `pnpm example-data` for a fake QFX file dated from today (see [Fresh example data](#fresh-example-data)).
 
-The demo data lives in a Docker volume. `docker compose down -v` deletes it. Set the `AUTH_SECRET` environment variable in your shell before the first start if you want something other than the default secret.
+The demo data lives in a Docker volume and is only loaded into an empty database. `docker compose down -v` deletes it, and the next `docker compose up` loads fresh data dated from that day. Set the `AUTH_SECRET` environment variable in your shell before the first start if you want something other than the default secret.
 
 ## Development setup
 
@@ -44,7 +44,7 @@ For working on the code. See [CONTRIBUTING.md](CONTRIBUTING.md) for the architec
 2. Copy `apps/api/.env.example` to `apps/api/.env` and `apps/web/.env.example` to `apps/web/.env`, then set `DATABASE_URL` in the API file to your database. Change both `AUTH_SECRET` values (and `BETTER_AUTH_SECRET`) if you will use real data.
 3. `pnpm migrate` creates the tables.
 4. `pnpm dev` runs the API (port 3002) and the web app (port 3001) with reloading. `pnpm start` runs a production build instead.
-5. Open <http://localhost:3001>, sign up, and import [`demo/example-transactions.qfx`](demo/example-transactions.qfx) or your own bank export.
+5. Open <http://localhost:3001>, sign up, and import your own bank export or a fake file from `pnpm example-data` (see [Fresh example data](#fresh-example-data)).
 
 You can also run the apps individually: `pnpm dev` inside `apps/api` or `apps/web`.
 
@@ -55,7 +55,7 @@ You can also run the apps individually: `pnpm dev` inside `apps/api` or `apps/we
 
 ### Fresh example data
 
-`demo/example-transactions.qfx` has fixed dates. To generate a file covering the last three months from today, run `pnpm example-data` and use `dist/example-transactions.qfx`.
+To generate a fake QFX file (a checking account, a savings account and a credit card) covering the last three months from today, run `pnpm example-data` and import `dist/example-transactions.qfx`. It is generated rather than committed so its dates are never stale.
 
 ### Checks
 
