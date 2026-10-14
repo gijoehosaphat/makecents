@@ -31,7 +31,11 @@ function buildAutoFilter({ autoCategorized }: TransactionRowFilterOptions): Tran
   return autoCategorized ? { categorySource: { equalTo: 'auto' } } : undefined
 }
 
-function buildAmountFilter({ direction, amountMin, amountMax }: TransactionRowFilterOptions): TransactionFilter | undefined {
+function buildAmountFilter({
+  direction,
+  amountMin,
+  amountMax,
+}: TransactionRowFilterOptions): TransactionFilter | undefined {
   const hasBounds = amountMin !== undefined || amountMax !== undefined
   if (!direction && !hasBounds) {
     return undefined

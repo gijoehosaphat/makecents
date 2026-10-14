@@ -43,7 +43,11 @@ export default function SignUp() {
   }
 
   return (
-    <Box component={'form'} onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 320 }}>
+    <Box
+      component={'form'}
+      onSubmit={handleSubmit}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: 320 }}
+    >
       {error && <Alert severity={'error'}>{error}</Alert>}
       <TextField label={t('shared.name')} value={name} onChange={(event) => setName(event.target.value)} autoFocus />
       <TextField

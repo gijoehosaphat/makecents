@@ -54,7 +54,14 @@ export function useFilteredTransactionTotals({
   const variables = useMemo(() => {
     const and: TransactionFilter[] = [{ bankAccountId: { in: bankAccountIds } }]
 
-    const rowFilter = buildTransactionRowFilter({ categorized, categoryIds, autoCategorized, direction, amountMin, amountMax })
+    const rowFilter = buildTransactionRowFilter({
+      categorized,
+      categoryIds,
+      autoCategorized,
+      direction,
+      amountMin,
+      amountMax,
+    })
     if (rowFilter) {
       and.push(rowFilter)
     }
@@ -74,7 +81,9 @@ export function useFilteredTransactionTotals({
     }
   }, [bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, dateFrom, dateTo])
 
-  const document = match ? GetFilteredTransactionTotalsBySearchDocument : GetFilteredTransactionTotalsByBankAccountsDocument
+  const document = match
+    ? GetFilteredTransactionTotalsBySearchDocument
+    : GetFilteredTransactionTotalsByBankAccountsDocument
   const documentVariables = match ? { ...variables, match } : variables
 
   const query = useSuspenseQuery(document as any, {
@@ -86,7 +95,10 @@ export function useFilteredTransactionTotals({
   const deposits = useMemo(() => sumsByBankAccount(data?.deposits?.groupedAggregates), [data?.deposits])
   const withdrawals = useMemo(() => sumsByBankAccount(data?.withdrawals?.groupedAggregates), [data?.withdrawals])
 
-  const transferDeposits = useMemo(() => sumsByBankAccount(data?.transferDeposits?.groupedAggregates), [data?.transferDeposits])
+  const transferDeposits = useMemo(
+    () => sumsByBankAccount(data?.transferDeposits?.groupedAggregates),
+    [data?.transferDeposits],
+  )
   const transferWithdrawals = useMemo(
     () => sumsByBankAccount(data?.transferWithdrawals?.groupedAggregates),
     [data?.transferWithdrawals],

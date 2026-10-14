@@ -1,14 +1,5 @@
 import { Edit as IconEdit } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  TextField,
-} from '@mui/material'
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from '@mui/material'
 import { useState } from 'react'
 import SaveCancel from '../forms/SaveCancel'
 import { Transaction } from '@/graphql/types'
@@ -31,12 +22,8 @@ export function TransactionMemoEditor({
   })
   const t = useTranslations('common')
   const [memoEditorOpen, setMemoEditorOpen] = useState(false)
-  const [name, setName] = useState<string>(
-    transaction.customName || transaction.name || '',
-  )
-  const [memo, setMemo] = useState<string>(
-    transaction.customMemo || transaction.memo || '',
-  )
+  const [name, setName] = useState<string>(transaction.customName || transaction.name || '')
+  const [memo, setMemo] = useState<string>(transaction.customMemo || transaction.memo || '')
 
   function openMemoEditor() {
     setMemoEditorOpen(true)
@@ -95,12 +82,7 @@ export function TransactionMemoEditor({
               fullWidth
               sx={{ marginBottom: 4 }}
             />
-            <TextField
-              label={t('memoEditor.memo')}
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              fullWidth
-            />
+            <TextField label={t('memoEditor.memo')} value={memo} onChange={(e) => setMemo(e.target.value)} fullWidth />
           </Box>
         </DialogContent>
         <DialogActions>

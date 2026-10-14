@@ -7,7 +7,7 @@ export function useColors() {
   function getColors(n: number) {
     return generateGradient(
       [theme?.palette?.primary?.main, theme?.palette?.secondary?.main, theme?.palette?.background?.paper],
-      n
+      n,
     )
   }
 

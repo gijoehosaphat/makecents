@@ -131,7 +131,7 @@ export async function up(knex: Knex): Promise<void> {
             - (SELECT sum(amount) FROM app_private.transaction WHERE split_source_id = p.id)) AS parents
   `)
   console.log(
-    `Split integrity: ${drift[0].children} child row(s) with a stale date/bank account, ${drift[0].parents} parent row(s) with a mismatched remainder.`
+    `Split integrity: ${drift[0].children} child row(s) with a stale date/bank account, ${drift[0].parents} parent row(s) with a mismatched remainder.`,
   )
   await knex.raw(`
     UPDATE app_private.transaction AS c

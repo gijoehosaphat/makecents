@@ -13,82 +13,58 @@ This app is intended to help you manage your personal finances by importing, cat
 - Generate reports and insights on spending
 - Support for QFX files (QuickBooks) & arbitrary CSVs with included template mapper.
 
-## Prerequisites
+## Quick demo (Docker only)
 
-- Ensure you have a PostgreSQL database set up and running. See Postgraphile recommendations for PostgreSQL versions. https://postgraphile.org/postgraphile/requirements#postgresql-use-latest
-  - Create a new `DATABASE` for this project. Name it whatever you want, but the default is: `budget`. Update the .env configs if you choose a different name.
-  - I personally use postgres:17.4 Docker image
-- If utilizing Docker, you will need Docker and Docker Compose installed on your machine. See https://docs.docker.com/get-docker/ for installation instructions.
-- This repository uses Mise. See installation instructions for your platform at https://mise.jdx.dev/getting-started.html
-  - Please ensure you `mist trust` and `mist install` to ensure you are using the correct versions of Node, etc.
+You only need [Docker](https://docs.docker.com/get-docker/) with Compose.
 
-## DB migrations
+```bash
+docker compose up --build
+```
 
-We need to create the schema, tables, etc in the database. We do this using Knex migrations.
+This starts PostgreSQL, applies the database migrations, loads demo data and runs the app (the first start is slow while the web app builds). Then:
 
-- Change directory to the `app/api` directory.
+1. Open <http://localhost:3001> and sign in with `admin@somewhere.com` / `devpassword123`.
+2. Explore the dashboard, reports and budgets. The demo has a checking account, a savings account and a credit card with six months of fake transactions, plus categories, groups, budgets, transfers and split transactions. The dates are generated relative to the day the demo first starts, so the current month always has data.
+3. Import your own QFX or CSV export from your bank by dragging it onto the upload area. To try an import without one, run `pnpm example-data` for a fake QFX file dated from today (see [Fresh example data](#fresh-example-data)).
 
-### Run all migrations or...
+The demo data lives in a Docker volume and is only loaded into an empty database. `docker compose down -v` deletes it, and the next `docker compose up` loads fresh data dated from that day. Set the `AUTH_SECRET` environment variable in your shell before the first start if you want something other than the default secret.
 
-- To execute all the migrations: `npx knex migrate:latest`
+## Development setup
 
-### ...run migrations one at a time
+For working on the code. See [CONTRIBUTING.md](CONTRIBUTING.md) for the architecture and conventions.
 
-- You can run `npx knex migrate:up` and keep re-running the above command until all the migrations have run successfully if you prefer to see them happen one at a time.
-- To rollback the last migration, you can run: `npx knex migrate:down`
+### Prerequisites
 
-## Getting transactions prepared
+- [Mise](https://mise.jdx.dev/getting-started.html). Run `mise trust && mise install` for the pinned Node and pnpm versions.
+- A PostgreSQL server (see Postgraphile's [version recommendations](https://postgraphile.org/postgraphile/requirements#postgresql-use-latest)) with an empty database, `budget` by default. For example: `docker run -d --name makecents-db -e POSTGRES_PASSWORD=pass -e POSTGRES_DB=budget -p 5432:5432 postgres:17.4`
 
-It is best to use YOUR real data, but for testing purposes there is a seed file that will populate the database with some fake data.
+### Set up and run
 
-### Use real data or...
+1. `pnpm setup` installs dependencies for the whole workspace.
+2. Copy `apps/api/.env.example` to `apps/api/.env` and `apps/web/.env.example` to `apps/web/.env`, then set `DATABASE_URL` in the API file to your database. Change both `AUTH_SECRET` values (and `BETTER_AUTH_SECRET`) if you will use real data.
+3. `pnpm migrate` creates the tables.
+4. `pnpm dev` runs the API (port 3002) and the web app (port 3001) with reloading. `pnpm start` runs a production build instead.
+5. Open <http://localhost:3001>, sign up, and import your own bank export or a fake file from `pnpm example-data` (see [Fresh example data](#fresh-example-data)).
 
-- Grab a QFX file from your bank or credit card provider. You can usually download this from their website.
-- Note where your downloaded qfx file is, we will reference it later.
+You can also run the apps individually: `pnpm dev` inside `apps/api` or `apps/web`.
 
-### ...generate example data
+### Database migrations
 
-- Ensure you are at the root directory.
-- Run: `npx tsx src/generateExampleData.ts`
-- Note the `dist/example-transactions.qfx` file that is created, we will reference it later.
+- `pnpm migrate` applies every pending migration.
+- From `apps/api`: `pnpm migrate:up` applies one at a time, `pnpm migrate:down` rolls back the last, and `./script/db-migrate-create <name>` creates a new one.
 
-## Running the application
+### Fresh example data
 
-There are two applications in this repository: the API and the Client (frontend). You can run them separately or together and/or using Docker Compose.
+To generate a fake QFX file (a checking account, a savings account and a credit card) covering the last three months from today, run `pnpm example-data` and import `dist/example-transactions.qfx`. It is generated rather than committed so its dates are never stale.
 
-### Running from the CLI
+### Checks
 
-#### Run both, at the same time or...
-
-- Ensure you are at the root directory.
-- Run: `./script/dev` or `./script/start` (Production)
-
-#### Running the API individually and...
-
-- Change directory to: `cd app/api`
-- Run the API: `./script/dev` or `./script/start` (Production)
-
-#### ...running the Client individually
-
-- Change directory to: `cd app/web`
-- Run the Client: `./script/dev` or `./script/start` (Production)
-
-### Running using Docker Compose
-
-- Ensure you are at the root directory.
-- Run: `docker-compose up --build`
-
-## Accessing the application
-
-- Open your web browser and navigate to: `http://localhost:3001`
-- If you configured an authentication provider, you will see a login button for that provider. If no user exists, it will be created automatically upon first login.
-- Once logged in, you can drag your OFX file onto the upload area to import your transactions.
+From the root directory: `pnpm typecheck`, `pnpm lint` and `pnpm test`. These also run in CI (GitHub Actions). Typechecking needs the generated GraphQL types, so run the API and `pnpm --dir apps/web codegen` first (`pnpm dev` does this for you). The API tests create (and drop) a temporary database on the PostgreSQL server in `apps/api/.env`, so that role needs `CREATEDB`. `pnpm format` runs Prettier.
 
 ## TODO
 
 - _External loans_: Add ability to create loans that are just manually updated. This is for things like mortgages, where the payment amount is fixed but the interest and principal amounts vary each month. It would be nice to be able to track the loan balance over time and see how much interest vs principal is being paid each month. Also relevant to home renovation loans, where the amount can vary each month but there is still a fixed payment amount.
 - _Filtering un/categorized transactions_: When filtering transactions by whether they are categorized or not, the split transactions are not handled correctly. If a transaction is split into multiple categories, only when the original transaction is categorized does it get filtered out of the "uncategorized" view. Ideally, if any part of the transaction is uncategorized, it should show up in the uncategorized view.
-- Tests?
 - Better initial seeding of non transaction data like categories, groups and other types used to organize your transactions. Really only useful for first time installations.
 - Better graphs and budgeting features.
 - Close the loop on budgeting reconsiliation. Ideally at the end of each month you would reconscile each budget and allocate every last dollar into a particular budget. For instance you budget $100 for "food", but only spent $94. The $6 should be re-allocated to another budget like "savings" or "fun money". And in the opposite case, if you overspend in a budget, you should be able to take money from another budget to cover the overspend.

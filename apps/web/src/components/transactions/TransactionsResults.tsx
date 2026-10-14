@@ -72,10 +72,7 @@ export function TransactionsResults() {
     })
   }
 
-  const handlePagination = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number,
-  ) => {
+  const handlePagination = (event: React.ChangeEvent<unknown>, newPage: number) => {
     if (newPage !== page) {
       const url = updateSearchParamsUrl(pathname, searchParams, { page: String(newPage) })
       startTransition(() => {
@@ -87,15 +84,8 @@ export function TransactionsResults() {
   return (
     <>
       {transactions.length === 0 && (
-        <Box
-          p={10}
-          display={'flex'}
-          justifyContent={'center'}
-          alignItems={'center'}
-        >
-          <Typography variant={'subtitle1'}>
-            {t('transactions.none')}
-          </Typography>
+        <Box p={10} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          <Typography variant={'subtitle1'}>{t('transactions.none')}</Typography>
         </Box>
       )}
       {transactions.length > 0 && (

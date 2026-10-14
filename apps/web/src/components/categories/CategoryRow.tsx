@@ -131,7 +131,9 @@ export default function CategoryRow({ category, accountId }: { category: Categor
               category.isPayroll && (
                 <Chip
                   size={'small'}
-                  label={category.kind === 'payroll' ? t('categories.kind.payroll') : t('categories.kind.payrollViaGroup')}
+                  label={
+                    category.kind === 'payroll' ? t('categories.kind.payroll') : t('categories.kind.payrollViaGroup')
+                  }
                 />
               )
             )}

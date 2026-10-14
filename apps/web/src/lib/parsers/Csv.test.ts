@@ -172,7 +172,7 @@ describe('buildTransactions', () => {
     const again = await buildTransactions(rows, mapping, '7')
     expect(new Set(first.map((transaction) => transaction.bankTransactionId)).size).toBe(3)
     expect(again.map((transaction) => transaction.bankTransactionId)).toEqual(
-      first.map((transaction) => transaction.bankTransactionId)
+      first.map((transaction) => transaction.bankTransactionId),
     )
   })
 

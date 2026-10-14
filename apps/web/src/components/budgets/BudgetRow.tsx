@@ -111,7 +111,7 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
           nodeId: budget?.nodeId,
           name: fields.name || budget?.name || '',
           amount: fields.amount || budget?.amount,
-          startingAmount: isSavingsBudget === true ? fields.startingAmount ?? budget?.startingAmount ?? null : null,
+          startingAmount: isSavingsBudget === true ? (fields.startingAmount ?? budget?.startingAmount ?? null) : null,
           effectiveDate: isSavingsBudget === true ? fields.effectiveDate || null : null,
         },
       })

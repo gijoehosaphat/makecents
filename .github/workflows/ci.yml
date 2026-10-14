@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.4
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: budget
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U user -d budget"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://user:pass@localhost:5432/budget
+      AUTH_SECRET: ci-secret
+      API_PORT: 3002
+      NEXT_PUBLIC_CODEGEN_GRAPH_URL: http://localhost:3002/api/graphql
+    steps:
+      - uses: actions/checkout@v4
+      # Reads the pnpm version from "packageManager" in package.json
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.0
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Migrate database
+        run: pnpm migrate
+      # GraphQL types are generated from the running API schema and are not committed
+      - name: Start API
+        run: |
+          pnpm --dir apps/api exec tsx src/index.ts &
+          pnpm exec wait-on tcp:3002 --timeout 60000
+      - name: Generate GraphQL types
+        run: pnpm --dir apps/web codegen
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Test
+        run: pnpm test

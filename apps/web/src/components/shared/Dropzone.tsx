@@ -49,7 +49,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
 
         const addAccountGroup = (newAccountGroup: AccountGroup) => {
           const index = accountGroups.findIndex(
-            (accountGroup) => accountGroup.account.bankAccountId === newAccountGroup.account.bankAccountId
+            (accountGroup) => accountGroup.account.bankAccountId === newAccountGroup.account.bankAccountId,
           )
           if (index === -1) {
             accountGroups.push(newAccountGroup)
@@ -61,7 +61,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
         parsedFiles.forEach((ofxData) => {
           const addTransactionsToAccountGroup = (
             statementTransactions: StatementTransaction[],
-            accountGroupIndex: number
+            accountGroupIndex: number,
           ) => {
             statementTransactions.forEach((statementTransaction) => {
               const newTransaction = {
@@ -73,7 +73,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
                 type: statementTransaction.TRNTYPE,
               }
               const index = accountGroups[accountGroupIndex].transactions.findIndex(
-                (transaction) => transaction.bankTransactionId === newTransaction.bankTransactionId
+                (transaction) => transaction.bankTransactionId === newTransaction.bankTransactionId,
               )
               if (index === -1) {
                 accountGroups[accountGroupIndex].transactions.push(newTransaction)
@@ -99,7 +99,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
             const transactionStatements = bankAccount?.STMTRS?.BANKTRANLIST?.STMTTRN
             addTransactionsToAccountGroup(
               Array.isArray(transactionStatements) ? transactionStatements : [transactionStatements],
-              index
+              index,
             )
           }
 
@@ -121,7 +121,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
             const transactionStatements = creditCardAccount?.CCSTMTRS?.BANKTRANLIST?.STMTTRN
             addTransactionsToAccountGroup(
               Array.isArray(transactionStatements) ? transactionStatements : [transactionStatements],
-              index
+              index,
             )
           }
 
@@ -150,7 +150,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
         })
       }
     },
-    [uploadHandler, currentAccountId]
+    [uploadHandler, currentAccountId],
   )
 
   const processParsedFiles = useCallback(
@@ -168,7 +168,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
       })
       processOfxData(parsedFiles, fileName)
     },
-    [processOfxData]
+    [processOfxData],
   )
 
   const onDrop = useCallback(
@@ -229,7 +229,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
         }
       })
     },
-    [processParsedFiles, enqueueSnackbar, t]
+    [processParsedFiles, enqueueSnackbar, t],
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

@@ -4,6 +4,15 @@
   "private": true,
   "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Joe Leonard <joeleonard@gmail.com>",
+  "scripts": {
+    "dev": "./script/dev",
+    "start": "./script/start",
+    "migrate": "knex migrate:latest",
+    "migrate:up": "knex migrate:up",
+    "migrate:down": "knex migrate:down",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
   "dependencies": {
     "@auth/core": "0.41.0",
     "@graphile/pg-aggregates": "^0.1.1",
@@ -23,5 +32,8 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.3"
   }
 }

@@ -24,7 +24,16 @@ describe('buildTransactionsCsv', () => {
 
   it('prefers custom name and memo and quotes embedded quotes', () => {
     const csv = buildTransactionsCsv(
-      [tx({ posted: '2026-03-05T12:00:00', name: 'RAW', customName: 'My "thing"', memo: 'm', customMemo: 'line\nbreak', amount: 100 })],
+      [
+        tx({
+          posted: '2026-03-05T12:00:00',
+          name: 'RAW',
+          customName: 'My "thing"',
+          memo: 'm',
+          customMemo: 'line\nbreak',
+          amount: 100,
+        }),
+      ],
       lookups,
     )
     expect(csv).toContain('"My ""thing""","line\nbreak"')

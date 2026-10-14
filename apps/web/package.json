@@ -4,6 +4,15 @@
   "private": true,
   "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Joe Leonard <joeleonard@gmail.com>",
+  "scripts": {
+    "dev": "./script/dev",
+    "start": "./script/start",
+    "codegen": "graphql-codegen",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
   "dependencies": {
     "@apollo/client": "^4.1.6",
     "@apollo/client-integration-nextjs": "^0.14.4",
@@ -20,7 +29,7 @@
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
     "@mui/x-date-pickers": "^8.27.2",
-    "@types/node": "^25.3.3",
+    "@types/node": "^22.19.0",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "19.2.3",
@@ -29,7 +38,7 @@
     "baseline-browser-mapping": "^2.10.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
-    "eslint": "^10.0.2",
+    "eslint": "^9",
     "eslint-config-next": "^16.1.6",
     "graphql": "^16.13.0",
     "graphql-codegen-typescript-validation-schema": "^0.18.1",

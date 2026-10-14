@@ -1,7 +1,16 @@
 import React, { useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ListSubheader, Collapse, List } from '@mui/material'
-import { AccountBalance, Wallet, Savings, CreditCard, ExpandLess, ExpandMore, VisibilityOff, Visibility } from '@mui/icons-material'
+import {
+  AccountBalance,
+  Wallet,
+  Savings,
+  CreditCard,
+  ExpandLess,
+  ExpandMore,
+  VisibilityOff,
+  Visibility,
+} from '@mui/icons-material'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { formatMoney } from '@/lib/formatMoney'
 import { useAmountVisibility } from '@/components/context/AmountVisibilityContext'
@@ -24,7 +33,7 @@ export function BankAccountList() {
   const closedBankAccounts = bankAccounts.filter((bankAccount) => bankAccount.closed)
   const visibleBankAccounts = showClosed ? bankAccounts : openBankAccounts
 
-  let totals: { [key: string]: number } = {}
+  const totals: { [key: string]: number } = {}
   openBankAccounts.forEach((bankAccount) => {
     if (bankAccount.currency && bankAccount.balance) {
       if (!totals[bankAccount.currency]) {
@@ -34,7 +43,7 @@ export function BankAccountList() {
       }
     }
   })
-  let total: string[] = []
+  const total: string[] = []
   Object.keys(totals).forEach((currency) => {
     total.push(formatMoney(totals[currency] / 100, currency || 'CAD', hidden))
   })
@@ -79,7 +88,11 @@ export function BankAccountList() {
                 onClick={() => {
                   router.push(`/${currentAccountId}/dashboard/bank-account/${bankAccount.id}${queryString}`)
                 }}
-                primary={bankAccount.closed ? `${accountLabel(bankAccount)} (${t('dashboard.closed')})` : accountLabel(bankAccount)}
+                primary={
+                  bankAccount.closed
+                    ? `${accountLabel(bankAccount)} (${t('dashboard.closed')})`
+                    : accountLabel(bankAccount)
+                }
                 secondary={formatMoney(bankAccount.balance / 100, bankAccount?.currency || 'CAD', hidden)}
                 icon={icon}
                 selected={pathname === `/${currentAccountId}/dashboard/bank-account/${bankAccount.id}`}

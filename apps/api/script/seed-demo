@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+set -e
+
+# Loads the demo seed data, but only into a database that has no users yet.
+# The seeds delete existing rows, so this is safe to run on every container start.
+cd "$(dirname "$0")/.."
+
+# Exits 0 for an empty database, 10 when users exist, anything else is a real error
+status=0
+pnpm exec tsx -e "
+import knex from 'knex'
+import config from './knexfile'
+;(async () => {
+  const db = knex(config)
+  const row = await db('app_private.user').count('* as count').first()
+  await db.destroy()
+  process.exit(Number(row?.count) === 0 ? 0 : 10)
+})()
+" || status=$?
+
+case $status in
+  0) pnpm exec knex seed:run ;;
+  10) echo "Database already has users, skipping demo seed" ;;
+  *) exit "$status" ;;
+esac

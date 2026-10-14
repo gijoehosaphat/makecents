@@ -13,14 +13,34 @@
   "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Joe Leonard <joeleonard@gmail.com>",
   "type": "commonjs",
-  "main": "index.js",
+  "private": true,
+  "packageManager": "pnpm@8.15.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "setup": "pnpm install",
+    "dev": "./script/dev",
+    "start": "./script/start",
+    "migrate": "pnpm --filter makecents-api migrate",
+    "example-data": "tsx src/generateExampleData.ts",
+    "test": "pnpm -r --workspace-concurrency=1 test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "lint:fix": "pnpm -r lint:fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
   "dependencies": {
     "@types/ejs": "^3.1.5",
-    "@types/node": "^25.0.5",
+    "@types/node": "^22.19.0",
     "concurrently": "^9.2.1",
     "ejs": "^3.1.10",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "wait-on": "^9.0.3"
+  },
+  "devDependencies": {
+    "prettier": "^3"
   }
 }

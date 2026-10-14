@@ -39,7 +39,7 @@ export function useUploadHandler() {
   async function createTransactionsForAccount(
     bankAccountId: number,
     transactions: InputTransaction[],
-    fileName?: string
+    fileName?: string,
   ): Promise<{ createdCount: number; duplicateCount: number; autoCategorizedCount: number; batchId?: number }> {
     const response = await importTransactions({
       variables: {
@@ -83,7 +83,7 @@ export function useUploadHandler() {
     duplicateCount: number,
     success: boolean,
     batchIds: number[] = [],
-    autoCategorizedCount = 0
+    autoCategorizedCount = 0,
   ) {
     if (success) {
       let message = t('upload.successCreated', {
@@ -174,7 +174,7 @@ export function useUploadHandler() {
   /** Imports a CSV's rows for one or more bank accounts that already exist, with a single result message. */
   async function importCsvTransactions(
     groups: { bankAccountId: number; transactions: InputTransaction[] }[],
-    fileName?: string
+    fileName?: string,
   ): Promise<void> {
     let createdCount = 0
     let duplicateCount = 0

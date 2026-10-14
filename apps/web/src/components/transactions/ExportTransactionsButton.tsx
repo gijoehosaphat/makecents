@@ -60,7 +60,11 @@ export function ExportTransactionsButton() {
           search,
           sort,
         })
-        const result = await client.query({ query: query as any, variables: variables as any, fetchPolicy: 'network-only' })
+        const result = await client.query({
+          query: query as any,
+          variables: variables as any,
+          fetchPolicy: 'network-only',
+        })
         const data = result.data as {
           transactionSearch?: { nodes: Transaction[] } | null
           allTransactions?: { nodes: Transaction[] } | null

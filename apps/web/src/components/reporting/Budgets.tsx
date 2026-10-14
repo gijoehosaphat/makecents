@@ -78,7 +78,8 @@ function BudgetItem({
   // Where an even spend would be by today, so a bar can be read as ahead of or behind pace. Only meaningful for a
   // monthly budget while its month is under way.
   const today = new Date()
-  const paceFraction = !isAccruing && maxAmount > 0 && isSameMonth(dateTo, today) ? getDate(today) / getDaysInMonth(today) : null
+  const paceFraction =
+    !isAccruing && maxAmount > 0 && isSameMonth(dateTo, today) ? getDate(today) / getDaysInMonth(today) : null
   const pacePercentage = paceFraction === null ? null : normalize(paceFraction * 100)
   const remainingCaption = isAccruing
     ? t('budgets.available')
@@ -97,8 +98,7 @@ function BudgetItem({
   return (
     <Box
       sx={{
-        backgroundColor:
-          isHover || anchorEl !== null ? theme.palette.hover.paper : 'none',
+        backgroundColor: isHover || anchorEl !== null ? theme.palette.hover.paper : 'none',
       }}
       ref={hoverRef}
     >
@@ -115,12 +115,8 @@ function BudgetItem({
         </Grid>
         <Grid size={7} sx={{ pt: 4, pb: 4 }}>
           <Box sx={{ position: 'relative', ml: 2, mr: 20 }}>
-            <Box
-              sx={{ borderRadius: 2, overflow: 'hidden', position: 'relative' }}
-            >
-              <Box
-                sx={{ width: '100%', display: 'flex', flexDirection: 'row' }}
-              >
+            <Box sx={{ borderRadius: 2, overflow: 'hidden', position: 'relative' }}>
+              <Box sx={{ width: '100%', display: 'flex', flexDirection: 'row' }}>
                 <Box
                   sx={{
                     width: `${percentage}%`,
@@ -195,10 +191,7 @@ function BudgetItem({
           </Box>
         </Grid>
         <Grid size={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <Typography
-            variant={'h4'}
-            sx={{ color: budgetItem.remaining < 0 ? TEXT_OVER : TEXT_UNDER }}
-          >
+          <Typography variant={'h4'} sx={{ color: budgetItem.remaining < 0 ? TEXT_OVER : TEXT_UNDER }}>
             {formatMoneyCents(isAccruing ? budgetItem.remaining : Math.abs(budgetItem.remaining), currency, hidden)}
           </Typography>
           <Typography variant={'caption'} color={'text.secondary'}>
@@ -206,10 +199,7 @@ function BudgetItem({
           </Typography>
         </Grid>
         <Grid size={1} sx={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton
-            onClick={handleOpenUserMenu}
-            sx={{ opacity: isHover || anchorEl !== null ? 1 : 0.4 }}
-          >
+          <IconButton onClick={handleOpenUserMenu} sx={{ opacity: isHover || anchorEl !== null ? 1 : 0.4 }}>
             <MoreVert />
           </IconButton>
           <Menu
@@ -263,7 +253,7 @@ export function Budgets() {
   useCategories()
   const { currentAccountId, bankAccounts } = useAppContext()
   const { dateTo, dateFrom, isFallback } = useBudgetPeriod()
-    const [detailsOpen, setDetailsOpen] = useState(false)
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const [previewNodeIds, setPreviewNodeIds] = useState<string[] | null>(null)
   const [selectedBudgetItem, setSelectedBudgetItem] = useState<BudgetItem | null>(null)
 
@@ -281,11 +271,7 @@ export function Budgets() {
         const transactionsSum = spentInPeriod(transactions, dateFrom, dateTo)
         const budgeted = Number(group.budget.amount)
         const available = isAccruing
-          ? availableBalance(
-              { ...group.budget, effectiveDate: group.budget.effectiveDate },
-              group.transactions,
-              dateTo,
-            )
+          ? availableBalance({ ...group.budget, effectiveDate: group.budget.effectiveDate }, group.transactions, dateTo)
           : null
         return {
           budget: group.budget,
@@ -307,7 +293,10 @@ export function Budgets() {
   // are set aside every month and spent from their balance later.
   const fixedBudgeted = useMemo(() => fixedItems.reduce((sum, item) => sum + item.budgeted, 0), [fixedItems])
   const accruingBudgeted = useMemo(() => accruingItems.reduce((sum, item) => sum + item.budgeted, 0), [accruingItems])
-  const fundBalance = useMemo(() => accruingItems.reduce((sum, item) => sum + (item.available ?? 0), 0), [accruingItems])
+  const fundBalance = useMemo(
+    () => accruingItems.reduce((sum, item) => sum + (item.available ?? 0), 0),
+    [accruingItems],
+  )
 
   // Money that left each kind of budget this month, counting a transaction once even if its category is in more
   // than one budget (a category in a fixed budget counts as fixed). Transfers between the user's own accounts are
@@ -417,7 +406,10 @@ export function Budgets() {
       <TransactionsPreview
         nodeIds={previewNodeIds}
         pool={previewPool}
-        refetchQuery={{ query: GetTransactionsGroupedByBudgetDocument, variables: { accountId: currentAccountId || 0 } }}
+        refetchQuery={{
+          query: GetTransactionsGroupedByBudgetDocument,
+          variables: { accountId: currentAccountId || 0 },
+        }}
         handleComplete={handlePreviewTransactionsClose}
       />
     </>

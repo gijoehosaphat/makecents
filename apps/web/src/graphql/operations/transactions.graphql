@@ -10,12 +10,7 @@ query GetTransactionsByBankAccounts(
   $filter: TransactionFilter!
   $orderBy: [TransactionsOrderBy!]
 ) {
-  allTransactions(
-    first: $first
-    offset: $offset
-    filter: $filter
-    orderBy: $orderBy
-  ) {
+  allTransactions(first: $first, offset: $offset, filter: $filter, orderBy: $orderBy) {
     nodes {
       ...TransactionFragment
       ...TransactionSuggestionsFragment
@@ -41,12 +36,7 @@ query GetFilteredTransactionsByBankAccounts(
   $filter: TransactionFilter!
   $orderBy: [TransactionsOrderBy!]
 ) {
-  allTransactions(
-    first: $first
-    offset: $offset
-    filter: $filter
-    orderBy: $orderBy
-  ) {
+  allTransactions(first: $first, offset: $offset, filter: $filter, orderBy: $orderBy) {
     nodes {
       ...TransactionFragment
       ...TransactionSuggestionsFragment
@@ -66,18 +56,8 @@ query GetFilteredTransactionsByBankAccounts(
   }
 }
 
-query GetFilteredTransactionsBySearch(
-  $first: Int
-  $offset: Int
-  $filter: TransactionFilter!
-  $match: String!
-) {
-  transactionSearch(
-    first: $first
-    offset: $offset
-    filter: $filter
-    match: $match
-  ) {
+query GetFilteredTransactionsBySearch($first: Int, $offset: Int, $filter: TransactionFilter!, $match: String!) {
+  transactionSearch(first: $first, offset: $offset, filter: $filter, match: $match) {
     nodes {
       ...TransactionFragment
       ...TransactionSuggestionsFragment
@@ -219,27 +199,16 @@ query TransactionSearch($match: String) {
 }
 
 query TransactionByAmount($amount: BigInt!) {
-  allTransactions(
-    filter: { amount: { equalTo: $amount } }
-    orderBy: POSTED_DESC
-  ) {
+  allTransactions(filter: { amount: { equalTo: $amount } }, orderBy: POSTED_DESC) {
     nodes {
       ...TransactionFragment
     }
   }
 }
 
-mutation CreateTransfer(
-  $transactionSourceId: Int!
-  $transactionTargetId: Int!
-) {
+mutation CreateTransfer($transactionSourceId: Int!, $transactionTargetId: Int!) {
   createTransfer(
-    input: {
-      transfer: {
-        transactionSourceId: $transactionSourceId
-        transactionTargetId: $transactionTargetId
-      }
-    }
+    input: { transfer: { transactionSourceId: $transactionSourceId, transactionTargetId: $transactionTargetId } }
   ) {
     transfer {
       ...TransferFragment
@@ -267,11 +236,7 @@ query GetTransfer($nodeId: ID!) {
   }
 }
 
-query GetTransactionAggregatesByBankAccount(
-  $bankAccountIds: [Int!]
-  $dateFrom: Datetime
-  $dateTo: Datetime
-) {
+query GetTransactionAggregatesByBankAccount($bankAccountIds: [Int!], $dateFrom: Datetime, $dateTo: Datetime) {
   deposits: allTransactions(
     filter: {
       bankAccountId: { in: $bankAccountIds }

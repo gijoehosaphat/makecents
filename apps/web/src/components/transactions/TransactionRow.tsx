@@ -28,15 +28,10 @@ function TransactionAmount({
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
   const amount = transaction.amount || 0
-  if (
-    (type === 'withdrawal' && amount < 0) ||
-    (type === 'deposit' && amount > 0)
-  ) {
+  if ((type === 'withdrawal' && amount < 0) || (type === 'deposit' && amount > 0)) {
     return (
       <>
-        <Typography sx={{ minHeight: 24 }}>
-          {formatMoney(amount / 100, 'CAD', hidden)}
-        </Typography>
+        <Typography sx={{ minHeight: 24 }}>{formatMoney(amount / 100, 'CAD', hidden)}</Typography>
         {showOriginalAmount && (
           <Typography variant={'caption'} color={'text.secondary'}>
             {t('transactions.splitOfTotal', {
@@ -56,9 +51,9 @@ function rowSx(dimmed: boolean, background?: string) {
   return {
     '&:hover': {
       '.transaction-row-hover': { visibility: 'visible' },
-      'opacity': 1,
+      opacity: 1,
     },
-    'opacity': dimmed ? 0.4 : 1,
+    opacity: dimmed ? 0.4 : 1,
     ...(background ? { backgroundColor: background } : {}),
   }
 }
@@ -96,69 +91,36 @@ export default function TransactionRow({
   }
 
   const hasTransfer = useMemo(() => {
-    return (
-      !!transaction.transferByTransactionSourceId ||
-      !!transaction.transferByTransactionTargetId
-    )
-  }, [
-    transaction.transferByTransactionSourceId,
-    transaction.transferByTransactionTargetId,
-  ])
+    return !!transaction.transferByTransactionSourceId || !!transaction.transferByTransactionTargetId
+  }, [transaction.transferByTransactionSourceId, transaction.transferByTransactionTargetId])
 
   return (
     <>
-      <TableRow
-        key={transaction.bankTransactionId}
-        sx={rowSx(isDimmed(transaction))}
-        hover={true}
-      >
+      <TableRow key={transaction.bankTransactionId} sx={rowSx(isDimmed(transaction))} hover={true}>
         <TableCell sx={{ width: '9%' }}>
-          <TransactionDateEditor
-            transaction={transaction}
-            refetchQuery={refetchQuery}
-          >
+          <TransactionDateEditor transaction={transaction} refetchQuery={refetchQuery}>
             <DateIcon date={new Date(transaction.posted || '')} />
           </TransactionDateEditor>
         </TableCell>
         {showBankAccount && (
           <TableCell sx={{ width: '15%' }}>
-            <Typography variant={'body2'}>
-              {bankAccountLabel(transaction.bankAccountId)}
-            </Typography>
+            <Typography variant={'body2'}>{bankAccountLabel(transaction.bankAccountId)}</Typography>
           </TableCell>
         )}
         <TableCell>
-          <TransactionMemoEditor
-            transaction={transaction}
-            refetchQuery={refetchQuery}
-          >
-            <Typography variant={'body2'}>
-              {transaction.customName || transaction.name}
-            </Typography>
-            <Typography variant={'caption'}>
-              {transaction.customMemo || transaction.memo}
-            </Typography>
+          <TransactionMemoEditor transaction={transaction} refetchQuery={refetchQuery}>
+            <Typography variant={'body2'}>{transaction.customName || transaction.name}</Typography>
+            <Typography variant={'caption'}>{transaction.customMemo || transaction.memo}</Typography>
           </TransactionMemoEditor>
         </TableCell>
         <TableCell sx={{ width: '25%' }}>
           <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-            {!hasTransfer && (
-              <CategoryEditor
-                transaction={transaction}
-                refetchQuery={refetchQuery}
-              />
-            )}
+            {!hasTransfer && <CategoryEditor transaction={transaction} refetchQuery={refetchQuery} />}
             {!categorizeOnly && (hasTransfer || !transaction.categoryId) && !hasSplits && (
-              <TransactionLink
-                transaction={transaction}
-                refetchQuery={refetchQuery}
-              />
+              <TransactionLink transaction={transaction} refetchQuery={refetchQuery} />
             )}
             {!categorizeOnly && !hasTransfer && (
-              <TransactionSplit
-                transaction={transaction}
-                refetchQuery={refetchQuery}
-              />
+              <TransactionSplit transaction={transaction} refetchQuery={refetchQuery} />
             )}
           </Box>
         </TableCell>
@@ -171,53 +133,31 @@ export default function TransactionRow({
       </TableRow>
       {splitTransactions.map((splitTransaction) => {
         return (
-          <TableRow
-            key={splitTransaction.nodeId}
-            sx={rowSx(isDimmed(splitTransaction), '#00000011')}
-            hover={true}
-          >
+          <TableRow key={splitTransaction.nodeId} sx={rowSx(isDimmed(splitTransaction), '#00000011')} hover={true}>
             <TableCell sx={{ width: '9%' }}>
               <CallSplit color={'primary'} sx={{ ml: 2 }} />
             </TableCell>
             {showBankAccount && (
               <TableCell sx={{ width: '15%' }}>
-                <Typography variant={'body2'}>
-                  {bankAccountLabel(splitTransaction.bankAccountId)}
-                </Typography>
+                <Typography variant={'body2'}>{bankAccountLabel(splitTransaction.bankAccountId)}</Typography>
               </TableCell>
             )}
             <TableCell>
-              <TransactionMemoEditor
-                transaction={splitTransaction}
-                refetchQuery={refetchQuery}
-              >
-                <Typography variant={'body2'}>
-                  {splitTransaction.customName || splitTransaction.name}
-                </Typography>
-                <Typography variant={'caption'}>
-                  {splitTransaction.customMemo || splitTransaction.memo}
-                </Typography>
+              <TransactionMemoEditor transaction={splitTransaction} refetchQuery={refetchQuery}>
+                <Typography variant={'body2'}>{splitTransaction.customName || splitTransaction.name}</Typography>
+                <Typography variant={'caption'}>{splitTransaction.customMemo || splitTransaction.memo}</Typography>
               </TransactionMemoEditor>
             </TableCell>
             <TableCell sx={{ width: '25%' }}>
               <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-                <CategoryEditor
-                  transaction={splitTransaction}
-                  refetchQuery={refetchQuery}
-                />
+                <CategoryEditor transaction={splitTransaction} refetchQuery={refetchQuery} />
               </Box>
             </TableCell>
             <TableCell align={'right'} sx={{ width: '10%' }}>
-              <TransactionAmount
-                transaction={splitTransaction}
-                type={'withdrawal'}
-              />
+              <TransactionAmount transaction={splitTransaction} type={'withdrawal'} />
             </TableCell>
             <TableCell align={'right'} sx={{ width: '10%' }}>
-              <TransactionAmount
-                transaction={splitTransaction}
-                type={'deposit'}
-              />
+              <TransactionAmount transaction={splitTransaction} type={'deposit'} />
             </TableCell>
           </TableRow>
         )

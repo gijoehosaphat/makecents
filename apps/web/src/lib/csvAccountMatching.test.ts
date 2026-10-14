@@ -57,7 +57,7 @@ describe('scoreOverlap', () => {
         { posted: day(3), amount: 500 },
         { posted: day(10), amount: -1200 },
       ],
-      existing
+      existing,
     )
     expect(scores.get(1)).toBe(2)
     expect(scores.get(2)).toBe(1)
@@ -69,7 +69,7 @@ describe('scoreOverlap', () => {
         { posted: day(2), amount: -500 },
         { posted: day(2), amount: -500 },
       ],
-      existing
+      existing,
     )
     expect(scores.get(1)).toBe(1)
   })
@@ -102,14 +102,19 @@ describe('matchAccount', () => {
     expect(matchAccount({ accounts, fileName: 'export.csv', overlapScores: new Map([[1, 5]]) })?.accountId).toBe(1)
     expect(matchAccount({ accounts, fileName: 'export.csv', overlapScores: new Map([[1, 2]]) })).toBeUndefined()
     expect(
-      matchAccount({ accounts, fileName: 'export.csv', overlapScores: new Map([[1, 6], [2, 4]]) })
+      matchAccount({
+        accounts,
+        fileName: 'export.csv',
+        overlapScores: new Map([
+          [1, 6],
+          [2, 4],
+        ]),
+      }),
     ).toBeUndefined()
   })
 
   it('does not guess when the file name and the transactions disagree', () => {
-    expect(
-      matchAccount({ accounts, fileName: 'Visa2222.csv', overlapScores: new Map([[1, 10]]) })
-    ).toBeUndefined()
+    expect(matchAccount({ accounts, fileName: 'Visa2222.csv', overlapScores: new Map([[1, 10]]) })).toBeUndefined()
   })
 
   it('uses overlap to break a tie between accounts sharing an ending', () => {
@@ -118,8 +123,15 @@ describe('matchAccount', () => {
       { id: 2, name: 'B ••3333' },
     ]
     expect(
-      matchAccount({ accounts: shared, accountColumnValue: '3333', fileName: 'x.csv', overlapScores: new Map([[2, 5]]) })
+      matchAccount({
+        accounts: shared,
+        accountColumnValue: '3333',
+        fileName: 'x.csv',
+        overlapScores: new Map([[2, 5]]),
+      }),
     ).toEqual({ accountId: 2, reason: 'overlap', detail: '5' })
-    expect(matchAccount({ accounts: shared, accountColumnValue: '3333', fileName: 'x.csv', overlapScores: none })).toBeUndefined()
+    expect(
+      matchAccount({ accounts: shared, accountColumnValue: '3333', fileName: 'x.csv', overlapScores: none }),
+    ).toBeUndefined()
   })
 })

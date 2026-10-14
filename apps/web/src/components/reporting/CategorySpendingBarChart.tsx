@@ -147,7 +147,7 @@ export function CategorySpendingBarChart() {
 
   const categoryGroupsByGroup = groupBy(
     categoryGroups,
-    (cg: CategoryGroup) => cg.customCategoryGroupByCustomCategoryGroupId?.name || ''
+    (cg: CategoryGroup) => cg.customCategoryGroupByCustomCategoryGroupId?.name || '',
   )
 
   const chartData = Object.keys(categoryGroupsByGroup).map((key) => {
@@ -164,8 +164,8 @@ export function CategorySpendingBarChart() {
     Math.ceil(
       measureLabelWidth(
         [...spending, ...chartData.flatMap((cd) => cd.data)].map((d) => d.label),
-        `16px ${fontFamily}`
-      )
+        `16px ${fontFamily}`,
+      ),
     ) + 16
 
   return (

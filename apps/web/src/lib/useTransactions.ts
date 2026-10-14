@@ -26,7 +26,7 @@ export function useTransactions({
   isCategoryNull?: boolean
 }) {
   const variables = useMemo(() => {
-    let tempVariables: GetTransactionsByBankAccountsVariables = {
+    const tempVariables: GetTransactionsByBankAccountsVariables = {
       filter: {
         bankAccountId: { in: bankAccountIds },
       },
@@ -93,7 +93,7 @@ export function useTransactions({
 
   const transactionsSansTransfers = useMemo(() => {
     return transactions.filter(
-      (transaction) => !transaction.transferByTransactionSourceId && !transaction.transferByTransactionTargetId
+      (transaction) => !transaction.transferByTransactionSourceId && !transaction.transferByTransactionTargetId,
     )
   }, [transactions])
 

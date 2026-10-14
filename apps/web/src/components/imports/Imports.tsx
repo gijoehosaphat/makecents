@@ -58,7 +58,7 @@ export default function Imports() {
       [...(data?.allImportBatches?.nodes ?? [])]
         .flatMap((batch) => (batch ? [batch] : []))
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
-    [data]
+    [data],
   )
 
   const labelFor = (bankAccountId: number) => {

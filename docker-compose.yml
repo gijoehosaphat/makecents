@@ -1,5 +1,39 @@
 services:
+  db:
+    image: postgres:17.4
+    environment:
+      POSTGRES_USER: makecents
+      POSTGRES_PASSWORD: makecents
+      POSTGRES_DB: budget
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U makecents -d budget']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   app:
     build: .
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
-      - "3001:3001"
+      - '3001:3001'
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://makecents:makecents@db:5432/budget
+      API_PORT: 3002
+      WEB_PORT: 3001
+      # Change this before using real data.
+      AUTH_SECRET: ${AUTH_SECRET:-atruesecretkeythatshouldbechanged}
+      AUTH_URL: http://localhost:3001
+      BETTER_AUTH_URL: http://localhost:3001
+      BETTER_AUTH_SECRET: ${AUTH_SECRET:-atruesecretkeythatshouldbechanged}
+      NEXT_PUBLIC_GRAPH_URL: http://localhost:3001/api/graphql
+      NEXT_PUBLIC_CODEGEN_GRAPH_URL: http://localhost:3002/api/graphql
+    # Apply migrations (idempotent) and load the demo seed into an empty database before starting
+    command: sh -c "pnpm --dir apps/api migrate && ./apps/api/script/seed-demo && ./script/start"
+
+volumes:
+  pgdata:

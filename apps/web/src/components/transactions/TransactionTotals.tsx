@@ -38,7 +38,10 @@ export function TransactionTotals() {
 
   // Amounts in different currencies can't be added together, so totals are kept per currency.
   const totalsByCurrency = useMemo(() => {
-    const totals: Record<string, { deposits: number; withdrawals: number; transferDeposits: number; transferWithdrawals: number }> = {}
+    const totals: Record<
+      string,
+      { deposits: number; withdrawals: number; transferDeposits: number; transferWithdrawals: number }
+    > = {}
     for (const bankAccount of bankAccounts) {
       if (!filteredBankAccountIds.includes(bankAccount.id)) {
         continue

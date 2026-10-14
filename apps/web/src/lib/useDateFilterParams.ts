@@ -9,7 +9,8 @@ export function useDateFilterParams() {
   const today = useMemo(() => new Date(), [])
 
   const dateRangeParam = searchParams?.get('dateRange')
-  const dateRange: DateFilterMode = dateRangeParam === 'year' || dateRangeParam === 'all' || dateRangeParam === 'custom' ? dateRangeParam : 'month'
+  const dateRange: DateFilterMode =
+    dateRangeParam === 'year' || dateRangeParam === 'all' || dateRangeParam === 'custom' ? dateRangeParam : 'month'
 
   const dateFromParam = useMemo(() => {
     return parse(String(searchParams?.get('dateFrom')), 'yyyy-MM-dd', new Date())

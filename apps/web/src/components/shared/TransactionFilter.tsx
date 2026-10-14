@@ -95,21 +95,21 @@ export function TransactionFilter({
       >
         <Typography>{t('shared.filter')}</Typography>
         {!hideCategorized && (
-        <Box ml={2}>
-          <FormControl size={'small'} sx={{ minWidth: 8 }}>
-            <InputLabel>{t('shared.categorized')}: </InputLabel>
-            <Select
-              value={categorized}
-              label={t('shared.categorized')}
-              onChange={handleCategorizedChange}
-              sx={{ minWidth: 140, maxWidth: 140 }}
-            >
-              <MenuItem value={'any'}>{t('shared.any')}</MenuItem>
-              <MenuItem value={'true'}>{t('shared.categorized')}</MenuItem>
-              <MenuItem value={'false'}>{t('shared.uncategorized')}</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+          <Box ml={2}>
+            <FormControl size={'small'} sx={{ minWidth: 8 }}>
+              <InputLabel>{t('shared.categorized')}: </InputLabel>
+              <Select
+                value={categorized}
+                label={t('shared.categorized')}
+                onChange={handleCategorizedChange}
+                sx={{ minWidth: 140, maxWidth: 140 }}
+              >
+                <MenuItem value={'any'}>{t('shared.any')}</MenuItem>
+                <MenuItem value={'true'}>{t('shared.categorized')}</MenuItem>
+                <MenuItem value={'false'}>{t('shared.uncategorized')}</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         )}
         <Box ml={2}>
           <FormControl size={'small'}>

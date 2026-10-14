@@ -26,7 +26,7 @@ export default function Groups() {
         if ((a.name || '') > (b.name || '')) return 1
         if ((a.name || '') < (b.name || '')) return -1
         return 0
-      }
+      },
     )
   }, [query?.data?.allCustomCategoryGroups?.nodes])
 

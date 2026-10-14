@@ -19,7 +19,7 @@ export const IMPORT_TRANSACTIONS_V3 = replaceOnce(
   `IF inserted > 0 THEN
           batch.auto_categorized_count := app_private.auto_categorize_import_batch(batch.id);
         END IF;
-        RETURN batch;`
+        RETURN batch;`,
 )
 
 export async function up(knex: Knex): Promise<void> {
