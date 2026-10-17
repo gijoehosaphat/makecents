@@ -16,3 +16,32 @@ query GetUserAndAccountsAndBankAccountsByEmail($email: String!) {
     }
   }
 }
+
+query GetAccountMembers($accountId: Int!) {
+  allAccountMembers(condition: { accountId: $accountId }) {
+    nodes {
+      nodeId
+      accountId
+      userId
+      role
+      createdAt
+      userByUserId {
+        ...UserFragment
+      }
+    }
+  }
+}
+
+mutation AddAccountUser($accountId: Int!, $email: String!, $password: String!, $name: String) {
+  addAccountUser(input: { accountId: $accountId, email: $email, password: $password, name: $name }) {
+    user {
+      ...UserFragment
+    }
+  }
+}
+
+mutation RemoveAccountUser($accountId: Int!, $userId: Int!) {
+  removeAccountUser(input: { accountId: $accountId, userId: $userId }) {
+    boolean
+  }
+}

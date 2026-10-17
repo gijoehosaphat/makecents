@@ -310,6 +310,24 @@
       "previewMemo": "Memo",
       "previewAmount": "Amount",
       "import": "Import"
+    },
+    "users": {
+      "title": "Users",
+      "manage": "Manage users",
+      "description": "Everyone here can sign in and manage this account's bank accounts.",
+      "primaryOnly": "Only the primary user can add or remove users.",
+      "add": "Add user",
+      "remove": "Remove user",
+      "removeConfirm": "Remove {name}? They will no longer be able to sign in to this account.",
+      "removeFailed": "Could not remove the user. Please try again.",
+      "role": "Role",
+      "primary": "Primary",
+      "member": "Member",
+      "you": "you",
+      "passwordHint": "They can change it after signing in.",
+      "passwordTooShort": "Password must be at least {length} characters",
+      "emailTaken": "A user with that email already exists.",
+      "addFailed": "Could not add the user. Please try again."
     }
   }
 }

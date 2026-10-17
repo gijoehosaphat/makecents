@@ -1,4 +1,4 @@
-import { BarChart, Home, Settings } from '@mui/icons-material'
+import { BarChart, Home, People, Settings } from '@mui/icons-material'
 import { Box, Divider, Typography } from '@mui/material'
 
 export function PageTitle({ icon, title }: { icon: string; title: string }) {
@@ -12,6 +12,9 @@ export function PageTitle({ icon, title }: { icon: string; title: string }) {
       break
     case 'home':
       iconComponent = <Home fontSize={'large'} color={'secondary'} sx={{ mt: 1, mr: 3 }} />
+      break
+    case 'people':
+      iconComponent = <People fontSize={'large'} color={'secondary'} sx={{ mt: 1, mr: 3 }} />
       break
   }
 
