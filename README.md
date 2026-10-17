@@ -65,19 +65,9 @@ To generate a fake QFX file (a checking account, a savings account and a credit 
 
 From the root directory: `pnpm typecheck`, `pnpm lint` and `pnpm test`. These also run in CI (GitHub Actions). Typechecking needs the generated GraphQL types, so run the API and `pnpm --dir apps/web codegen` first (`pnpm dev` does this for you). The API tests create (and drop) a temporary database on the PostgreSQL server in `apps/api/.env`, so that role needs `CREATEDB`. `pnpm format` runs Prettier.
 
-## TODO
+## Roadmap
 
-- _External loans_: Add ability to create loans that are just manually updated. This is for things like mortgages, where the payment amount is fixed but the interest and principal amounts vary each month. It would be nice to be able to track the loan balance over time and see how much interest vs principal is being paid each month. Also relevant to home renovation loans, where the amount can vary each month but there is still a fixed payment amount.
-- _Filtering un/categorized transactions_: When filtering transactions by whether they are categorized or not, the split transactions are not handled correctly. If a transaction is split into multiple categories, only when the original transaction is categorized does it get filtered out of the "uncategorized" view. Ideally, if any part of the transaction is uncategorized, it should show up in the uncategorized view.
-- Better initial seeding of non transaction data like categories, groups and other types used to organize your transactions. Really only useful for first time installations.
-- Better graphs and budgeting features.
-- Close the loop on budgeting reconsiliation. Ideally at the end of each month you would reconscile each budget and allocate every last dollar into a particular budget. For instance you budget $100 for "food", but only spent $94. The $6 should be re-allocated to another budget like "savings" or "fun money". And in the opposite case, if you overspend in a budget, you should be able to take money from another budget to cover the overspend.
-- Improve search and the ability to filter transactions by multiple criteria. Search by amount, date range, etc. We already have a bunch of things setup here.
-- _Transaction clarity_ When viewing a transaction, sometimes the memo data is cryptic. Improve the transaction detail view to show more useful information, potentially launching a simple google search for the vendor name to help the user identify the transaction. Also potentially support aliases for vendors so the user can rename them to something more meaningful.
-- _Automatic transaction categorization_: Improve transaction categorization using better rules and automatic categorization based on prior user behavior. Ideally this happens at import time. There are some remnants of regular expressions to assist in matching but it is not fleshed out at all.
-- Closely monitor postgraphile and their upcoming v5 release for new features and improvements we can take advantage of. Seems like this is a rather large change and I would be fearful of it breaking schema.
-- Better handling of multiple currencies? I primarily use CAD but have accounts with USD. All the bank accounts are marked as such, but there is little else in the app that respects currency differences and no concept of exchange rates. Maybe this is OK?
-- The API layer doesn't really get "built" into a deployable artifact. We should have a proper build step that compiles the TS into JS and outputs to a dist/ folder. Probably w/ vite.
+Planned and possible work is in [ROADMAP.md](ROADMAP.md).
 
 ## Thanks
 
