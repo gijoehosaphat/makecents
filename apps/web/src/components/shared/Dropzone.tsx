@@ -17,6 +17,7 @@ import { useUploadHandler } from '@/lib/useUploadHandler'
 import { useSnackbar } from 'notistack'
 import { CsvImportDialog } from './CsvImportDialog'
 import { toCents } from '@/lib/formatMoney'
+import { accountTypeFromOfx } from '@/lib/bankAccountTypes'
 
 function parseDate(dateString: string) {
   const dateParts = String(dateString).split('[')
@@ -85,7 +86,7 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
             const accountGroup = {
               account: {
                 bankAccountId: bankAccount.STMTRS.BANKACCTFROM.ACCTID,
-                type: bankAccount.STMTRS.BANKACCTFROM.ACCTTYPE,
+                ...accountTypeFromOfx(bankAccount.STMTRS.BANKACCTFROM.ACCTTYPE),
                 currency: bankAccount.STMTRS.CURDEF,
                 accountId,
               },

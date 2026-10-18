@@ -1,4 +1,4 @@
-export const ACCOUNT_TYPES = ['CHECKING', 'SAVINGS', 'CREDIT_CARD'] as const
+import { isAccountType } from './bankAccountTypes'
 
 type Translate = (key: string) => string
 
@@ -10,7 +10,6 @@ export function bankAccountLabel(
   if (account.name) {
     return account.name
   }
-  const isKnownType = ACCOUNT_TYPES.some((type) => type === account.type)
-  const type = isKnownType ? t(`csvImport.accountTypes.${account.type}`) : (account.type ?? '')
+  const type = isAccountType(account.type) ? t(`bankAccounts.types.${account.type}`) : (account.type ?? '')
   return `${type} ••${(account.bankAccountId ?? '').slice(-4)}`
 }

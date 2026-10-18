@@ -6,7 +6,7 @@ query GetUserAndAccountsAndBankAccountsByEmail($email: String!) {
         role
         accountByAccountId {
           ...AccountFragment
-          bankAccountsByAccountId {
+          bankAccountsByAccountId(orderBy: [SORT_ORDER_ASC, ID_ASC]) {
             nodes {
               ...BankAccountFragment
             }

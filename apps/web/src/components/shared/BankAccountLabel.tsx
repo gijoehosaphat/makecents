@@ -3,14 +3,12 @@ import { useTranslations } from 'next-intl'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { useAmountVisibility } from '@/components/context/AmountVisibilityContext'
 import { bankAccountLabel } from '@/lib/bankAccountLabel'
+import { isAccountType } from '@/lib/bankAccountTypes'
 
 type LabelableAccount = { id?: number; name?: string | null; type?: string | null; bankAccountId?: string | null }
 
-const GENERIC_NAMES: { [type: string]: { key: string; letters: boolean } } = {
-  CREDIT_CARD: { key: 'creditCard', letters: true },
-  CHECKING: { key: 'checkingAccount', letters: false },
-  SAVINGS: { key: 'savingsAccount', letters: false },
-}
+// Credit cards are lettered ("Credit Card A"); every other type is numbered ("Savings Account 1").
+const LETTERED_TYPES = ['CREDIT_CARD']
 
 function letterSuffix(index: number) {
   let suffix = ''
@@ -36,12 +34,11 @@ export function useBankAccountLabel() {
     const counts: { [type: string]: number } = {}
     const sorted = [...(bankAccounts ?? [])].sort((a, b) => a.id - b.id)
     for (const account of sorted) {
-      const type = account.type && GENERIC_NAMES[account.type] ? account.type : 'OTHER'
+      const type = isAccountType(account.type) ? account.type : 'OTHER'
       const index = counts[type] ?? 0
       counts[type] = index + 1
-      const generic = GENERIC_NAMES[type]
-      const base = t(`privacy.${generic?.key ?? 'account'}`)
-      names.set(account.id, `${base} ${generic?.letters ? letterSuffix(index) : index + 1}`)
+      const suffix = LETTERED_TYPES.includes(type) ? letterSuffix(index) : index + 1
+      names.set(account.id, `${t(`privacy.${type}`)} ${suffix}`)
     }
     return names
   }, [bankAccounts, t])

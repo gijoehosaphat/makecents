@@ -1,6 +1,7 @@
 interface InputAccount {
   bankAccountId: string
   type: string
+  subtype?: string | null
   currency: string
   accountId: number
 }

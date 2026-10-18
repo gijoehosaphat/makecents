@@ -1,5 +1,5 @@
 import { Box, Chip, Divider, IconButton, Tooltip, Typography, useTheme } from '@mui/material'
-import { Lock, LockOpen, Sync } from '@mui/icons-material'
+import { Sync } from '@mui/icons-material'
 import { useState } from 'react'
 import BankAccountName from './BankAccountName'
 import ReconcileBalanceDialog from './ReconcileBalanceDialog'
@@ -7,44 +7,18 @@ import { useAppContext } from '../context/AppContextProvider'
 import { useParams } from 'next/navigation'
 import { formatMoneyCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
-import { useMutationWithToast } from '@/lib/useMutationWithToast'
-import { useRefreshAccountData } from '@/lib/useRefreshAccountData'
 import { useTranslations } from 'next-intl'
-import { GetUserAndAccountsAndBankAccountsByEmailDocument, UpdateBankAccountClosedDocument } from '@/graphql/operations'
 
 export function BankAccountHeader() {
-  const { bankAccounts, user, currentAccountId } = useAppContext()
+  const { bankAccounts } = useAppContext()
   const { hidden } = useAmountVisibility()
   const theme = useTheme()
   const params = useParams()
-  const refreshAccountData = useRefreshAccountData()
   const t = useTranslations('common')
   const bankAccountId = Number(Array.isArray(params?.bankAccountId) ? params?.bankAccountId[0] : params?.bankAccountId)
   const [isReconciling, setIsReconciling] = useState(false)
 
   const bankAccount = bankAccounts.find((bankAccount) => bankAccount.id === bankAccountId)
-
-  const [updateBankAccountClosed] = useMutationWithToast(UpdateBankAccountClosedDocument, {
-    refetchQueries: [
-      {
-        query: GetUserAndAccountsAndBankAccountsByEmailDocument,
-        variables: {
-          email: user?.email || '',
-        },
-      },
-    ],
-  })
-
-  async function handleToggleClosed() {
-    await updateBankAccountClosed({
-      variables: {
-        id: bankAccountId,
-        accountId: Number(currentAccountId),
-        closed: !bankAccount?.closed,
-      },
-    })
-    refreshAccountData()
-  }
 
   return (
     <>
@@ -52,11 +26,6 @@ export function BankAccountHeader() {
         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
           <BankAccountName bankAccountId={bankAccountId} bankAccount={bankAccount} />
           {bankAccount?.closed && <Chip label={t('dashboard.closed')} size={'small'} sx={{ ml: 2 }} />}
-          <Tooltip title={bankAccount?.closed ? t('dashboard.reopenAccount') : t('dashboard.closeAccount')}>
-            <IconButton size={'small'} color={'secondary'} sx={{ ml: 1 }} onClick={handleToggleClosed}>
-              {bankAccount?.closed ? <LockOpen /> : <Lock />}
-            </IconButton>
-          </Tooltip>
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
           <span>

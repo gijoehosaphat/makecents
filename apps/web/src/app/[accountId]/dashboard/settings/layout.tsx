@@ -26,6 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <Box sx={{ mb: 20 }}>
       <PageTitle icon={'settings'} title={t('settings.title')} />
       <Tabs value={pathname} onChange={handleChange} variant={'scrollable'} scrollButtons={'auto'}>
+        <Tab label={t('bankAccounts.title')} value={`/${currentAccountId}/dashboard/settings/bank-accounts`} />
         <Tab label={t('categories.title')} value={`/${currentAccountId}/dashboard/settings/categories`} />
         <Tab label={t('budgets.title')} value={`/${currentAccountId}/dashboard/settings/budgets`} />
         <Tab label={t('groups.title')} value={`/${currentAccountId}/dashboard/settings/groups`} />

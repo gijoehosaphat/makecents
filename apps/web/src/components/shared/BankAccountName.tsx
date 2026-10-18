@@ -3,7 +3,7 @@
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useRefreshAccountData } from '@/lib/useRefreshAccountData'
-import { CreditCard, Edit, Savings, Wallet } from '@mui/icons-material'
+import { Edit } from '@mui/icons-material'
 import { Box, IconButton, TextField, Typography } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useRef, useState } from 'react'
@@ -11,6 +11,7 @@ import { useHover } from 'usehooks-ts'
 import SaveCancel from '@/components/forms/SaveCancel'
 import { BankAccount } from '@/graphql/types'
 import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
+import { BankAccountTypeIcon } from '@/components/shared/BankAccountTypeIcon'
 import { GetUserAndAccountsAndBankAccountsByEmailDocument, UpdateBankAccountNameDocument } from '@/graphql/operations'
 
 export default function BankAccountName({
@@ -67,9 +68,7 @@ export default function BankAccountName({
         {t('dashboard.accountName')}:
       </Typography> */}
       <Box sx={{ mr: 4, position: 'relative', top: 3 }}>
-        {bankAccount?.type === 'CHECKING' && <Wallet fontSize={'large'} color={'secondary'} />}
-        {bankAccount?.type === 'SAVINGS' && <Savings fontSize={'large'} color={'secondary'} />}
-        {bankAccount?.type === 'CREDIT_CARD' && <CreditCard fontSize={'large'} color={'secondary'} />}
+        {bankAccount && <BankAccountTypeIcon accountType={bankAccount.type} fontSize={'large'} color={'secondary'} />}
       </Box>
       {isEditting && (
         <>

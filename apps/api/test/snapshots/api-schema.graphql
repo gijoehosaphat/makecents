@@ -1321,6 +1321,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_SUM_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_SUM_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_SUM_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_SUM_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_SUM_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_ASC
@@ -1341,6 +1345,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_DISTINCT_COUNT_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_CREATED_AT_ASC
@@ -1361,6 +1369,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MIN_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_CREATED_AT_ASC
@@ -1381,6 +1393,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_MAX_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_CREATED_AT_ASC
@@ -1401,6 +1417,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_AVERAGE_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_ASC
@@ -1421,6 +1441,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_ASC
@@ -1441,6 +1465,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_STDDEV_POPULATION_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
@@ -1461,6 +1489,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ID_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_ASC
@@ -1481,6 +1513,10 @@ enum AccountsOrderBy {
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_CLOSED_DESC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_SUBTYPE_DESC
   CATEGORIES_BY_ACCOUNT_ID_COUNT_ASC
   CATEGORIES_BY_ACCOUNT_ID_COUNT_DESC
   CATEGORIES_BY_ACCOUNT_ID_SUM_ID_ASC
@@ -2551,6 +2587,9 @@ input BankAccountFilter {
   """Filter by the object’s `accountId` field."""
   accountId: IntFilter
 
+  """Filter by the object’s `sortOrder` field."""
+  sortOrder: IntFilter
+
   """Filter by the object’s `balance` field."""
   balance: BigIntFilter
 
@@ -3483,6 +3522,7 @@ input BankAccountSumAggregateFilter {
   id: BigIntFilter
   userId: BigIntFilter
   accountId: BigIntFilter
+  sortOrder: BigIntFilter
   balance: BigIntFilter
 }
 
@@ -3497,6 +3537,8 @@ input BankAccountDistinctCountAggregateFilter {
   userId: BigIntFilter
   closed: BigIntFilter
   accountId: BigIntFilter
+  sortOrder: BigIntFilter
+  subtype: BigIntFilter
   balance: BigIntFilter
 }
 
@@ -3504,6 +3546,7 @@ input BankAccountMinAggregateFilter {
   id: IntFilter
   userId: IntFilter
   accountId: IntFilter
+  sortOrder: IntFilter
   balance: BigIntFilter
 }
 
@@ -3511,6 +3554,7 @@ input BankAccountMaxAggregateFilter {
   id: IntFilter
   userId: IntFilter
   accountId: IntFilter
+  sortOrder: IntFilter
   balance: BigIntFilter
 }
 
@@ -3518,6 +3562,7 @@ input BankAccountAverageAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
   accountId: BigFloatFilter
+  sortOrder: BigFloatFilter
   balance: BigIntFilter
 }
 
@@ -3525,6 +3570,7 @@ input BankAccountStddevSampleAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
   accountId: BigFloatFilter
+  sortOrder: BigFloatFilter
   balance: BigIntFilter
 }
 
@@ -3532,6 +3578,7 @@ input BankAccountStddevPopulationAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
   accountId: BigFloatFilter
+  sortOrder: BigFloatFilter
   balance: BigIntFilter
 }
 
@@ -3539,6 +3586,7 @@ input BankAccountVarianceSampleAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
   accountId: BigFloatFilter
+  sortOrder: BigFloatFilter
   balance: BigIntFilter
 }
 
@@ -3546,6 +3594,7 @@ input BankAccountVariancePopulationAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
   accountId: BigFloatFilter
+  sortOrder: BigFloatFilter
   balance: BigIntFilter
 }
 
@@ -5248,12 +5297,14 @@ type BankAccount implements Node {
   createdAt: Datetime!
   updatedAt: Datetime!
   bankAccountId: String
-  type: String
+  type: String!
   name: String
   currency: String
   userId: Int
   closed: Boolean!
   accountId: Int!
+  sortOrder: Int
+  subtype: String
 
   """Reads a single `User` that is related to this `BankAccount`."""
   userByUserId: User
@@ -9573,6 +9624,9 @@ type BankAccountSumAggregates {
   """Sum of accountId across the matching connection"""
   accountId: BigInt!
 
+  """Sum of sortOrder across the matching connection"""
+  sortOrder: BigInt!
+
   """Sum of this field across the matching connection."""
   balance: BigFloat
 }
@@ -9608,6 +9662,12 @@ type BankAccountDistinctCountAggregates {
   """Distinct count of accountId across the matching connection"""
   accountId: BigInt
 
+  """Distinct count of sortOrder across the matching connection"""
+  sortOrder: BigInt
+
+  """Distinct count of subtype across the matching connection"""
+  subtype: BigInt
+
   """Distinct count of this field across the matching connection."""
   balance: BigInt
 }
@@ -9621,6 +9681,9 @@ type BankAccountMinAggregates {
 
   """Minimum of accountId across the matching connection"""
   accountId: Int
+
+  """Minimum of sortOrder across the matching connection"""
+  sortOrder: Int
 
   """Minimum of this field across the matching connection."""
   balance: BigInt
@@ -9636,6 +9699,9 @@ type BankAccountMaxAggregates {
   """Maximum of accountId across the matching connection"""
   accountId: Int
 
+  """Maximum of sortOrder across the matching connection"""
+  sortOrder: Int
+
   """Maximum of this field across the matching connection."""
   balance: BigInt
 }
@@ -9650,6 +9716,9 @@ type BankAccountAverageAggregates {
   """Mean average of accountId across the matching connection"""
   accountId: BigFloat
 
+  """Mean average of sortOrder across the matching connection"""
+  sortOrder: BigFloat
+
   """Mean average of this field across the matching connection."""
   balance: BigFloat
 }
@@ -9663,6 +9732,9 @@ type BankAccountStddevSampleAggregates {
 
   """Sample standard deviation of accountId across the matching connection"""
   accountId: BigFloat
+
+  """Sample standard deviation of sortOrder across the matching connection"""
+  sortOrder: BigFloat
 
   """
   Sample standard deviation of this field across the matching connection.
@@ -9683,6 +9755,11 @@ type BankAccountStddevPopulationAggregates {
   accountId: BigFloat
 
   """
+  Population standard deviation of sortOrder across the matching connection
+  """
+  sortOrder: BigFloat
+
+  """
   Population standard deviation of this field across the matching connection.
   """
   balance: BigFloat
@@ -9698,6 +9775,9 @@ type BankAccountVarianceSampleAggregates {
   """Sample variance of accountId across the matching connection"""
   accountId: BigFloat
 
+  """Sample variance of sortOrder across the matching connection"""
+  sortOrder: BigFloat
+
   """Sample variance of this field across the matching connection."""
   balance: BigFloat
 }
@@ -9712,6 +9792,9 @@ type BankAccountVariancePopulationAggregates {
   """Population variance of accountId across the matching connection"""
   accountId: BigFloat
 
+  """Population variance of sortOrder across the matching connection"""
+  sortOrder: BigFloat
+
   """Population variance of this field across the matching connection."""
   balance: BigFloat
 }
@@ -9720,6 +9803,7 @@ type BankAccountVariancePopulationAggregates {
 enum BankAccountGroupBy {
   USER_ID
   ACCOUNT_ID
+  SORT_ORDER
 }
 
 """Conditions for `BankAccount` aggregates."""
@@ -9743,6 +9827,7 @@ input BankAccountHavingSumInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingSumBankAccountBalanceInput
 }
 
@@ -9756,6 +9841,7 @@ input BankAccountHavingDistinctCountInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingDistinctCountBankAccountBalanceInput
 }
 
@@ -9769,6 +9855,7 @@ input BankAccountHavingMinInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingMinBankAccountBalanceInput
 }
 
@@ -9782,6 +9869,7 @@ input BankAccountHavingMaxInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingMaxBankAccountBalanceInput
 }
 
@@ -9795,6 +9883,7 @@ input BankAccountHavingAverageInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingAverageBankAccountBalanceInput
 }
 
@@ -9808,6 +9897,7 @@ input BankAccountHavingStddevSampleInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingStddevSampleBankAccountBalanceInput
 }
 
@@ -9821,6 +9911,7 @@ input BankAccountHavingStddevPopulationInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingStddevPopulationBankAccountBalanceInput
 }
 
@@ -9834,6 +9925,7 @@ input BankAccountHavingVarianceSampleInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingVarianceSampleBankAccountBalanceInput
 }
 
@@ -9847,6 +9939,7 @@ input BankAccountHavingVariancePopulationInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   accountId: HavingIntFilter
+  sortOrder: HavingIntFilter
   balance: BankAccountHavingVariancePopulationBankAccountBalanceInput
 }
 
@@ -9863,6 +9956,8 @@ enum BankAccountsOrderBy {
   USER_ID_DESC
   ACCOUNT_ID_ASC
   ACCOUNT_ID_DESC
+  SORT_ORDER_ASC
+  SORT_ORDER_DESC
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
   TRANSACTIONS_BY_BANK_ACCOUNT_ID_COUNT_ASC
@@ -10644,6 +10739,9 @@ input BankAccountCondition {
 
   """Checks for equality with the object’s `accountId` field."""
   accountId: Int
+
+  """Checks for equality with the object’s `sortOrder` field."""
+  sortOrder: Int
 }
 
 """A connection to a list of `Category` values."""
@@ -13277,6 +13375,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_SUM_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_SUM_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_SUM_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_SUM_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_SUM_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_SUM_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_SUM_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_CREATED_AT_ASC
@@ -13297,6 +13399,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_MIN_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_MIN_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_MIN_CREATED_AT_ASC
@@ -13317,6 +13423,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_MIN_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_MIN_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_MIN_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_MIN_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_MIN_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_MIN_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_MIN_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_MAX_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_MAX_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_MAX_CREATED_AT_ASC
@@ -13337,6 +13447,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_MAX_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_MAX_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_MAX_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_MAX_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_MAX_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_MAX_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_MAX_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_AVERAGE_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_AVERAGE_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_AVERAGE_CREATED_AT_ASC
@@ -13357,6 +13471,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_AVERAGE_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_AVERAGE_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_AVERAGE_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_AVERAGE_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_AVERAGE_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_AVERAGE_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_AVERAGE_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_CREATED_AT_ASC
@@ -13377,6 +13495,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_CREATED_AT_ASC
@@ -13397,6 +13519,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
@@ -13417,6 +13543,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_SUBTYPE_DESC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ID_DESC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_CREATED_AT_ASC
@@ -13437,6 +13567,10 @@ enum UsersOrderBy {
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_CLOSED_DESC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
   BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_SORT_ORDER_ASC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_SORT_ORDER_DESC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_SUBTYPE_ASC
+  BANK_ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_SUBTYPE_DESC
   CATEGORIES_BY_USER_ID_COUNT_ASC
   CATEGORIES_BY_USER_ID_COUNT_DESC
   CATEGORIES_BY_USER_ID_SUM_ID_ASC
@@ -14999,6 +15133,12 @@ type Mutation {
     """
     input: RemoveAccountUserInput!
   ): RemoveAccountUserPayload
+  reorderBankAccounts(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: ReorderBankAccountsInput!
+  ): ReorderBankAccountsPayload
   undoImportBatch(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -15377,6 +15517,8 @@ input BankAccountInput {
   userId: Int
   closed: Boolean
   accountId: Int!
+  sortOrder: Int
+  subtype: String
 }
 
 """The output of our create `BankAccountReconciliation` mutation."""
@@ -16151,6 +16293,8 @@ input BankAccountPatch {
   userId: Int
   closed: Boolean
   accountId: Int
+  sortOrder: Int
+  subtype: String
 }
 
 """All input for the `updateBankAccountById` mutation."""
@@ -18190,6 +18334,32 @@ input RemoveAccountUserInput {
   clientMutationId: String
   accountId: Int
   userId: Int
+}
+
+"""The output of our `reorderBankAccounts` mutation."""
+type ReorderBankAccountsPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  bankAccounts: [BankAccount!]
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `reorderBankAccounts` mutation."""
+input ReorderBankAccountsInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  accountId: Int!
+  bankAccountIds: [Int]!
 }
 
 """The output of our `undoImportBatch` mutation."""
