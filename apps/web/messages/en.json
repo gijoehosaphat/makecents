@@ -232,7 +232,7 @@
     "bankAccounts": {
       "title": "Bank Accounts",
       "description": "Drag accounts to set the order they appear in the navigation. Closed accounts keep their transactions but are left out of totals.",
-      "showClosed": "Show closed accounts in the navigation",
+      "showClosed": "Show closed accounts in the navigation and filters",
       "type": "Type",
       "status": "Status",
       "open": "Open",
