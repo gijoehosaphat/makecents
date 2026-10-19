@@ -24,10 +24,7 @@
       "filter": "Filter",
       "any": "Any",
       "all": "All",
-      "minAmount": "Min amount",
-      "maxAmount": "Max amount",
-      "minAmountChip": "At least {amount}",
-      "maxAmountChip": "At most {amount}",
+      "amountChip": "Amount: {amount}",
       "clearAll": "Clear all",
       "searchChip": "Search: {term}",
       "category": "Category",
@@ -73,10 +70,6 @@
       "search": "Search",
       "searchSubtitle": "All accounts, find & categorize",
       "closed": "Closed",
-      "closeAccount": "Close account",
-      "reopenAccount": "Reopen account",
-      "showClosedAccounts": "Show closed accounts",
-      "hideClosedAccounts": "Hide closed accounts",
       "reconcileBalance": "Reconcile balance",
       "reconcileBalanceDescription": "Enter the account's actual balance and the date it's accurate as of. Any transactions after that date will be added automatically.",
       "asOfDate": "As of"
@@ -236,6 +229,35 @@
         "saveFailed": "Could not save the group type."
       }
     },
+    "bankAccounts": {
+      "title": "Bank Accounts",
+      "description": "Drag accounts to set the order they appear in the navigation. Closed accounts keep their transactions but are left out of totals.",
+      "showClosed": "Show closed accounts in the navigation and filters",
+      "type": "Type",
+      "status": "Status",
+      "open": "Open",
+      "rename": "Rename",
+      "closeAccount": "Close account",
+      "reopenAccount": "Reopen account",
+      "reorder": "Drag to reorder, or use the up and down arrow keys",
+      "none": "No bank accounts yet. Import a file to add one.",
+      "subtype": "Subtype",
+      "subtypePlaceholder": "e.g. RRSP, 401k",
+      "assets": "Assets",
+      "debts": "Debts",
+      "types": {
+        "CHECKING": "Checking",
+        "SAVINGS": "Savings",
+        "CASH": "Cash",
+        "INVESTMENT": "Investment",
+        "RETIREMENT": "Retirement",
+        "CREDIT_CARD": "Credit card",
+        "LINE_OF_CREDIT": "Line of credit",
+        "LOAN": "Loan",
+        "MORTGAGE": "Mortgage",
+        "OTHER": "Other"
+      }
+    },
     "imports": {
       "title": "Imports",
       "description": "Every imported file. If one went into the wrong account, move it; transactions the other account already has are merged instead of duplicated.",
@@ -264,10 +286,16 @@
       "memo": "Memo"
     },
     "privacy": {
-      "creditCard": "Credit Card",
-      "checkingAccount": "Checking Account",
-      "savingsAccount": "Savings Account",
-      "account": "Account"
+      "CHECKING": "Checking Account",
+      "SAVINGS": "Savings Account",
+      "CASH": "Cash Account",
+      "INVESTMENT": "Investment Account",
+      "RETIREMENT": "Retirement Account",
+      "CREDIT_CARD": "Credit Card",
+      "LINE_OF_CREDIT": "Line of Credit",
+      "LOAN": "Loan",
+      "MORTGAGE": "Mortgage",
+      "OTHER": "Account"
     },
     "csvImport": {
       "title": "Import CSV",
@@ -276,11 +304,6 @@
       "newAccount": "New account…",
       "accountName": "Account name",
       "accountType": "Account type",
-      "accountTypes": {
-        "CHECKING": "Checking",
-        "SAVINGS": "Savings",
-        "CREDIT_CARD": "Credit card"
-      },
       "chooseAccount": "We couldn't tell which account this file belongs to. Choose one, or create a new account.",
       "autoMatchedByFileName": "The file name mentions an account ending in {identifier}, so we matched it to \"{account}\".",
       "autoMatchedByOverlap": "{count} of these transactions are already in \"{account}\", so we matched the file to it.",

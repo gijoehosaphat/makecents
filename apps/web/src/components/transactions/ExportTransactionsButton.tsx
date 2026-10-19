@@ -31,7 +31,7 @@ export function ExportTransactionsButton() {
   const { dateFrom, dateTo } = useDateFilterParams()
   const { categorized, categoryIds, autoCategorized } = useTransactionFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
-  const { direction, amountMin, amountMax } = useTransactionAmountParams()
+  const { direction, amount } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
   const { sort } = useTransactionSortParams()
   const [exporting, setExporting] = useState(false)
@@ -55,8 +55,7 @@ export function ExportTransactionsButton() {
           categoryIds,
           autoCategorized,
           direction,
-          amountMin,
-          amountMax,
+          amount,
           search,
           sort,
         })

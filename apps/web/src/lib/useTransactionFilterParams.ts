@@ -1,48 +1,25 @@
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 export function useTransactionFilterParams() {
   const searchParams = useSearchParams()
+  const categorizedParam = searchParams?.get('categorized')
+  const categoryIdsParam = searchParams?.get('categoryIds')
+  const autoParam = searchParams?.get('auto')
 
-  const categorizedParam = useMemo(() => {
-    const val = searchParams?.get('categorized')
-    if (val === 'true') {
-      return true
-    }
-    if (val === 'false') {
-      return false
-    }
-    return undefined
-  }, [searchParams])
+  return useMemo(() => {
+    const categorized = categorizedParam === 'true' ? true : categorizedParam === 'false' ? false : undefined
 
-  const categoryIdsParam = useMemo(() => {
-    const val = searchParams?.get('categoryIds')
-    if (!val) {
-      return undefined
-    }
-    const ids = val
+    const ids = (categoryIdsParam || '')
       .split(',')
+      .filter(Boolean)
       .map((id) => Number(id))
       .filter((id) => !Number.isNaN(id))
-    return ids.length > 0 ? ids : undefined
-  }, [searchParams])
 
-  const autoCategorizedParam = searchParams?.get('auto') === 'true'
-
-  const [categorized, setCategorized] = useState<boolean | undefined>(categorizedParam)
-  const [categoryIds, setCategoryIds] = useState<number[] | undefined>(categoryIdsParam)
-
-  useEffect(() => {
-    setCategorized(categorizedParam)
-  }, [categorizedParam])
-
-  useEffect(() => {
-    setCategoryIds(categoryIdsParam)
-  }, [categoryIdsParam])
-
-  return {
-    categorized,
-    categoryIds,
-    autoCategorized: autoCategorizedParam,
-  }
+    return {
+      categorized,
+      categoryIds: ids.length > 0 ? ids : undefined,
+      autoCategorized: autoParam === 'true',
+    }
+  }, [categorizedParam, categoryIdsParam, autoParam])
 }

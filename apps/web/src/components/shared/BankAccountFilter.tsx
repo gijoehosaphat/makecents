@@ -15,7 +15,8 @@ import {
 import { useTranslations } from 'next-intl'
 import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
+import { useOptimistic, useTransition } from 'react'
+import { useShowClosedBankAccounts } from '@/lib/useShowClosedBankAccounts'
 
 export function BankAccountFilter() {
   const t = useTranslations('common')
@@ -25,25 +26,25 @@ export function BankAccountFilter() {
   const searchParams = useSearchParams()
   const { bankAccounts } = useAppContext()
   const [, startTransition] = useTransition()
+  const [showClosed] = useShowClosedBankAccounts()
 
-  const [selected, setSelected] = useState<string[]>(
-    searchParams?.get('bankAccountIds')?.split(',').filter(Boolean) || [],
+  // Shows the new selection straight away, while the results for it load.
+  const [selected, setSelected] = useOptimistic(searchParams?.get('bankAccountIds')?.split(',').filter(Boolean) || [])
+
+  // Closed accounts follow the Settings → Bank Accounts toggle, but stay listed while selected so they can be cleared.
+  const visibleBankAccounts = bankAccounts.filter(
+    (bankAccount) => showClosed || !bankAccount.closed || selected.includes(String(bankAccount.id)),
   )
-
-  useEffect(() => {
-    setSelected(searchParams?.get('bankAccountIds')?.split(',').filter(Boolean) || [])
-  }, [searchParams])
 
   function handleChange(event: SelectChangeEvent<string[]>) {
     const value = event.target.value
     const bankAccountIds = typeof value === 'string' ? value.split(',').filter(Boolean) : value
 
     const url = updateSearchParamsUrl(pathname, searchParams, { bankAccountIds: bankAccountIds.join(',') })
-    setTimeout(() => {
-      startTransition(() => {
-        router.push(url)
-      })
-    }, 1)
+    startTransition(() => {
+      setSelected(bankAccountIds)
+      router.push(url)
+    })
   }
 
   return (
@@ -65,7 +66,7 @@ export function BankAccountFilter() {
           }
           sx={{ minWidth: 200, maxWidth: 260 }}
         >
-          {bankAccounts.map((bankAccount) => (
+          {visibleBankAccounts.map((bankAccount) => (
             <MenuItem key={bankAccount.nodeId} value={String(bankAccount.id)}>
               <Checkbox checked={selected.includes(String(bankAccount.id))} />
               <ListItemText primary={accountLabel(bankAccount)} />

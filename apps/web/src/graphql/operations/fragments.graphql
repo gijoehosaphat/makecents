@@ -35,6 +35,8 @@ fragment BankAccountFragment on BankAccount {
   id
   name
   nodeId
+  sortOrder
+  subtype
   type
   updatedAt
   accountId

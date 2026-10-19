@@ -1,41 +1,16 @@
 'use client'
 
-import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
 import { Box, InputAdornment, TextField } from '@mui/material'
 import { Search } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useDebouncedSearchParam } from '@/lib/useDebouncedSearchParam'
 
 export function TransactionSearchFilter() {
   const t = useTranslations('common')
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const [, startTransition] = useTransition()
-
-  const [value, setValue] = useState(searchParams?.get('search') || '')
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  useEffect(() => {
-    setValue(searchParams?.get('search') || '')
-  }, [searchParams])
-
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const search = event.target.value
-    setValue(search)
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-
-    debounceRef.current = setTimeout(() => {
-      const url = updateSearchParamsUrl(pathname, searchParams, { search: search.trim() })
-      startTransition(() => {
-        router.push(url)
-      })
-    }, 300)
-  }
+  const [value, setValue] = useDebouncedSearchParam('search', {
+    delay: 300,
+    toParam: (search) => search.trim() || null,
+  })
 
   return (
     <Box ml={2}>
@@ -43,7 +18,7 @@ export function TransactionSearchFilter() {
         size={'small'}
         placeholder={t('transactions.searchPlaceholder')}
         value={value}
-        onChange={handleChange}
+        onChange={(event) => setValue(event.target.value)}
         sx={{ minWidth: 220 }}
         slotProps={{
           input: {

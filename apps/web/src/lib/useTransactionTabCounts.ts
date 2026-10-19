@@ -15,28 +15,26 @@ export function useTransactionTabCounts({
   dateFrom,
   dateTo,
   direction,
-  amountMin,
-  amountMax,
+  amount,
   search,
 }: {
   bankAccountIds: number[]
   dateFrom?: Date
   dateTo?: Date
   direction?: TransactionDirection
-  amountMin?: number
-  amountMax?: number
+  amount?: number
   search?: string
 }) {
   const match = useMemo(() => buildTransactionSearchQuery(search || ''), [search])
 
   const variables = useMemo(() => {
-    const base = { bankAccountIds, dateFrom, dateTo, direction, amountMin, amountMax }
+    const base = { bankAccountIds, dateFrom, dateTo, direction, amount }
     return {
       allFilter: buildTransactionListFilter(base),
       uncategorizedFilter: buildTransactionListFilter({ ...base, categorized: false }),
       categorizedFilter: buildTransactionListFilter({ ...base, categorized: true }),
     }
-  }, [bankAccountIds, dateFrom, dateTo, direction, amountMin, amountMax])
+  }, [bankAccountIds, dateFrom, dateTo, direction, amount])
 
   const document = match ? GetTransactionTabCountsBySearchDocument : GetTransactionTabCountsDocument
   const query = useSuspenseQuery(document as any, {

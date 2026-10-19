@@ -9,6 +9,7 @@ import {
 } from '@/graphql/operations'
 import { useSnackbar } from 'notistack'
 import { useTranslations } from 'next-intl'
+import { useAppContext } from '@/components/context/AppContextProvider'
 
 // Long enough to notice a wrong import and undo it; Settings → Imports works after that too.
 const UNDO_SNACKBAR_DURATION = 15000
@@ -17,6 +18,7 @@ export function useUploadHandler() {
   const t = useTranslations('common')
   const { enqueueSnackbar, closeSnackbar } = useSnackbar()
   const client = useApolloClient()
+  const { bankAccounts } = useAppContext()
   const [importTransactions] = useMutationWithToast(ImportTransactionsDocument, { reportErrors: false })
   const [undoImportBatch] = useMutationWithToast(UndoImportBatchDocument, { errorMessage: t('upload.undoError') })
 
@@ -138,10 +140,17 @@ export function useUploadHandler() {
     for (const accountGroup of accountGroups) {
       const { account, reconciliation, transactions } = accountGroup
 
-      //Upsert Account
-      await upsertBankAccount({ variables: account })
-        .then(async (response) => {
-          const bankAccountId = response?.data?.upsertBankAccount?.bankAccount?.id
+      // Only new accounts are created from the file: upserting an existing one would reset the
+      // type and subtype chosen in Settings → Bank Accounts.
+      const existingAccount = bankAccounts.find((bankAccount) => bankAccount.bankAccountId === account.bankAccountId)
+      await (
+        existingAccount
+          ? Promise.resolve(existingAccount.id)
+          : upsertBankAccount({ variables: account }).then(
+              (response) => response?.data?.upsertBankAccount?.bankAccount?.id,
+            )
+      )
+        .then(async (bankAccountId) => {
           if (bankAccountId && reconciliation) {
             await upsertBankAccountReconciliation({
               variables: {

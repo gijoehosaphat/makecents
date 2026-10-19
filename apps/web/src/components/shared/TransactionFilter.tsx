@@ -17,7 +17,7 @@ import {
 } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
+import { useOptimistic, useTransition } from 'react'
 
 export function TransactionFilter({
   children,
@@ -31,19 +31,14 @@ export function TransactionFilter({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [categorized, setCategorized] = useState(searchParams?.get('categorized') || 'any')
-  const [autoOnly, setAutoOnly] = useState(searchParams?.get('auto') === 'true')
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(
+  // Optimistic so each control shows the new choice straight away, while the results for it load.
+  const [categorized, setCategorized] = useOptimistic(searchParams?.get('categorized') || 'any')
+  const [autoOnly, setAutoOnly] = useOptimistic(searchParams?.get('auto') === 'true')
+  const [selectedCategoryIds, setSelectedCategoryIds] = useOptimistic(
     searchParams?.get('categoryIds')?.split(',').filter(Boolean) || [],
   )
   const { categories } = useCategories()
   const [, startTransition] = useTransition()
-
-  useEffect(() => {
-    setCategorized(searchParams?.get('categorized') || 'any')
-    setAutoOnly(searchParams?.get('auto') === 'true')
-    setSelectedCategoryIds(searchParams?.get('categoryIds')?.split(',').filter(Boolean) || [])
-  }, [searchParams])
 
   function handleCategorizedChange(event: SelectChangeEvent) {
     const categorized = event.target.value as string
@@ -52,22 +47,19 @@ export function TransactionFilter({
       const url = updateSearchParamsUrl(pathname, searchParams, {
         categorized: categorized === 'any' ? null : categorized,
       })
-      setTimeout(() => {
-        startTransition(() => {
-          router.push(url)
-        })
-      }, 1)
+      startTransition(() => {
+        setCategorized(categorized)
+        router.push(url)
+      })
     }
   }
 
   function handleAutoChange(checked: boolean) {
-    setAutoOnly(checked)
     const url = updateSearchParamsUrl(pathname, searchParams, { auto: checked ? 'true' : null })
-    setTimeout(() => {
-      startTransition(() => {
-        router.push(url)
-      })
-    }, 1)
+    startTransition(() => {
+      setAutoOnly(checked)
+      router.push(url)
+    })
   }
 
   function handleCategoryChange(event: SelectChangeEvent<string[]>) {
@@ -75,11 +67,10 @@ export function TransactionFilter({
     const categoryIds = typeof value === 'string' ? value.split(',').filter(Boolean) : value
 
     const url = updateSearchParamsUrl(pathname, searchParams, { categoryIds: categoryIds.join(',') })
-    setTimeout(() => {
-      startTransition(() => {
-        router.push(url)
-      })
-    }, 1)
+    startTransition(() => {
+      setSelectedCategoryIds(categoryIds)
+      router.push(url)
+    })
   }
 
   return (

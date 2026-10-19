@@ -15,7 +15,7 @@ export function TransactionTotals() {
   const { dateFrom, dateTo } = useDateFilterParams()
   const { categorized, categoryIds, autoCategorized } = useTransactionFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
-  const { direction, amountMin, amountMax } = useTransactionAmountParams()
+  const { direction, amount } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
   const [selectedCurrency, setSelectedCurrency] = useState<string>()
 
@@ -31,8 +31,7 @@ export function TransactionTotals() {
     categoryIds,
     autoCategorized,
     direction,
-    amountMin,
-    amountMax,
+    amount,
     search,
   })
 

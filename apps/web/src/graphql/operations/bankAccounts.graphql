@@ -1,6 +1,20 @@
-mutation UpsertBankAccount($accountId: Int!, $type: String!, $currency: String!, $bankAccountId: String!) {
+mutation UpsertBankAccount(
+  $accountId: Int!
+  $type: String!
+  $subtype: String
+  $currency: String!
+  $bankAccountId: String!
+) {
   upsertBankAccount(
-    input: { bankAccount: { accountId: $accountId, type: $type, currency: $currency, bankAccountId: $bankAccountId } }
+    input: {
+      bankAccount: {
+        accountId: $accountId
+        type: $type
+        subtype: $subtype
+        currency: $currency
+        bankAccountId: $bankAccountId
+      }
+    }
   ) {
     bankAccount {
       ...BankAccountFragment
@@ -29,6 +43,30 @@ mutation UpdateBankAccountName($id: Int!, $accountId: Int!, $name: String!) {
 mutation UpdateBankAccountClosed($id: Int!, $accountId: Int!, $closed: Boolean!) {
   upsertBankAccount(input: { bankAccount: { closed: $closed, accountId: $accountId } }, where: { id: $id }) {
     bankAccount {
+      ...BankAccountFragment
+    }
+  }
+}
+
+mutation UpdateBankAccountType($id: Int!, $accountId: Int!, $type: String!) {
+  upsertBankAccount(input: { bankAccount: { type: $type, accountId: $accountId } }, where: { id: $id }) {
+    bankAccount {
+      ...BankAccountFragment
+    }
+  }
+}
+
+mutation UpdateBankAccountSubtype($id: Int!, $accountId: Int!, $subtype: String) {
+  upsertBankAccount(input: { bankAccount: { subtype: $subtype, accountId: $accountId } }, where: { id: $id }) {
+    bankAccount {
+      ...BankAccountFragment
+    }
+  }
+}
+
+mutation ReorderBankAccounts($accountId: Int!, $bankAccountIds: [Int]!) {
+  reorderBankAccounts(input: { accountId: $accountId, bankAccountIds: $bankAccountIds }) {
+    bankAccounts {
       ...BankAccountFragment
     }
   }

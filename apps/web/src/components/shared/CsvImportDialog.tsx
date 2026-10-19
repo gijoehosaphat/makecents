@@ -61,7 +61,7 @@ import {
   matchAccount,
   scoreOverlap,
 } from '@/lib/csvAccountMatching'
-import { ACCOUNT_TYPES } from '@/lib/bankAccountLabel'
+import { ACCOUNT_TYPES } from '@/lib/bankAccountTypes'
 import { countDuplicateRows } from '@/lib/csvDuplicates'
 import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 
@@ -499,7 +499,7 @@ export function CsvImportDialog({
                     >
                       {ACCOUNT_TYPES.map((type) => (
                         <MenuItem key={type} value={type}>
-                          {t(`csvImport.accountTypes.${type}`)}
+                          {t(`bankAccounts.types.${type}`)}
                         </MenuItem>
                       ))}
                     </TextField>

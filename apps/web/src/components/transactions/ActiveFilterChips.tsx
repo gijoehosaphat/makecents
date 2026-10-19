@@ -28,7 +28,7 @@ export function ActiveFilterChips() {
   const { search } = useTransactionSearchParams()
   const { bankAccountIds } = useBankAccountFilterParams()
   const { categoryIds, autoCategorized } = useTransactionFilterParams()
-  const { direction, amountMin, amountMax } = useTransactionAmountParams()
+  const { direction, amount } = useTransactionAmountParams()
   const [, startTransition] = useTransition()
 
   function navigate(changes: Record<string, string | null>) {
@@ -58,18 +58,11 @@ export function ActiveFilterChips() {
       onDelete: () => navigate({ type: null }),
     })
   }
-  if (amountMin !== undefined) {
+  if (amount !== undefined) {
     chips.push({
-      key: 'amountMin',
-      label: t('shared.minAmountChip', { amount: formatMoneyCents(amountMin, DEFAULT_CURRENCY) }),
-      onDelete: () => navigate({ amountMin: null }),
-    })
-  }
-  if (amountMax !== undefined) {
-    chips.push({
-      key: 'amountMax',
-      label: t('shared.maxAmountChip', { amount: formatMoneyCents(amountMax, DEFAULT_CURRENCY) }),
-      onDelete: () => navigate({ amountMax: null }),
+      key: 'amount',
+      label: t('shared.amountChip', { amount: formatMoneyCents(amount, DEFAULT_CURRENCY) }),
+      onDelete: () => navigate({ amount: null }),
     })
   }
   if (autoCategorized) {
@@ -118,8 +111,7 @@ export function ActiveFilterChips() {
             categoryIds: null,
             auto: null,
             type: null,
-            amountMin: null,
-            amountMax: null,
+            amount: null,
           })
         }
       >
