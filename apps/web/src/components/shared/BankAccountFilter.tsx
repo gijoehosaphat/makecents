@@ -15,7 +15,7 @@ import {
 import { useTranslations } from 'next-intl'
 import { useBankAccountLabel } from '@/components/shared/BankAccountLabel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
+import { useOptimistic, useTransition } from 'react'
 
 export function BankAccountFilter() {
   const t = useTranslations('common')
@@ -26,24 +26,18 @@ export function BankAccountFilter() {
   const { bankAccounts } = useAppContext()
   const [, startTransition] = useTransition()
 
-  const [selected, setSelected] = useState<string[]>(
-    searchParams?.get('bankAccountIds')?.split(',').filter(Boolean) || [],
-  )
-
-  useEffect(() => {
-    setSelected(searchParams?.get('bankAccountIds')?.split(',').filter(Boolean) || [])
-  }, [searchParams])
+  // Shows the new selection straight away, while the results for it load.
+  const [selected, setSelected] = useOptimistic(searchParams?.get('bankAccountIds')?.split(',').filter(Boolean) || [])
 
   function handleChange(event: SelectChangeEvent<string[]>) {
     const value = event.target.value
     const bankAccountIds = typeof value === 'string' ? value.split(',').filter(Boolean) : value
 
     const url = updateSearchParamsUrl(pathname, searchParams, { bankAccountIds: bankAccountIds.join(',') })
-    setTimeout(() => {
-      startTransition(() => {
-        router.push(url)
-      })
-    }, 1)
+    startTransition(() => {
+      setSelected(bankAccountIds)
+      router.push(url)
+    })
   }
 
   return (

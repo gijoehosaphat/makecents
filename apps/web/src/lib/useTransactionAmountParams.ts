@@ -8,19 +8,18 @@ function parseCents(value: string | null | undefined) {
     return undefined
   }
   const dollars = Number(value)
-  return Number.isFinite(dollars) && dollars >= 0 ? toCents(dollars) : undefined
+  return Number.isFinite(dollars) && dollars > 0 ? toCents(dollars) : undefined
 }
 
-/** Reads the `type` (withdrawals | deposits), `amountMin` and `amountMax` params; amounts are in cents. */
+/** Reads the `type` (withdrawals | deposits) and `amount` params; the amount is in cents. */
 export function useTransactionAmountParams() {
   const searchParams = useSearchParams()
   const typeParam = searchParams?.get('type')
-  const minParam = searchParams?.get('amountMin')
-  const maxParam = searchParams?.get('amountMax')
+  const amountParam = searchParams?.get('amount')
 
   return useMemo(() => {
     const direction: TransactionDirection | undefined =
       typeParam === 'withdrawals' || typeParam === 'deposits' ? typeParam : undefined
-    return { direction, amountMin: parseCents(minParam), amountMax: parseCents(maxParam) }
-  }, [typeParam, minParam, maxParam])
+    return { direction, amount: parseCents(amountParam) }
+  }, [typeParam, amountParam])
 }

@@ -1,6 +1,6 @@
 import { useSearchParams } from 'next/navigation'
 import { parse, isValid, startOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, endOfDay } from 'date-fns'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 export type DateFilterMode = 'month' | 'year' | 'all' | 'custom'
 
@@ -12,15 +12,11 @@ export function useDateFilterParams() {
   const dateRange: DateFilterMode =
     dateRangeParam === 'year' || dateRangeParam === 'all' || dateRangeParam === 'custom' ? dateRangeParam : 'month'
 
-  const dateFromParam = useMemo(() => {
-    return parse(String(searchParams?.get('dateFrom')), 'yyyy-MM-dd', new Date())
-  }, [searchParams])
+  const dateFromString = searchParams?.get('dateFrom')
+  const dateToString = searchParams?.get('dateTo')
 
-  const dateToParam = useMemo(() => {
-    return endOfDay(parse(String(searchParams?.get('dateTo')), 'yyyy-MM-dd', new Date()))
-  }, [searchParams])
-
-  const defaultDateFrom = useMemo(() => {
+  const dateFrom = useMemo(() => {
+    const dateFromParam = parse(String(dateFromString), 'yyyy-MM-dd', new Date())
     if (dateRange === 'custom') {
       return isValid(dateFromParam) ? startOfDay(dateFromParam) : startOfMonth(today)
     }
@@ -28,9 +24,10 @@ export function useDateFilterParams() {
       return isValid(dateFromParam) ? startOfYear(dateFromParam) : startOfYear(today)
     }
     return isValid(dateFromParam) ? startOfMonth(dateFromParam) : startOfMonth(today)
-  }, [dateRange, dateFromParam, today])
+  }, [dateRange, dateFromString, today])
 
-  const defaultDateTo = useMemo(() => {
+  const dateTo = useMemo(() => {
+    const dateToParam = endOfDay(parse(String(dateToString), 'yyyy-MM-dd', new Date()))
     if (dateRange === 'custom') {
       return isValid(dateToParam) ? endOfDay(dateToParam) : endOfMonth(endOfDay(today))
     }
@@ -38,15 +35,7 @@ export function useDateFilterParams() {
       return isValid(dateToParam) ? endOfYear(dateToParam) : endOfYear(endOfDay(today))
     }
     return isValid(dateToParam) ? endOfMonth(dateToParam) : endOfMonth(endOfDay(today))
-  }, [dateRange, dateToParam, today])
-
-  const [dateFrom, setDateFrom] = useState(defaultDateFrom)
-  const [dateTo, setDateTo] = useState(defaultDateTo)
-
-  useEffect(() => {
-    setDateFrom(defaultDateFrom)
-    setDateTo(defaultDateTo)
-  }, [defaultDateFrom, defaultDateTo])
+  }, [dateRange, dateToString, today])
 
   if (dateRange === 'all') {
     return {

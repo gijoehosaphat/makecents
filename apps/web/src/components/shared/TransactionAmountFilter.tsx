@@ -3,12 +3,17 @@
 import { Box, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useOptimistic, useTransition } from 'react'
 import { updateSearchParamsUrl } from '@/lib/updateSearchParamsUrl'
+import { useDebouncedSearchParam } from '@/lib/useDebouncedSearchParam'
 
-type AmountKey = 'amountMin' | 'amountMax'
+// The amount param is a positive number of dollars; anything else clears it.
+function toAmountParam(value: string) {
+  const amount = Number(value)
+  return value.trim() !== '' && Number.isFinite(amount) && amount > 0 ? String(amount) : null
+}
 
-/** Withdrawals / deposits toggle plus min and max amount (absolute value) inputs. */
+/** Withdrawals / deposits toggle plus an exact amount (absolute value) input. */
 export function TransactionAmountFilter() {
   const t = useTranslations('common')
   const router = useRouter()
@@ -16,35 +21,14 @@ export function TransactionAmountFilter() {
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
 
-  const type = searchParams?.get('type') || 'any'
-  const [min, setMin] = useState(searchParams?.get('amountMin') || '')
-  const [max, setMax] = useState(searchParams?.get('amountMax') || '')
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const [type, setType] = useOptimistic(searchParams?.get('type') || 'any')
+  const [amount, setAmount] = useDebouncedSearchParam('amount', { delay: 400, toParam: toAmountParam })
 
-  useEffect(() => {
-    setMin(searchParams?.get('amountMin') || '')
-    setMax(searchParams?.get('amountMax') || '')
-  }, [searchParams])
-
-  function navigate(changes: Record<string, string | null>) {
+  function handleTypeChange(value: string) {
     startTransition(() => {
-      router.push(updateSearchParamsUrl(pathname, searchParams, changes))
+      setType(value)
+      router.push(updateSearchParamsUrl(pathname, searchParams, { type: value === 'any' ? null : value }))
     })
-  }
-
-  function handleAmountChange(key: AmountKey, value: string) {
-    if (key === 'amountMin') {
-      setMin(value)
-    } else {
-      setMax(value)
-    }
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-    debounceRef.current = setTimeout(() => {
-      const amount = Number(value)
-      navigate({ [key]: value.trim() !== '' && Number.isFinite(amount) && amount >= 0 ? String(amount) : null })
-    }, 400)
   }
 
   return (
@@ -53,7 +37,7 @@ export function TransactionAmountFilter() {
         exclusive
         size={'small'}
         value={type}
-        onChange={(event, value: string | null) => value && navigate({ type: value === 'any' ? null : value })}
+        onChange={(event, value: string | null) => value && handleTypeChange(value)}
       >
         <ToggleButton value={'any'}>{t('shared.any')}</ToggleButton>
         <ToggleButton value={'withdrawals'}>{t('transactions.withdrawals')}</ToggleButton>
@@ -62,18 +46,9 @@ export function TransactionAmountFilter() {
       <TextField
         size={'small'}
         type={'number'}
-        label={t('shared.minAmount')}
-        value={min}
-        onChange={(event) => handleAmountChange('amountMin', event.target.value)}
-        slotProps={{ htmlInput: { min: 0, step: 'any' } }}
-        sx={{ width: 120 }}
-      />
-      <TextField
-        size={'small'}
-        type={'number'}
-        label={t('shared.maxAmount')}
-        value={max}
-        onChange={(event) => handleAmountChange('amountMax', event.target.value)}
+        label={t('shared.amount')}
+        value={amount}
+        onChange={(event) => setAmount(event.target.value)}
         slotProps={{ htmlInput: { min: 0, step: 'any' } }}
         sx={{ width: 120 }}
       />

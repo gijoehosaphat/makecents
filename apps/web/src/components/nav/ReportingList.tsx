@@ -4,20 +4,14 @@ import { ExpandLess, ExpandMore, BarChart, Category, Paid, CurrencyExchange } fr
 import { useTranslations } from 'next-intl'
 import { MainMenuItem } from '../shared/MainMenuItem'
 import { useAppContext } from '../context/AppContextProvider'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 export function ReportingList() {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const router = useRouter()
   const { currentAccountId } = useAppContext()
   const t = useTranslations('common')
   const [listOpen, setListOpen] = useState(true)
-
-  let queryString = searchParams?.toString()
-  if (queryString) {
-    queryString = `?${queryString}`
-  }
 
   return (
     <>
@@ -37,7 +31,7 @@ export function ReportingList() {
         <Collapse in={listOpen} timeout={'auto'} unmountOnExit sx={{ pl: 3 }}>
           <MainMenuItem
             onClick={() => {
-              router.push(`/${currentAccountId}/dashboard/reporting/budgets${queryString}`)
+              router.push(`/${currentAccountId}/dashboard/reporting/budgets${window.location.search}`)
             }}
             primary={t('reporting.budgetsTitle')}
             icon={<Paid fontSize={'large'} />}
@@ -46,7 +40,7 @@ export function ReportingList() {
           />
           <MainMenuItem
             onClick={() => {
-              router.push(`/${currentAccountId}/dashboard/reporting/daily${queryString}`)
+              router.push(`/${currentAccountId}/dashboard/reporting/daily${window.location.search}`)
             }}
             primary={t('reporting.dailySpendingTitle')}
             icon={<CurrencyExchange fontSize={'large'} />}
@@ -55,7 +49,7 @@ export function ReportingList() {
           />
           <MainMenuItem
             onClick={() => {
-              router.push(`/${currentAccountId}/dashboard/reporting/category${queryString}`)
+              router.push(`/${currentAccountId}/dashboard/reporting/category${window.location.search}`)
             }}
             primary={t('reporting.categorySpendingTitle')}
             icon={<Category fontSize={'large'} />}

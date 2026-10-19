@@ -34,8 +34,7 @@ export function useFilteredTransactionTotals({
   categoryIds,
   autoCategorized,
   direction,
-  amountMin,
-  amountMax,
+  amount,
   search,
 }: {
   dateFrom?: Date
@@ -45,8 +44,7 @@ export function useFilteredTransactionTotals({
   categoryIds?: number[]
   autoCategorized?: boolean
   direction?: TransactionDirection
-  amountMin?: number
-  amountMax?: number
+  amount?: number
   search?: string
 }) {
   const match = useMemo(() => buildTransactionSearchQuery(search || ''), [search])
@@ -59,8 +57,7 @@ export function useFilteredTransactionTotals({
       categoryIds,
       autoCategorized,
       direction,
-      amountMin,
-      amountMax,
+      amount,
     })
     if (rowFilter) {
       and.push(rowFilter)
@@ -79,7 +76,7 @@ export function useFilteredTransactionTotals({
       transferDepositFilter: { and: [...and, ONLY_TRANSFERS_FILTER, deposit] },
       transferWithdrawalFilter: { and: [...and, ONLY_TRANSFERS_FILTER, withdrawal] },
     }
-  }, [bankAccountIds, categorized, categoryIds, autoCategorized, direction, amountMin, amountMax, dateFrom, dateTo])
+  }, [bankAccountIds, categorized, categoryIds, autoCategorized, direction, amount, dateFrom, dateTo])
 
   const document = match
     ? GetFilteredTransactionTotalsBySearchDocument

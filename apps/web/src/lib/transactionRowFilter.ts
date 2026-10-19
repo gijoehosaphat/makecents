@@ -9,9 +9,8 @@ export interface TransactionRowFilterOptions {
   autoCategorized?: boolean
   /** Only withdrawals (negative amounts) or only deposits (positive amounts). */
   direction?: TransactionDirection
-  /** Bounds on the absolute amount, in cents. */
-  amountMin?: number
-  amountMax?: number
+  /** The exact absolute amount, in cents: a withdrawal or deposit of this much. */
+  amount?: number
 }
 
 function buildCategoryFilter({ categorized, categoryIds }: TransactionRowFilterOptions): TransactionFilter | undefined {
@@ -31,36 +30,24 @@ function buildAutoFilter({ autoCategorized }: TransactionRowFilterOptions): Tran
   return autoCategorized ? { categorySource: { equalTo: 'auto' } } : undefined
 }
 
-function buildAmountFilter({
-  direction,
-  amountMin,
-  amountMax,
-}: TransactionRowFilterOptions): TransactionFilter | undefined {
-  const hasBounds = amountMin !== undefined || amountMax !== undefined
-  if (!direction && !hasBounds) {
+function buildAmountFilter({ direction, amount }: TransactionRowFilterOptions): TransactionFilter | undefined {
+  if (amount === undefined) {
+    if (direction === 'deposits') {
+      return { amount: { greaterThan: '0' } }
+    }
+    if (direction === 'withdrawals') {
+      return { amount: { lessThan: '0' } }
+    }
     return undefined
   }
 
-  const deposit: TransactionFilter = {
-    amount: {
-      ...(amountMin !== undefined ? { greaterThanOrEqualTo: String(amountMin) } : { greaterThan: '0' }),
-      ...(amountMax !== undefined ? { lessThanOrEqualTo: String(amountMax) } : {}),
-    },
-  }
-  const withdrawal: TransactionFilter = {
-    amount: {
-      ...(amountMin !== undefined ? { lessThanOrEqualTo: String(-amountMin) } : { lessThan: '0' }),
-      ...(amountMax !== undefined ? { greaterThanOrEqualTo: String(-amountMax) } : {}),
-    },
-  }
-
   if (direction === 'deposits') {
-    return deposit
+    return { amount: { equalTo: String(amount) } }
   }
   if (direction === 'withdrawals') {
-    return withdrawal
+    return { amount: { equalTo: String(-amount) } }
   }
-  return { or: [deposit, withdrawal] }
+  return { amount: { in: [String(amount), String(-amount)] } }
 }
 
 /**
@@ -99,10 +86,7 @@ function matchesAutoFilter(transaction: Transaction, { autoCategorized }: Transa
   return !autoCategorized || transaction.categorySource === 'auto'
 }
 
-function matchesAmountFilter(
-  transaction: Transaction,
-  { direction, amountMin, amountMax }: TransactionRowFilterOptions,
-) {
+function matchesAmountFilter(transaction: Transaction, { direction, amount: wanted }: TransactionRowFilterOptions) {
   const amount = Number(transaction.amount || 0)
   if (direction === 'deposits' && amount <= 0) {
     return false
@@ -110,14 +94,7 @@ function matchesAmountFilter(
   if (direction === 'withdrawals' && amount >= 0) {
     return false
   }
-  if (!direction && amountMin === undefined && amountMax === undefined) {
-    return true
-  }
-  if (amount === 0) {
-    return false
-  }
-  const absolute = Math.abs(amount)
-  return (amountMin === undefined || absolute >= amountMin) && (amountMax === undefined || absolute <= amountMax)
+  return wanted === undefined || Math.abs(amount) === wanted
 }
 
 /** Client-side mirror of buildTransactionRowFilter, used to highlight which rows of a split group matched. */

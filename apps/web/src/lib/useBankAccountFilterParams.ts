@@ -1,28 +1,18 @@
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 export function useBankAccountFilterParams() {
   const searchParams = useSearchParams()
+  const bankAccountIdsParam = searchParams?.get('bankAccountIds')
 
-  const bankAccountIdsParam = useMemo(() => {
-    const val = searchParams?.get('bankAccountIds')
-    if (!val) {
-      return undefined
+  return useMemo(() => {
+    if (!bankAccountIdsParam) {
+      return { bankAccountIds: undefined }
     }
-    const ids = val
+    const ids = bankAccountIdsParam
       .split(',')
       .map((id) => Number(id))
       .filter((id) => !Number.isNaN(id))
-    return ids.length > 0 ? ids : undefined
-  }, [searchParams])
-
-  const [bankAccountIds, setBankAccountIds] = useState<number[] | undefined>(bankAccountIdsParam)
-
-  useEffect(() => {
-    setBankAccountIds(bankAccountIdsParam)
+    return { bankAccountIds: ids.length > 0 ? ids : undefined }
   }, [bankAccountIdsParam])
-
-  return {
-    bankAccountIds,
-  }
 }

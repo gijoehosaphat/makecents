@@ -32,7 +32,7 @@ import { BankAccountList } from '@/components/nav/BankAccountList'
 import { useAppContext } from '@/components/context/AppContextProvider'
 import { useAmountVisibility } from '@/components/context/AmountVisibilityContext'
 import { useTranslations } from 'next-intl'
-import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import { Dropzone } from '@/components/shared/Dropzone'
 import { MainMenuItem } from '@/components/shared/MainMenuItem'
 import { ReportingList } from '@/components/nav/ReportingList'
@@ -139,7 +139,6 @@ function DrawerHeader({ children }: { children?: React.ReactNode }) {
 
 export default function Layout({ children }: { children?: React.ReactNode }) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const router = useRouter()
   const t = useTranslations('common')
   const { user, currentAccountId } = useAppContext()
@@ -153,11 +152,6 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
 
   const handleDrawerClose = () => {
     setOpen(false)
-  }
-
-  let queryString = searchParams?.toString()
-  if (queryString) {
-    queryString = `?${queryString}`
   }
 
   return (

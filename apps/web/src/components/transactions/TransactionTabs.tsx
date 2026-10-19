@@ -3,7 +3,7 @@
 import { Box, Tab, Tabs } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useMemo, useTransition } from 'react'
+import { Suspense, useMemo, useOptimistic, useTransition } from 'react'
 import { ExportTransactionsButton } from './ExportTransactionsButton'
 import { useAppContext } from '../context/AppContextProvider'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
@@ -24,13 +24,15 @@ function TabsView({ counts }: { counts?: { all: number; uncategorized: number; c
   const { categorized } = useTransactionFilterParams()
   const [, startTransition] = useTransition()
 
-  const value: TabValue = categorized === undefined ? 'any' : categorized ? 'true' : 'false'
+  // Optimistic so the tab switches straight away, while its results load.
+  const [value, setValue] = useOptimistic<TabValue>(categorized === undefined ? 'any' : categorized ? 'true' : 'false')
 
   function handleChange(event: React.SyntheticEvent, next: TabValue) {
     if (next === value) {
       return
     }
     startTransition(() => {
+      setValue(next)
       router.push(
         updateSearchParamsUrl(pathname, searchParams, {
           categorized: next === 'any' ? null : next,
@@ -58,14 +60,14 @@ function TabsWithCounts() {
   const { bankAccounts } = useAppContext()
   const { dateFrom, dateTo } = useDateFilterParams()
   const { bankAccountIds: selectedBankAccountIds } = useBankAccountFilterParams()
-  const { direction, amountMin, amountMax } = useTransactionAmountParams()
+  const { direction, amount } = useTransactionAmountParams()
   const { search } = useTransactionSearchParams()
 
   const bankAccountIds = useMemo(() => {
     return selectedBankAccountIds || bankAccounts.map((bankAccount) => bankAccount.id)
   }, [selectedBankAccountIds, bankAccounts])
 
-  const counts = useTransactionTabCounts({ bankAccountIds, dateFrom, dateTo, direction, amountMin, amountMax, search })
+  const counts = useTransactionTabCounts({ bankAccountIds, dateFrom, dateTo, direction, amount, search })
   return <TabsView counts={counts} />
 }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { ListSubheader, Collapse, List } from '@mui/material'
 import { AccountBalance, ExpandLess, ExpandMore } from '@mui/icons-material'
 import { useAppContext } from '@/components/context/AppContextProvider'
@@ -18,7 +18,6 @@ export function BankAccountList() {
   const t = useTranslations('common')
   const accountLabel = useBankAccountLabel()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [listOpen, setListOpen] = useState(true)
   const [showClosed] = useShowClosedBankAccounts()
 
@@ -39,11 +38,6 @@ export function BankAccountList() {
   Object.keys(totals).forEach((currency) => {
     total.push(formatMoney(totals[currency] / 100, currency || 'CAD', hidden))
   })
-
-  let queryString = searchParams?.toString()
-  if (queryString) {
-    queryString = `?${queryString}`
-  }
 
   return (
     <>
@@ -66,7 +60,7 @@ export function BankAccountList() {
               <MainMenuItem
                 key={`${bankAccount.nodeId}`}
                 onClick={() => {
-                  router.push(`/${currentAccountId}/dashboard/bank-account/${bankAccount.id}${queryString}`)
+                  router.push(`/${currentAccountId}/dashboard/bank-account/${bankAccount.id}${window.location.search}`)
                 }}
                 primary={
                   bankAccount.closed

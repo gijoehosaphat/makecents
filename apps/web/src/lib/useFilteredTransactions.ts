@@ -21,8 +21,7 @@ export interface FilteredTransactionsParams {
   categoryIds?: number[]
   autoCategorized?: boolean
   direction?: TransactionDirection
-  amountMin?: number
-  amountMax?: number
+  amount?: number
   search?: string
   sort?: TransactionSort
 }
@@ -41,8 +40,7 @@ export function buildFilteredTransactionsRequest({
   categoryIds,
   autoCategorized,
   direction,
-  amountMin,
-  amountMax,
+  amount,
   search,
   sort = DEFAULT_TRANSACTION_SORT,
 }: FilteredTransactionsParams) {
@@ -57,8 +55,7 @@ export function buildFilteredTransactionsRequest({
       categoryIds,
       autoCategorized,
       direction,
-      amountMin,
-      amountMax,
+      amount,
     }),
   }
 
@@ -91,8 +88,7 @@ export function useFilteredTransactions({
   categoryIds,
   autoCategorized,
   direction,
-  amountMin,
-  amountMax,
+  amount,
   search,
   sort,
 }: FilteredTransactionsParams) {
@@ -112,8 +108,7 @@ export function useFilteredTransactions({
         categoryIds,
         autoCategorized,
         direction,
-        amountMin,
-        amountMax,
+        amount,
         search,
         sort,
       }),
@@ -127,8 +122,7 @@ export function useFilteredTransactions({
       categoryIds,
       autoCategorized,
       direction,
-      amountMin,
-      amountMax,
+      amount,
       search,
       sort,
     ],

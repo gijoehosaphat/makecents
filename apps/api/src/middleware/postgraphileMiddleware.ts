@@ -69,16 +69,21 @@ export function getPostgraphileOptions() {
     // legacyRelations: 'omit',
     // Every request runs as a restricted role so row-level security applies. Without a valid
     // Auth.js session it can only call the SECURITY DEFINER sign-up/sign-in functions.
+    //
+    // JIT is off because the nested row-level security policies inflate plan cost estimates enough to
+    // trigger LLVM compilation, which took ~22s for transfer-total queries that execute in ~5ms.
     pgSettings: async (req) => {
       const jwt = await getSessionToken(req)
       if (jwt?.sub) {
         return {
           role: 'makecents_member',
           'jwt.claims.user_id': jwt.sub,
+          jit: 'off',
         }
       }
       return {
         role: 'makecents_anonymous',
+        jit: 'off',
       }
     },
     appendPlugins: [PgMutationUpsertPlugin, PluginManyCreateUpdateDelete, ConnectionFilterPlugin, PgAggregatesPlugin],

@@ -14,16 +14,15 @@ describe('buildTransactionRowFilter', () => {
     expect(buildTransactionRowFilter({ direction: 'withdrawals' })).toEqual({ amount: { lessThan: '0' } })
   })
 
-  it('applies absolute bounds to withdrawals as negative amounts', () => {
-    expect(buildTransactionRowFilter({ direction: 'withdrawals', amountMin: 1000, amountMax: 5000 })).toEqual({
-      amount: { lessThanOrEqualTo: '-1000', greaterThanOrEqualTo: '-5000' },
+  it('matches an exact amount as a negative withdrawal or a positive deposit', () => {
+    expect(buildTransactionRowFilter({ direction: 'withdrawals', amount: 1000 })).toEqual({
+      amount: { equalTo: '-1000' },
     })
+    expect(buildTransactionRowFilter({ direction: 'deposits', amount: 1000 })).toEqual({ amount: { equalTo: '1000' } })
   })
 
-  it('matches either sign when only bounds are set', () => {
-    expect(buildTransactionRowFilter({ amountMin: 1000 })).toEqual({
-      or: [{ amount: { greaterThanOrEqualTo: '1000' } }, { amount: { lessThanOrEqualTo: '-1000' } }],
-    })
+  it('matches either sign when only the amount is set', () => {
+    expect(buildTransactionRowFilter({ amount: 1000 })).toEqual({ amount: { in: ['1000', '-1000'] } })
   })
 
   it('combines category and amount filters', () => {
@@ -34,12 +33,12 @@ describe('buildTransactionRowFilter', () => {
 })
 
 describe('transactionMatchesRowFilter', () => {
-  it('matches by absolute amount regardless of sign', () => {
-    const options = { amountMin: 1000, amountMax: 5000 }
+  it('matches the exact absolute amount regardless of sign', () => {
+    const options = { amount: 2500 }
     expect(transactionMatchesRowFilter(tx(-2500), options)).toBe(true)
     expect(transactionMatchesRowFilter(tx(2500), options)).toBe(true)
-    expect(transactionMatchesRowFilter(tx(-500), options)).toBe(false)
-    expect(transactionMatchesRowFilter(tx(-6000), options)).toBe(false)
+    expect(transactionMatchesRowFilter(tx(-2499), options)).toBe(false)
+    expect(transactionMatchesRowFilter(tx(2500), { ...options, direction: 'withdrawals' })).toBe(false)
   })
 
   it('respects direction', () => {
