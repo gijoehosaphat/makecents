@@ -12,7 +12,8 @@ import { IMPORT_TRANSACTIONS_V3 } from './20261012130000_import-auto-categorize'
 // none. Existing rows are only candidates when the file does not carry their id (otherwise
 // they are already accounted for), and rows with the same name are paired off before rows
 // with a different one.
-const IMPORT_TRANSACTIONS_V4 = `
+// Exported so later migrations can extend it and restore it on rollback.
+export const IMPORT_TRANSACTIONS_V4 = `
     CREATE OR REPLACE FUNCTION app_private.import_transactions(bank_account_id int, file_name text, transactions jsonb)
     RETURNS app_private.import_batch
     AS $$

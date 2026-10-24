@@ -37,7 +37,7 @@ mutation DeleteBankCsvDefinitionById($id: Int!) {
   }
 }
 
-query GetTransactionsForCsvAccountMatching($filter: TransactionFilter!) {
+query GetTransactionsForCsvAccountMatching($filter: TransactionFilter!, $deletedFilter: DeletedTransactionFilter!) {
   allTransactions(filter: $filter) {
     nodes {
       id
@@ -48,6 +48,13 @@ query GetTransactionsForCsvAccountMatching($filter: TransactionFilter!) {
       originalAmount
       posted
       originalPosted
+    }
+  }
+  # Deleted rows are skipped by imports, so the preview counts them as already there.
+  allDeletedTransactions(filter: $deletedFilter) {
+    nodes {
+      bankAccountId
+      bankTransactionId
     }
   }
 }

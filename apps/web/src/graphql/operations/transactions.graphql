@@ -109,6 +109,7 @@ mutation CreateTransaction(
   $amount: BigInt
   $bankAccountId: Int!
   $bankTransactionId: String
+  $categoryId: Int
   $memo: String
   $name: String
   $originalAmount: BigInt
@@ -124,6 +125,7 @@ mutation CreateTransaction(
         amount: $amount
         splitSourceId: $splitSourceId
         bankTransactionId: $bankTransactionId
+        categoryId: $categoryId
         memo: $memo
         name: $name
         originalAmount: $originalAmount
@@ -459,5 +461,76 @@ query GetTransactionTabCountsBySearch(
   }
   categorized: transactionSearch(first: 0, filter: $categorizedFilter, match: $match) {
     totalCount
+  }
+}
+
+mutation RemoveTransaction($transactionId: Int!, $reason: String!, $note: String, $duplicateOfId: Int) {
+  removeTransaction(
+    input: { transactionId: $transactionId, reason: $reason, note: $note, duplicateOfId: $duplicateOfId }
+  ) {
+    deletedTransaction {
+      id
+    }
+  }
+}
+
+mutation RestoreTransaction($deletedTransactionId: Int!) {
+  restoreTransaction(input: { deletedTransactionId: $deletedTransactionId }) {
+    deletedTransaction {
+      id
+    }
+  }
+}
+
+# Transactions a deleted one may duplicate: same bank account, close in date. The caller matches the amount.
+query GetDuplicateCandidates($transactionId: Int!, $bankAccountId: Int!, $from: Datetime!, $to: Datetime!) {
+  allTransactions(
+    filter: {
+      id: { notEqualTo: $transactionId }
+      bankAccountId: { equalTo: $bankAccountId }
+      splitSourceId: { isNull: true }
+      posted: { greaterThanOrEqualTo: $from, lessThanOrEqualTo: $to }
+    }
+    orderBy: POSTED_ASC
+  ) {
+    nodes {
+      id
+      nodeId
+      posted
+      name
+      customName
+      memo
+      customMemo
+      amount
+      originalAmount
+    }
+  }
+}
+
+query GetDeletedTransactions($accountId: Int!) {
+  allDeletedTransactions(filter: { bankAccountByBankAccountId: { accountId: { equalTo: $accountId } } }) {
+    nodes {
+      id
+      nodeId
+      createdAt
+      bankAccountId
+      posted
+      amount
+      name
+      memo
+      reason
+      note
+      userByUserId {
+        id
+        name
+        email
+      }
+      transactionByDuplicateOfId {
+        id
+        posted
+        name
+        customName
+      }
+    }
   }
 }

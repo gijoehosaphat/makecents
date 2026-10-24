@@ -24,6 +24,7 @@ import { BankAccountHeader } from '../shared/BankAccountHeader'
 import { TransactionFilter } from '../shared/TransactionFilter'
 import { useTransactionFilterParams } from '@/lib/useTransactionFilterParams'
 import { useFilteredTransactions } from '@/lib/useFilteredTransactions'
+import { CreateTransactionButton } from './CreateTransactionDialog'
 
 export function Transactions() {
   const searchParams = useSearchParams()
@@ -95,7 +96,7 @@ export function Transactions() {
                       {t('transactions.deposits')}
                     </Typography>
                   </TableCell>
-                  {/* <TableCell /> */}
+                  <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -110,17 +111,24 @@ export function Transactions() {
               </TableBody>
             </Table>
           </TableContainer>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-            <Pagination
-              count={Math.ceil(totalCount / limit)}
-              page={page}
-              onChange={handlePagination}
-              variant={'outlined'}
-              shape={'rounded'}
-            />
-          </Box>
         </>
       )}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mt: 4 }}>
+        <CreateTransactionButton
+          refetchQuery={refetchQuery}
+          bankAccountId={bankAccountIds.length === 1 ? bankAccountIds[0] : undefined}
+        />
+        {transactions.length > 0 && (
+          <Pagination
+            count={Math.ceil(totalCount / limit)}
+            page={page}
+            onChange={handlePagination}
+            variant={'outlined'}
+            shape={'rounded'}
+            sx={{ ml: 'auto' }}
+          />
+        )}
+      </Box>
     </>
   )
 }

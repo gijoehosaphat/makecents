@@ -15,12 +15,19 @@ export interface ExistingRow extends Omit<ImportRow, 'bankTransactionId'> {
  *
  * A row is a duplicate when its id is already stored. Rows with a new id still count as duplicates
  * when the account holds rows with the same date and amount whose ids the file doesn't carry (the
- * bank re-issued the id or renamed the payee), paired off one-to-one, same names first.
+ * bank re-issued the id or renamed the payee), paired off one-to-one, same names first. Rows whose
+ * id was deleted from the account (deletedIds) are skipped as well.
  */
-export function countDuplicateRows(incoming: ImportRow[], existing: ExistingRow[]): number {
+export function countDuplicateRows(
+  incoming: ImportRow[],
+  existing: ExistingRow[],
+  deletedIds: ReadonlySet<string> = new Set(),
+): number {
   const existingIds = new Set(existing.map((row) => row.bankTransactionId ?? ''))
   const incomingIds = new Set(incoming.map((row) => row.bankTransactionId))
-  const fresh = incoming.filter((row) => !existingIds.has(row.bankTransactionId))
+  const fresh = incoming.filter(
+    (row) => !existingIds.has(row.bankTransactionId) && !deletedIds.has(row.bankTransactionId),
+  )
   let duplicates = incoming.length - fresh.length
 
   const keyOf = (row: Pick<ImportRow, 'posted' | 'amount'>) => `${row.posted.getTime()}|${row.amount}`

@@ -393,6 +393,40 @@ type Query implements Node {
     filter: CustomCategoryGroupFilter
   ): CustomCategoryGroupsConnection
 
+  """Reads and enables pagination through a set of `DeletedTransaction`."""
+  allDeletedTransactions(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DeletedTransaction`."""
+    orderBy: [DeletedTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DeletedTransactionCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DeletedTransactionFilter
+  ): DeletedTransactionsConnection
+
   """Reads and enables pagination through a set of `ImportBatch`."""
   allImportBatches(
     """Only read the first `n` values of the set."""
@@ -547,6 +581,8 @@ type Query implements Node {
   categoryGroupByAccountIdAndCategoryId(accountId: Int!, categoryId: Int!): CategoryGroup
   customCategoryGroupById(id: Int!): CustomCategoryGroup
   customCategoryGroupByAccountIdAndName(accountId: Int!, name: String!): CustomCategoryGroup
+  deletedTransactionById(id: Int!): DeletedTransaction
+  deletedTransactionByBankAccountIdAndBankTransactionId(bankAccountId: Int!, bankTransactionId: String!): DeletedTransaction
   importBatchById(id: Int!): ImportBatch
   transactionById(id: Int!): Transaction
   transactionByBankAccountIdAndBankTransactionId(bankAccountId: Int!, bankTransactionId: String!): Transaction
@@ -724,6 +760,14 @@ type Query implements Node {
     """
     nodeId: ID!
   ): CustomCategoryGroup
+
+  """Reads a single `DeletedTransaction` using its globally unique `ID`."""
+  deletedTransaction(
+    """
+    The globally unique `ID` to be used in selecting a single `DeletedTransaction`.
+    """
+    nodeId: ID!
+  ): DeletedTransaction
 
   """Reads a single `ImportBatch` using its globally unique `ID`."""
   importBatch(
@@ -1422,6 +1466,40 @@ type User implements Node {
     """
     filter: ImportBatchFilter
   ): ImportBatchesConnection!
+
+  """Reads and enables pagination through a set of `DeletedTransaction`."""
+  deletedTransactionsByUserId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DeletedTransaction`."""
+    orderBy: [DeletedTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DeletedTransactionCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DeletedTransactionFilter
+  ): DeletedTransactionsConnection!
 }
 
 """
@@ -2880,6 +2958,12 @@ input BankAccountFilter {
   """Some related `importBatchesByBankAccountId` exist."""
   importBatchesByBankAccountIdExist: Boolean
 
+  """Filter by the object’s `deletedTransactionsByBankAccountId` relation."""
+  deletedTransactionsByBankAccountId: BankAccountToManyDeletedTransactionFilter
+
+  """Some related `deletedTransactionsByBankAccountId` exist."""
+  deletedTransactionsByBankAccountIdExist: Boolean
+
   """Filter by the object’s `userByUserId` relation."""
   userByUserId: UserFilter
 
@@ -3015,6 +3099,12 @@ input TransactionFilter {
 
   """A related `transferByTransactionTargetId` exists."""
   transferByTransactionTargetIdExists: Boolean
+
+  """Filter by the object’s `deletedTransactionsByDuplicateOfId` relation."""
+  deletedTransactionsByDuplicateOfId: TransactionToManyDeletedTransactionFilter
+
+  """Some related `deletedTransactionsByDuplicateOfId` exist."""
+  deletedTransactionsByDuplicateOfIdExist: Boolean
 
   """Filter by the object’s `bankAccountByBankAccountId` relation."""
   bankAccountByBankAccountId: BankAccountFilter
@@ -3339,41 +3429,54 @@ input TransferFilter {
 }
 
 """
-A filter to be used against `Category` object types. All fields are combined with a logical ‘and.’
+A filter to be used against many `DeletedTransaction` object types. All fields are combined with a logical ‘and.’
 """
-input CategoryFilter {
+input TransactionToManyDeletedTransactionFilter {
+  """
+  Every related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DeletedTransactionFilter
+
+  """
+  Some related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DeletedTransactionFilter
+
+  """
+  No related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DeletedTransactionFilter
+
+  """
+  Aggregates across related `DeletedTransaction` match the filter criteria.
+  """
+  aggregates: DeletedTransactionAggregatesFilter
+}
+
+"""
+A filter to be used against `DeletedTransaction` object types. All fields are combined with a logical ‘and.’
+"""
+input DeletedTransactionFilter {
   """Filter by the object’s `id` field."""
   id: IntFilter
+
+  """Filter by the object’s `bankAccountId` field."""
+  bankAccountId: IntFilter
+
+  """Filter by the object’s `duplicateOfId` field."""
+  duplicateOfId: IntFilter
 
   """Filter by the object’s `userId` field."""
   userId: IntFilter
 
-  """Filter by the object’s `accountId` field."""
-  accountId: IntFilter
+  """Filter by the object’s `bankAccountByBankAccountId` relation."""
+  bankAccountByBankAccountId: BankAccountFilter
 
-  """Filter by the object’s `kind` field."""
-  kind: StringFilter
+  """Filter by the object’s `transactionByDuplicateOfId` relation."""
+  transactionByDuplicateOfId: TransactionFilter
 
-  """Filter by the object’s `isPayroll` field."""
-  isPayroll: BooleanFilter
-
-  """Filter by the object’s `transactionsByCategoryId` relation."""
-  transactionsByCategoryId: CategoryToManyTransactionFilter
-
-  """Some related `transactionsByCategoryId` exist."""
-  transactionsByCategoryIdExist: Boolean
-
-  """Filter by the object’s `budgetCategoryByCategoryId` relation."""
-  budgetCategoryByCategoryId: BudgetCategoryFilter
-
-  """A related `budgetCategoryByCategoryId` exists."""
-  budgetCategoryByCategoryIdExists: Boolean
-
-  """Filter by the object’s `categoryGroupsByCategoryId` relation."""
-  categoryGroupsByCategoryId: CategoryToManyCategoryGroupFilter
-
-  """Some related `categoryGroupsByCategoryId` exist."""
-  categoryGroupsByCategoryIdExist: Boolean
+  """A related `transactionByDuplicateOfId` exists."""
+  transactionByDuplicateOfIdExists: Boolean
 
   """Filter by the object’s `userByUserId` relation."""
   userByUserId: UserFilter
@@ -3381,126 +3484,14 @@ input CategoryFilter {
   """A related `userByUserId` exists."""
   userByUserIdExists: Boolean
 
-  """Filter by the object’s `accountByAccountId` relation."""
-  accountByAccountId: AccountFilter
-
   """Checks for all expressions in this list."""
-  and: [CategoryFilter!]
+  and: [DeletedTransactionFilter!]
 
   """Checks for any expressions in this list."""
-  or: [CategoryFilter!]
+  or: [DeletedTransactionFilter!]
 
   """Negates the expression."""
-  not: CategoryFilter
-}
-
-"""
-A filter to be used against Boolean fields. All fields are combined with a logical ‘and.’
-"""
-input BooleanFilter {
-  """
-  Is null (if `true` is specified) or is not null (if `false` is specified).
-  """
-  isNull: Boolean
-
-  """Equal to the specified value."""
-  equalTo: Boolean
-
-  """Not equal to the specified value."""
-  notEqualTo: Boolean
-
-  """
-  Not equal to the specified value, treating null like an ordinary value.
-  """
-  distinctFrom: Boolean
-
-  """Equal to the specified value, treating null like an ordinary value."""
-  notDistinctFrom: Boolean
-
-  """Included in the specified list."""
-  in: [Boolean!]
-
-  """Not included in the specified list."""
-  notIn: [Boolean!]
-
-  """Less than the specified value."""
-  lessThan: Boolean
-
-  """Less than or equal to the specified value."""
-  lessThanOrEqualTo: Boolean
-
-  """Greater than the specified value."""
-  greaterThan: Boolean
-
-  """Greater than or equal to the specified value."""
-  greaterThanOrEqualTo: Boolean
-}
-
-"""
-A filter to be used against many `Transaction` object types. All fields are combined with a logical ‘and.’
-"""
-input CategoryToManyTransactionFilter {
-  """
-  Every related `Transaction` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: TransactionFilter
-
-  """
-  Some related `Transaction` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: TransactionFilter
-
-  """
-  No related `Transaction` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: TransactionFilter
-
-  """Aggregates across related `Transaction` match the filter criteria."""
-  aggregates: TransactionAggregatesFilter
-}
-
-"""
-A filter to be used against `BudgetCategory` object types. All fields are combined with a logical ‘and.’
-"""
-input BudgetCategoryFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
-
-  """Filter by the object’s `userId` field."""
-  userId: IntFilter
-
-  """Filter by the object’s `budgetId` field."""
-  budgetId: IntFilter
-
-  """Filter by the object’s `categoryId` field."""
-  categoryId: IntFilter
-
-  """Filter by the object’s `accountId` field."""
-  accountId: IntFilter
-
-  """Filter by the object’s `userByUserId` relation."""
-  userByUserId: UserFilter
-
-  """A related `userByUserId` exists."""
-  userByUserIdExists: Boolean
-
-  """Filter by the object’s `budgetByBudgetId` relation."""
-  budgetByBudgetId: BudgetFilter
-
-  """Filter by the object’s `categoryByCategoryId` relation."""
-  categoryByCategoryId: CategoryFilter
-
-  """Filter by the object’s `accountByAccountId` relation."""
-  accountByAccountId: AccountFilter
-
-  """Checks for all expressions in this list."""
-  and: [BudgetCategoryFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [BudgetCategoryFilter!]
-
-  """Negates the expression."""
-  not: BudgetCategoryFilter
+  not: DeletedTransactionFilter
 }
 
 """
@@ -3560,6 +3551,12 @@ input UserFilter {
 
   """Some related `importBatchesByUserId` exist."""
   importBatchesByUserIdExist: Boolean
+
+  """Filter by the object’s `deletedTransactionsByUserId` relation."""
+  deletedTransactionsByUserId: UserToManyDeletedTransactionFilter
+
+  """Some related `deletedTransactionsByUserId` exist."""
+  deletedTransactionsByUserIdExist: Boolean
 
   """Checks for all expressions in this list."""
   and: [UserFilter!]
@@ -3871,123 +3868,169 @@ input UserToManyCategoryFilter {
   aggregates: CategoryAggregatesFilter
 }
 
-"""A filter to be used against aggregates of `Category` object types."""
-input CategoryAggregatesFilter {
-  """
-  A filter that must pass for the relevant `Category` object to be included within the aggregate.
-  """
-  filter: CategoryFilter
+"""
+A filter to be used against `Category` object types. All fields are combined with a logical ‘and.’
+"""
+input CategoryFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
 
-  """Sum aggregate over matching `Category` objects."""
-  sum: CategorySumAggregateFilter
+  """Filter by the object’s `userId` field."""
+  userId: IntFilter
 
-  """Distinct count aggregate over matching `Category` objects."""
-  distinctCount: CategoryDistinctCountAggregateFilter
+  """Filter by the object’s `accountId` field."""
+  accountId: IntFilter
 
-  """Minimum aggregate over matching `Category` objects."""
-  min: CategoryMinAggregateFilter
+  """Filter by the object’s `kind` field."""
+  kind: StringFilter
 
-  """Maximum aggregate over matching `Category` objects."""
-  max: CategoryMaxAggregateFilter
-
-  """Mean average aggregate over matching `Category` objects."""
-  average: CategoryAverageAggregateFilter
-
-  """Sample standard deviation aggregate over matching `Category` objects."""
-  stddevSample: CategoryStddevSampleAggregateFilter
-
-  """
-  Population standard deviation aggregate over matching `Category` objects.
-  """
-  stddevPopulation: CategoryStddevPopulationAggregateFilter
-
-  """Sample variance aggregate over matching `Category` objects."""
-  varianceSample: CategoryVarianceSampleAggregateFilter
-
-  """Population variance aggregate over matching `Category` objects."""
-  variancePopulation: CategoryVariancePopulationAggregateFilter
-}
-
-input CategorySumAggregateFilter {
-  id: BigIntFilter
-  userId: BigIntFilter
-  accountId: BigIntFilter
-}
-
-input CategoryDistinctCountAggregateFilter {
-  id: BigIntFilter
-  createdAt: BigIntFilter
-  updatedAt: BigIntFilter
-  name: BigIntFilter
-  userId: BigIntFilter
-  accountId: BigIntFilter
-  kind: BigIntFilter
+  """Filter by the object’s `isPayroll` field."""
   isPayroll: BooleanFilter
-}
 
-input CategoryMinAggregateFilter {
-  id: IntFilter
-  userId: IntFilter
-  accountId: IntFilter
-}
+  """Filter by the object’s `transactionsByCategoryId` relation."""
+  transactionsByCategoryId: CategoryToManyTransactionFilter
 
-input CategoryMaxAggregateFilter {
-  id: IntFilter
-  userId: IntFilter
-  accountId: IntFilter
-}
+  """Some related `transactionsByCategoryId` exist."""
+  transactionsByCategoryIdExist: Boolean
 
-input CategoryAverageAggregateFilter {
-  id: BigFloatFilter
-  userId: BigFloatFilter
-  accountId: BigFloatFilter
-}
+  """Filter by the object’s `budgetCategoryByCategoryId` relation."""
+  budgetCategoryByCategoryId: BudgetCategoryFilter
 
-input CategoryStddevSampleAggregateFilter {
-  id: BigFloatFilter
-  userId: BigFloatFilter
-  accountId: BigFloatFilter
-}
+  """A related `budgetCategoryByCategoryId` exists."""
+  budgetCategoryByCategoryIdExists: Boolean
 
-input CategoryStddevPopulationAggregateFilter {
-  id: BigFloatFilter
-  userId: BigFloatFilter
-  accountId: BigFloatFilter
-}
+  """Filter by the object’s `categoryGroupsByCategoryId` relation."""
+  categoryGroupsByCategoryId: CategoryToManyCategoryGroupFilter
 
-input CategoryVarianceSampleAggregateFilter {
-  id: BigFloatFilter
-  userId: BigFloatFilter
-  accountId: BigFloatFilter
-}
+  """Some related `categoryGroupsByCategoryId` exist."""
+  categoryGroupsByCategoryIdExist: Boolean
 
-input CategoryVariancePopulationAggregateFilter {
-  id: BigFloatFilter
-  userId: BigFloatFilter
-  accountId: BigFloatFilter
+  """Filter by the object’s `userByUserId` relation."""
+  userByUserId: UserFilter
+
+  """A related `userByUserId` exists."""
+  userByUserIdExists: Boolean
+
+  """Filter by the object’s `accountByAccountId` relation."""
+  accountByAccountId: AccountFilter
+
+  """Checks for all expressions in this list."""
+  and: [CategoryFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [CategoryFilter!]
+
+  """Negates the expression."""
+  not: CategoryFilter
 }
 
 """
-A filter to be used against many `Budget` object types. All fields are combined with a logical ‘and.’
+A filter to be used against Boolean fields. All fields are combined with a logical ‘and.’
 """
-input UserToManyBudgetFilter {
+input BooleanFilter {
   """
-  Every related `Budget` matches the filter criteria. All fields are combined with a logical ‘and.’
+  Is null (if `true` is specified) or is not null (if `false` is specified).
   """
-  every: BudgetFilter
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: Boolean
+
+  """Not equal to the specified value."""
+  notEqualTo: Boolean
 
   """
-  Some related `Budget` matches the filter criteria. All fields are combined with a logical ‘and.’
+  Not equal to the specified value, treating null like an ordinary value.
   """
-  some: BudgetFilter
+  distinctFrom: Boolean
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: Boolean
+
+  """Included in the specified list."""
+  in: [Boolean!]
+
+  """Not included in the specified list."""
+  notIn: [Boolean!]
+
+  """Less than the specified value."""
+  lessThan: Boolean
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: Boolean
+
+  """Greater than the specified value."""
+  greaterThan: Boolean
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: Boolean
+}
+
+"""
+A filter to be used against many `Transaction` object types. All fields are combined with a logical ‘and.’
+"""
+input CategoryToManyTransactionFilter {
+  """
+  Every related `Transaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: TransactionFilter
 
   """
-  No related `Budget` matches the filter criteria. All fields are combined with a logical ‘and.’
+  Some related `Transaction` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
-  none: BudgetFilter
+  some: TransactionFilter
 
-  """Aggregates across related `Budget` match the filter criteria."""
-  aggregates: BudgetAggregatesFilter
+  """
+  No related `Transaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: TransactionFilter
+
+  """Aggregates across related `Transaction` match the filter criteria."""
+  aggregates: TransactionAggregatesFilter
+}
+
+"""
+A filter to be used against `BudgetCategory` object types. All fields are combined with a logical ‘and.’
+"""
+input BudgetCategoryFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
+
+  """Filter by the object’s `userId` field."""
+  userId: IntFilter
+
+  """Filter by the object’s `budgetId` field."""
+  budgetId: IntFilter
+
+  """Filter by the object’s `categoryId` field."""
+  categoryId: IntFilter
+
+  """Filter by the object’s `accountId` field."""
+  accountId: IntFilter
+
+  """Filter by the object’s `userByUserId` relation."""
+  userByUserId: UserFilter
+
+  """A related `userByUserId` exists."""
+  userByUserIdExists: Boolean
+
+  """Filter by the object’s `budgetByBudgetId` relation."""
+  budgetByBudgetId: BudgetFilter
+
+  """Filter by the object’s `categoryByCategoryId` relation."""
+  categoryByCategoryId: CategoryFilter
+
+  """Filter by the object’s `accountByAccountId` relation."""
+  accountByAccountId: AccountFilter
+
+  """Checks for all expressions in this list."""
+  and: [BudgetCategoryFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [BudgetCategoryFilter!]
+
+  """Negates the expression."""
+  not: BudgetCategoryFilter
 }
 
 """
@@ -4376,6 +4419,352 @@ input BudgetAssignmentVariancePopulationAggregateFilter {
   accountId: BigFloatFilter
   budgetId: BigFloatFilter
   amount: BigFloatFilter
+}
+
+"""
+A filter to be used against many `CategoryGroup` object types. All fields are combined with a logical ‘and.’
+"""
+input CategoryToManyCategoryGroupFilter {
+  """
+  Every related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: CategoryGroupFilter
+
+  """
+  Some related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: CategoryGroupFilter
+
+  """
+  No related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: CategoryGroupFilter
+
+  """Aggregates across related `CategoryGroup` match the filter criteria."""
+  aggregates: CategoryGroupAggregatesFilter
+}
+
+"""
+A filter to be used against `CategoryGroup` object types. All fields are combined with a logical ‘and.’
+"""
+input CategoryGroupFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
+
+  """Filter by the object’s `accountId` field."""
+  accountId: IntFilter
+
+  """Filter by the object’s `categoryId` field."""
+  categoryId: IntFilter
+
+  """Filter by the object’s `customCategoryGroupId` field."""
+  customCategoryGroupId: IntFilter
+
+  """Filter by the object’s `accountByAccountId` relation."""
+  accountByAccountId: AccountFilter
+
+  """Filter by the object’s `categoryByCategoryId` relation."""
+  categoryByCategoryId: CategoryFilter
+
+  """A related `categoryByCategoryId` exists."""
+  categoryByCategoryIdExists: Boolean
+
+  """
+  Filter by the object’s `customCategoryGroupByCustomCategoryGroupId` relation.
+  """
+  customCategoryGroupByCustomCategoryGroupId: CustomCategoryGroupFilter
+
+  """A related `customCategoryGroupByCustomCategoryGroupId` exists."""
+  customCategoryGroupByCustomCategoryGroupIdExists: Boolean
+
+  """Checks for all expressions in this list."""
+  and: [CategoryGroupFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [CategoryGroupFilter!]
+
+  """Negates the expression."""
+  not: CategoryGroupFilter
+}
+
+"""
+A filter to be used against `CustomCategoryGroup` object types. All fields are combined with a logical ‘and.’
+"""
+input CustomCategoryGroupFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
+
+  """Filter by the object’s `accountId` field."""
+  accountId: IntFilter
+
+  """Filter by the object’s `kind` field."""
+  kind: StringFilter
+
+  """
+  Filter by the object’s `categoryGroupsByCustomCategoryGroupId` relation.
+  """
+  categoryGroupsByCustomCategoryGroupId: CustomCategoryGroupToManyCategoryGroupFilter
+
+  """Some related `categoryGroupsByCustomCategoryGroupId` exist."""
+  categoryGroupsByCustomCategoryGroupIdExist: Boolean
+
+  """Filter by the object’s `accountByAccountId` relation."""
+  accountByAccountId: AccountFilter
+
+  """Checks for all expressions in this list."""
+  and: [CustomCategoryGroupFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [CustomCategoryGroupFilter!]
+
+  """Negates the expression."""
+  not: CustomCategoryGroupFilter
+}
+
+"""
+A filter to be used against many `CategoryGroup` object types. All fields are combined with a logical ‘and.’
+"""
+input CustomCategoryGroupToManyCategoryGroupFilter {
+  """
+  Every related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: CategoryGroupFilter
+
+  """
+  Some related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: CategoryGroupFilter
+
+  """
+  No related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: CategoryGroupFilter
+
+  """Aggregates across related `CategoryGroup` match the filter criteria."""
+  aggregates: CategoryGroupAggregatesFilter
+}
+
+"""
+A filter to be used against aggregates of `CategoryGroup` object types.
+"""
+input CategoryGroupAggregatesFilter {
+  """
+  A filter that must pass for the relevant `CategoryGroup` object to be included within the aggregate.
+  """
+  filter: CategoryGroupFilter
+
+  """Sum aggregate over matching `CategoryGroup` objects."""
+  sum: CategoryGroupSumAggregateFilter
+
+  """Distinct count aggregate over matching `CategoryGroup` objects."""
+  distinctCount: CategoryGroupDistinctCountAggregateFilter
+
+  """Minimum aggregate over matching `CategoryGroup` objects."""
+  min: CategoryGroupMinAggregateFilter
+
+  """Maximum aggregate over matching `CategoryGroup` objects."""
+  max: CategoryGroupMaxAggregateFilter
+
+  """Mean average aggregate over matching `CategoryGroup` objects."""
+  average: CategoryGroupAverageAggregateFilter
+
+  """
+  Sample standard deviation aggregate over matching `CategoryGroup` objects.
+  """
+  stddevSample: CategoryGroupStddevSampleAggregateFilter
+
+  """
+  Population standard deviation aggregate over matching `CategoryGroup` objects.
+  """
+  stddevPopulation: CategoryGroupStddevPopulationAggregateFilter
+
+  """Sample variance aggregate over matching `CategoryGroup` objects."""
+  varianceSample: CategoryGroupVarianceSampleAggregateFilter
+
+  """Population variance aggregate over matching `CategoryGroup` objects."""
+  variancePopulation: CategoryGroupVariancePopulationAggregateFilter
+}
+
+input CategoryGroupSumAggregateFilter {
+  id: BigIntFilter
+  accountId: BigIntFilter
+  categoryId: BigIntFilter
+  customCategoryGroupId: BigIntFilter
+}
+
+input CategoryGroupDistinctCountAggregateFilter {
+  id: BigIntFilter
+  accountId: BigIntFilter
+  categoryId: BigIntFilter
+  customCategoryGroupId: BigIntFilter
+}
+
+input CategoryGroupMinAggregateFilter {
+  id: IntFilter
+  accountId: IntFilter
+  categoryId: IntFilter
+  customCategoryGroupId: IntFilter
+}
+
+input CategoryGroupMaxAggregateFilter {
+  id: IntFilter
+  accountId: IntFilter
+  categoryId: IntFilter
+  customCategoryGroupId: IntFilter
+}
+
+input CategoryGroupAverageAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  categoryId: BigFloatFilter
+  customCategoryGroupId: BigFloatFilter
+}
+
+input CategoryGroupStddevSampleAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  categoryId: BigFloatFilter
+  customCategoryGroupId: BigFloatFilter
+}
+
+input CategoryGroupStddevPopulationAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  categoryId: BigFloatFilter
+  customCategoryGroupId: BigFloatFilter
+}
+
+input CategoryGroupVarianceSampleAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  categoryId: BigFloatFilter
+  customCategoryGroupId: BigFloatFilter
+}
+
+input CategoryGroupVariancePopulationAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  categoryId: BigFloatFilter
+  customCategoryGroupId: BigFloatFilter
+}
+
+"""A filter to be used against aggregates of `Category` object types."""
+input CategoryAggregatesFilter {
+  """
+  A filter that must pass for the relevant `Category` object to be included within the aggregate.
+  """
+  filter: CategoryFilter
+
+  """Sum aggregate over matching `Category` objects."""
+  sum: CategorySumAggregateFilter
+
+  """Distinct count aggregate over matching `Category` objects."""
+  distinctCount: CategoryDistinctCountAggregateFilter
+
+  """Minimum aggregate over matching `Category` objects."""
+  min: CategoryMinAggregateFilter
+
+  """Maximum aggregate over matching `Category` objects."""
+  max: CategoryMaxAggregateFilter
+
+  """Mean average aggregate over matching `Category` objects."""
+  average: CategoryAverageAggregateFilter
+
+  """Sample standard deviation aggregate over matching `Category` objects."""
+  stddevSample: CategoryStddevSampleAggregateFilter
+
+  """
+  Population standard deviation aggregate over matching `Category` objects.
+  """
+  stddevPopulation: CategoryStddevPopulationAggregateFilter
+
+  """Sample variance aggregate over matching `Category` objects."""
+  varianceSample: CategoryVarianceSampleAggregateFilter
+
+  """Population variance aggregate over matching `Category` objects."""
+  variancePopulation: CategoryVariancePopulationAggregateFilter
+}
+
+input CategorySumAggregateFilter {
+  id: BigIntFilter
+  userId: BigIntFilter
+  accountId: BigIntFilter
+}
+
+input CategoryDistinctCountAggregateFilter {
+  id: BigIntFilter
+  createdAt: BigIntFilter
+  updatedAt: BigIntFilter
+  name: BigIntFilter
+  userId: BigIntFilter
+  accountId: BigIntFilter
+  kind: BigIntFilter
+  isPayroll: BooleanFilter
+}
+
+input CategoryMinAggregateFilter {
+  id: IntFilter
+  userId: IntFilter
+  accountId: IntFilter
+}
+
+input CategoryMaxAggregateFilter {
+  id: IntFilter
+  userId: IntFilter
+  accountId: IntFilter
+}
+
+input CategoryAverageAggregateFilter {
+  id: BigFloatFilter
+  userId: BigFloatFilter
+  accountId: BigFloatFilter
+}
+
+input CategoryStddevSampleAggregateFilter {
+  id: BigFloatFilter
+  userId: BigFloatFilter
+  accountId: BigFloatFilter
+}
+
+input CategoryStddevPopulationAggregateFilter {
+  id: BigFloatFilter
+  userId: BigFloatFilter
+  accountId: BigFloatFilter
+}
+
+input CategoryVarianceSampleAggregateFilter {
+  id: BigFloatFilter
+  userId: BigFloatFilter
+  accountId: BigFloatFilter
+}
+
+input CategoryVariancePopulationAggregateFilter {
+  id: BigFloatFilter
+  userId: BigFloatFilter
+  accountId: BigFloatFilter
+}
+
+"""
+A filter to be used against many `Budget` object types. All fields are combined with a logical ‘and.’
+"""
+input UserToManyBudgetFilter {
+  """
+  Every related `Budget` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: BudgetFilter
+
+  """
+  Some related `Budget` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: BudgetFilter
+
+  """
+  No related `Budget` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: BudgetFilter
+
+  """Aggregates across related `Budget` match the filter criteria."""
+  aggregates: BudgetAggregatesFilter
 }
 
 """A filter to be used against aggregates of `Budget` object types."""
@@ -5035,230 +5424,161 @@ input ImportBatchVariancePopulationAggregateFilter {
 }
 
 """
-A filter to be used against many `CategoryGroup` object types. All fields are combined with a logical ‘and.’
+A filter to be used against many `DeletedTransaction` object types. All fields are combined with a logical ‘and.’
 """
-input CategoryToManyCategoryGroupFilter {
+input UserToManyDeletedTransactionFilter {
   """
-  Every related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  Every related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
-  every: CategoryGroupFilter
+  every: DeletedTransactionFilter
 
   """
-  Some related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  Some related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
-  some: CategoryGroupFilter
+  some: DeletedTransactionFilter
 
   """
-  No related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
+  No related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
   """
-  none: CategoryGroupFilter
+  none: DeletedTransactionFilter
 
-  """Aggregates across related `CategoryGroup` match the filter criteria."""
-  aggregates: CategoryGroupAggregatesFilter
+  """
+  Aggregates across related `DeletedTransaction` match the filter criteria.
+  """
+  aggregates: DeletedTransactionAggregatesFilter
 }
 
 """
-A filter to be used against `CategoryGroup` object types. All fields are combined with a logical ‘and.’
+A filter to be used against aggregates of `DeletedTransaction` object types.
 """
-input CategoryGroupFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
+input DeletedTransactionAggregatesFilter {
+  """
+  A filter that must pass for the relevant `DeletedTransaction` object to be included within the aggregate.
+  """
+  filter: DeletedTransactionFilter
 
-  """Filter by the object’s `accountId` field."""
-  accountId: IntFilter
+  """Sum aggregate over matching `DeletedTransaction` objects."""
+  sum: DeletedTransactionSumAggregateFilter
 
-  """Filter by the object’s `categoryId` field."""
-  categoryId: IntFilter
+  """Distinct count aggregate over matching `DeletedTransaction` objects."""
+  distinctCount: DeletedTransactionDistinctCountAggregateFilter
 
-  """Filter by the object’s `customCategoryGroupId` field."""
-  customCategoryGroupId: IntFilter
+  """Minimum aggregate over matching `DeletedTransaction` objects."""
+  min: DeletedTransactionMinAggregateFilter
 
-  """Filter by the object’s `accountByAccountId` relation."""
-  accountByAccountId: AccountFilter
+  """Maximum aggregate over matching `DeletedTransaction` objects."""
+  max: DeletedTransactionMaxAggregateFilter
 
-  """Filter by the object’s `categoryByCategoryId` relation."""
-  categoryByCategoryId: CategoryFilter
-
-  """A related `categoryByCategoryId` exists."""
-  categoryByCategoryIdExists: Boolean
+  """Mean average aggregate over matching `DeletedTransaction` objects."""
+  average: DeletedTransactionAverageAggregateFilter
 
   """
-  Filter by the object’s `customCategoryGroupByCustomCategoryGroupId` relation.
+  Sample standard deviation aggregate over matching `DeletedTransaction` objects.
   """
-  customCategoryGroupByCustomCategoryGroupId: CustomCategoryGroupFilter
+  stddevSample: DeletedTransactionStddevSampleAggregateFilter
 
-  """A related `customCategoryGroupByCustomCategoryGroupId` exists."""
-  customCategoryGroupByCustomCategoryGroupIdExists: Boolean
+  """
+  Population standard deviation aggregate over matching `DeletedTransaction` objects.
+  """
+  stddevPopulation: DeletedTransactionStddevPopulationAggregateFilter
 
-  """Checks for all expressions in this list."""
-  and: [CategoryGroupFilter!]
+  """Sample variance aggregate over matching `DeletedTransaction` objects."""
+  varianceSample: DeletedTransactionVarianceSampleAggregateFilter
 
-  """Checks for any expressions in this list."""
-  or: [CategoryGroupFilter!]
-
-  """Negates the expression."""
-  not: CategoryGroupFilter
+  """
+  Population variance aggregate over matching `DeletedTransaction` objects.
+  """
+  variancePopulation: DeletedTransactionVariancePopulationAggregateFilter
 }
 
-"""
-A filter to be used against `CustomCategoryGroup` object types. All fields are combined with a logical ‘and.’
-"""
-input CustomCategoryGroupFilter {
-  """Filter by the object’s `id` field."""
-  id: IntFilter
-
-  """Filter by the object’s `accountId` field."""
-  accountId: IntFilter
-
-  """Filter by the object’s `kind` field."""
-  kind: StringFilter
-
-  """
-  Filter by the object’s `categoryGroupsByCustomCategoryGroupId` relation.
-  """
-  categoryGroupsByCustomCategoryGroupId: CustomCategoryGroupToManyCategoryGroupFilter
-
-  """Some related `categoryGroupsByCustomCategoryGroupId` exist."""
-  categoryGroupsByCustomCategoryGroupIdExist: Boolean
-
-  """Filter by the object’s `accountByAccountId` relation."""
-  accountByAccountId: AccountFilter
-
-  """Checks for all expressions in this list."""
-  and: [CustomCategoryGroupFilter!]
-
-  """Checks for any expressions in this list."""
-  or: [CustomCategoryGroupFilter!]
-
-  """Negates the expression."""
-  not: CustomCategoryGroupFilter
-}
-
-"""
-A filter to be used against many `CategoryGroup` object types. All fields are combined with a logical ‘and.’
-"""
-input CustomCategoryGroupToManyCategoryGroupFilter {
-  """
-  Every related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: CategoryGroupFilter
-
-  """
-  Some related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: CategoryGroupFilter
-
-  """
-  No related `CategoryGroup` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: CategoryGroupFilter
-
-  """Aggregates across related `CategoryGroup` match the filter criteria."""
-  aggregates: CategoryGroupAggregatesFilter
-}
-
-"""
-A filter to be used against aggregates of `CategoryGroup` object types.
-"""
-input CategoryGroupAggregatesFilter {
-  """
-  A filter that must pass for the relevant `CategoryGroup` object to be included within the aggregate.
-  """
-  filter: CategoryGroupFilter
-
-  """Sum aggregate over matching `CategoryGroup` objects."""
-  sum: CategoryGroupSumAggregateFilter
-
-  """Distinct count aggregate over matching `CategoryGroup` objects."""
-  distinctCount: CategoryGroupDistinctCountAggregateFilter
-
-  """Minimum aggregate over matching `CategoryGroup` objects."""
-  min: CategoryGroupMinAggregateFilter
-
-  """Maximum aggregate over matching `CategoryGroup` objects."""
-  max: CategoryGroupMaxAggregateFilter
-
-  """Mean average aggregate over matching `CategoryGroup` objects."""
-  average: CategoryGroupAverageAggregateFilter
-
-  """
-  Sample standard deviation aggregate over matching `CategoryGroup` objects.
-  """
-  stddevSample: CategoryGroupStddevSampleAggregateFilter
-
-  """
-  Population standard deviation aggregate over matching `CategoryGroup` objects.
-  """
-  stddevPopulation: CategoryGroupStddevPopulationAggregateFilter
-
-  """Sample variance aggregate over matching `CategoryGroup` objects."""
-  varianceSample: CategoryGroupVarianceSampleAggregateFilter
-
-  """Population variance aggregate over matching `CategoryGroup` objects."""
-  variancePopulation: CategoryGroupVariancePopulationAggregateFilter
-}
-
-input CategoryGroupSumAggregateFilter {
+input DeletedTransactionSumAggregateFilter {
   id: BigIntFilter
-  accountId: BigIntFilter
-  categoryId: BigIntFilter
-  customCategoryGroupId: BigIntFilter
+  bankAccountId: BigIntFilter
+  transactionId: BigIntFilter
+  amount: BigFloatFilter
+  duplicateOfId: BigIntFilter
+  userId: BigIntFilter
 }
 
-input CategoryGroupDistinctCountAggregateFilter {
+input DeletedTransactionDistinctCountAggregateFilter {
   id: BigIntFilter
-  accountId: BigIntFilter
-  categoryId: BigIntFilter
-  customCategoryGroupId: BigIntFilter
+  createdAt: BigIntFilter
+  updatedAt: BigIntFilter
+  bankAccountId: BigIntFilter
+  transactionId: BigIntFilter
+  bankTransactionId: BigIntFilter
+  posted: BigIntFilter
+  amount: BigIntFilter
+  name: BigIntFilter
+  memo: BigIntFilter
+  reason: BigIntFilter
+  note: BigIntFilter
+  duplicateOfId: BigIntFilter
+  snapshot: BigIntFilter
+  userId: BigIntFilter
 }
 
-input CategoryGroupMinAggregateFilter {
+input DeletedTransactionMinAggregateFilter {
   id: IntFilter
-  accountId: IntFilter
-  categoryId: IntFilter
-  customCategoryGroupId: IntFilter
+  bankAccountId: IntFilter
+  transactionId: IntFilter
+  amount: BigIntFilter
+  duplicateOfId: IntFilter
+  userId: IntFilter
 }
 
-input CategoryGroupMaxAggregateFilter {
+input DeletedTransactionMaxAggregateFilter {
   id: IntFilter
-  accountId: IntFilter
-  categoryId: IntFilter
-  customCategoryGroupId: IntFilter
+  bankAccountId: IntFilter
+  transactionId: IntFilter
+  amount: BigIntFilter
+  duplicateOfId: IntFilter
+  userId: IntFilter
 }
 
-input CategoryGroupAverageAggregateFilter {
+input DeletedTransactionAverageAggregateFilter {
   id: BigFloatFilter
-  accountId: BigFloatFilter
-  categoryId: BigFloatFilter
-  customCategoryGroupId: BigFloatFilter
+  bankAccountId: BigFloatFilter
+  transactionId: BigFloatFilter
+  amount: BigFloatFilter
+  duplicateOfId: BigFloatFilter
+  userId: BigFloatFilter
 }
 
-input CategoryGroupStddevSampleAggregateFilter {
+input DeletedTransactionStddevSampleAggregateFilter {
   id: BigFloatFilter
-  accountId: BigFloatFilter
-  categoryId: BigFloatFilter
-  customCategoryGroupId: BigFloatFilter
+  bankAccountId: BigFloatFilter
+  transactionId: BigFloatFilter
+  amount: BigFloatFilter
+  duplicateOfId: BigFloatFilter
+  userId: BigFloatFilter
 }
 
-input CategoryGroupStddevPopulationAggregateFilter {
+input DeletedTransactionStddevPopulationAggregateFilter {
   id: BigFloatFilter
-  accountId: BigFloatFilter
-  categoryId: BigFloatFilter
-  customCategoryGroupId: BigFloatFilter
+  bankAccountId: BigFloatFilter
+  transactionId: BigFloatFilter
+  amount: BigFloatFilter
+  duplicateOfId: BigFloatFilter
+  userId: BigFloatFilter
 }
 
-input CategoryGroupVarianceSampleAggregateFilter {
+input DeletedTransactionVarianceSampleAggregateFilter {
   id: BigFloatFilter
-  accountId: BigFloatFilter
-  categoryId: BigFloatFilter
-  customCategoryGroupId: BigFloatFilter
+  bankAccountId: BigFloatFilter
+  transactionId: BigFloatFilter
+  amount: BigFloatFilter
+  duplicateOfId: BigFloatFilter
+  userId: BigFloatFilter
 }
 
-input CategoryGroupVariancePopulationAggregateFilter {
+input DeletedTransactionVariancePopulationAggregateFilter {
   id: BigFloatFilter
-  accountId: BigFloatFilter
-  categoryId: BigFloatFilter
-  customCategoryGroupId: BigFloatFilter
+  bankAccountId: BigFloatFilter
+  transactionId: BigFloatFilter
+  amount: BigFloatFilter
+  duplicateOfId: BigFloatFilter
+  userId: BigFloatFilter
 }
 
 """
@@ -5461,6 +5781,31 @@ input BankAccountToManyImportBatchFilter {
 
   """Aggregates across related `ImportBatch` match the filter criteria."""
   aggregates: ImportBatchAggregatesFilter
+}
+
+"""
+A filter to be used against many `DeletedTransaction` object types. All fields are combined with a logical ‘and.’
+"""
+input BankAccountToManyDeletedTransactionFilter {
+  """
+  Every related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: DeletedTransactionFilter
+
+  """
+  Some related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: DeletedTransactionFilter
+
+  """
+  No related `DeletedTransaction` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: DeletedTransactionFilter
+
+  """
+  Aggregates across related `DeletedTransaction` match the filter criteria.
+  """
+  aggregates: DeletedTransactionAggregatesFilter
 }
 
 """
@@ -5937,6 +6282,40 @@ type BankAccount implements Node {
     """
     filter: ImportBatchFilter
   ): ImportBatchesConnection!
+
+  """Reads and enables pagination through a set of `DeletedTransaction`."""
+  deletedTransactionsByBankAccountId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DeletedTransaction`."""
+    orderBy: [DeletedTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DeletedTransactionCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DeletedTransactionFilter
+  ): DeletedTransactionsConnection!
   balance: BigInt
 }
 
@@ -6118,6 +6497,40 @@ type Transaction implements Node {
     """
     filter: TransferFilter
   ): TransfersConnection! @deprecated(reason: "Please use transferByTransactionTargetId instead")
+
+  """Reads and enables pagination through a set of `DeletedTransaction`."""
+  deletedTransactionsByDuplicateOfId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `DeletedTransaction`."""
+    orderBy: [DeletedTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: DeletedTransactionCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: DeletedTransactionFilter
+  ): DeletedTransactionsConnection!
 
   """Reads and enables pagination through a set of `CategorySuggestion`."""
   suggestedCategories(
@@ -6639,6 +7052,278 @@ enum TransactionsOrderBy {
   TRANSACTIONS_BY_SPLIT_SOURCE_ID_VARIANCE_POPULATION_IMPORT_BATCH_ID_DESC
   TRANSACTIONS_BY_SPLIT_SOURCE_ID_VARIANCE_POPULATION_CATEGORY_SOURCE_ASC
   TRANSACTIONS_BY_SPLIT_SOURCE_ID_VARIANCE_POPULATION_CATEGORY_SOURCE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_COUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_COUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_SUM_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_DISTINCT_COUNT_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MIN_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_MAX_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_AVERAGE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_SAMPLE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_STDDEV_POPULATION_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_SAMPLE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_NAME_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_NAME_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_REASON_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_REASON_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_DUPLICATE_OF_ID_VARIANCE_POPULATION_USER_ID_DESC
 }
 
 """
@@ -8332,6 +9017,525 @@ input TransferCondition {
   transactionTargetId: Int
 }
 
+"""A connection to a list of `DeletedTransaction` values."""
+type DeletedTransactionsConnection {
+  """A list of `DeletedTransaction` objects."""
+  nodes: [DeletedTransaction!]!
+
+  """
+  A list of edges which contains the `DeletedTransaction` and cursor to aid in pagination.
+  """
+  edges: [DeletedTransactionsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `DeletedTransaction` you could get from the connection.
+  """
+  totalCount: Int!
+
+  """
+  Aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  aggregates: DeletedTransactionAggregates
+
+  """
+  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  groupedAggregates(
+    """
+    The method to use when grouping `DeletedTransaction` for these aggregates.
+    """
+    groupBy: [DeletedTransactionGroupBy!]!
+
+    """Conditions on the grouped aggregates."""
+    having: DeletedTransactionHavingInput
+  ): [DeletedTransactionAggregates!]
+}
+
+type DeletedTransaction implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  createdAt: Datetime!
+  updatedAt: Datetime!
+  bankAccountId: Int!
+  transactionId: Int!
+  bankTransactionId: String
+  posted: Datetime
+  amount: BigInt
+  name: String
+  memo: String
+  reason: String!
+  note: String
+  duplicateOfId: Int
+  snapshot: JSON!
+  userId: Int
+
+  """
+  Reads a single `BankAccount` that is related to this `DeletedTransaction`.
+  """
+  bankAccountByBankAccountId: BankAccount
+
+  """
+  Reads a single `Transaction` that is related to this `DeletedTransaction`.
+  """
+  transactionByDuplicateOfId: Transaction
+
+  """Reads a single `User` that is related to this `DeletedTransaction`."""
+  userByUserId: User
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+"""A `DeletedTransaction` edge in the connection."""
+type DeletedTransactionsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `DeletedTransaction` at the end of the edge."""
+  node: DeletedTransaction!
+}
+
+type DeletedTransactionAggregates {
+  keys: [String!]
+
+  """
+  Sum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  sum: DeletedTransactionSumAggregates
+
+  """
+  Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  distinctCount: DeletedTransactionDistinctCountAggregates
+
+  """
+  Minimum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  min: DeletedTransactionMinAggregates
+
+  """
+  Maximum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  max: DeletedTransactionMaxAggregates
+
+  """
+  Mean average aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  average: DeletedTransactionAverageAggregates
+
+  """
+  Sample standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevSample: DeletedTransactionStddevSampleAggregates
+
+  """
+  Population standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevPopulation: DeletedTransactionStddevPopulationAggregates
+
+  """
+  Sample variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  varianceSample: DeletedTransactionVarianceSampleAggregates
+
+  """
+  Population variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  variancePopulation: DeletedTransactionVariancePopulationAggregates
+}
+
+type DeletedTransactionSumAggregates {
+  """Sum of id across the matching connection"""
+  id: BigInt!
+
+  """Sum of bankAccountId across the matching connection"""
+  bankAccountId: BigInt!
+
+  """Sum of transactionId across the matching connection"""
+  transactionId: BigInt!
+
+  """Sum of amount across the matching connection"""
+  amount: BigFloat!
+
+  """Sum of duplicateOfId across the matching connection"""
+  duplicateOfId: BigInt!
+
+  """Sum of userId across the matching connection"""
+  userId: BigInt!
+}
+
+type DeletedTransactionDistinctCountAggregates {
+  """Distinct count of id across the matching connection"""
+  id: BigInt
+
+  """Distinct count of createdAt across the matching connection"""
+  createdAt: BigInt
+
+  """Distinct count of updatedAt across the matching connection"""
+  updatedAt: BigInt
+
+  """Distinct count of bankAccountId across the matching connection"""
+  bankAccountId: BigInt
+
+  """Distinct count of transactionId across the matching connection"""
+  transactionId: BigInt
+
+  """Distinct count of bankTransactionId across the matching connection"""
+  bankTransactionId: BigInt
+
+  """Distinct count of posted across the matching connection"""
+  posted: BigInt
+
+  """Distinct count of amount across the matching connection"""
+  amount: BigInt
+
+  """Distinct count of name across the matching connection"""
+  name: BigInt
+
+  """Distinct count of memo across the matching connection"""
+  memo: BigInt
+
+  """Distinct count of reason across the matching connection"""
+  reason: BigInt
+
+  """Distinct count of note across the matching connection"""
+  note: BigInt
+
+  """Distinct count of duplicateOfId across the matching connection"""
+  duplicateOfId: BigInt
+
+  """Distinct count of snapshot across the matching connection"""
+  snapshot: BigInt
+
+  """Distinct count of userId across the matching connection"""
+  userId: BigInt
+}
+
+type DeletedTransactionMinAggregates {
+  """Minimum of id across the matching connection"""
+  id: Int
+
+  """Minimum of bankAccountId across the matching connection"""
+  bankAccountId: Int
+
+  """Minimum of transactionId across the matching connection"""
+  transactionId: Int
+
+  """Minimum of amount across the matching connection"""
+  amount: BigInt
+
+  """Minimum of duplicateOfId across the matching connection"""
+  duplicateOfId: Int
+
+  """Minimum of userId across the matching connection"""
+  userId: Int
+}
+
+type DeletedTransactionMaxAggregates {
+  """Maximum of id across the matching connection"""
+  id: Int
+
+  """Maximum of bankAccountId across the matching connection"""
+  bankAccountId: Int
+
+  """Maximum of transactionId across the matching connection"""
+  transactionId: Int
+
+  """Maximum of amount across the matching connection"""
+  amount: BigInt
+
+  """Maximum of duplicateOfId across the matching connection"""
+  duplicateOfId: Int
+
+  """Maximum of userId across the matching connection"""
+  userId: Int
+}
+
+type DeletedTransactionAverageAggregates {
+  """Mean average of id across the matching connection"""
+  id: BigFloat
+
+  """Mean average of bankAccountId across the matching connection"""
+  bankAccountId: BigFloat
+
+  """Mean average of transactionId across the matching connection"""
+  transactionId: BigFloat
+
+  """Mean average of amount across the matching connection"""
+  amount: BigFloat
+
+  """Mean average of duplicateOfId across the matching connection"""
+  duplicateOfId: BigFloat
+
+  """Mean average of userId across the matching connection"""
+  userId: BigFloat
+}
+
+type DeletedTransactionStddevSampleAggregates {
+  """Sample standard deviation of id across the matching connection"""
+  id: BigFloat
+
+  """
+  Sample standard deviation of bankAccountId across the matching connection
+  """
+  bankAccountId: BigFloat
+
+  """
+  Sample standard deviation of transactionId across the matching connection
+  """
+  transactionId: BigFloat
+
+  """Sample standard deviation of amount across the matching connection"""
+  amount: BigFloat
+
+  """
+  Sample standard deviation of duplicateOfId across the matching connection
+  """
+  duplicateOfId: BigFloat
+
+  """Sample standard deviation of userId across the matching connection"""
+  userId: BigFloat
+}
+
+type DeletedTransactionStddevPopulationAggregates {
+  """Population standard deviation of id across the matching connection"""
+  id: BigFloat
+
+  """
+  Population standard deviation of bankAccountId across the matching connection
+  """
+  bankAccountId: BigFloat
+
+  """
+  Population standard deviation of transactionId across the matching connection
+  """
+  transactionId: BigFloat
+
+  """Population standard deviation of amount across the matching connection"""
+  amount: BigFloat
+
+  """
+  Population standard deviation of duplicateOfId across the matching connection
+  """
+  duplicateOfId: BigFloat
+
+  """Population standard deviation of userId across the matching connection"""
+  userId: BigFloat
+}
+
+type DeletedTransactionVarianceSampleAggregates {
+  """Sample variance of id across the matching connection"""
+  id: BigFloat
+
+  """Sample variance of bankAccountId across the matching connection"""
+  bankAccountId: BigFloat
+
+  """Sample variance of transactionId across the matching connection"""
+  transactionId: BigFloat
+
+  """Sample variance of amount across the matching connection"""
+  amount: BigFloat
+
+  """Sample variance of duplicateOfId across the matching connection"""
+  duplicateOfId: BigFloat
+
+  """Sample variance of userId across the matching connection"""
+  userId: BigFloat
+}
+
+type DeletedTransactionVariancePopulationAggregates {
+  """Population variance of id across the matching connection"""
+  id: BigFloat
+
+  """Population variance of bankAccountId across the matching connection"""
+  bankAccountId: BigFloat
+
+  """Population variance of transactionId across the matching connection"""
+  transactionId: BigFloat
+
+  """Population variance of amount across the matching connection"""
+  amount: BigFloat
+
+  """Population variance of duplicateOfId across the matching connection"""
+  duplicateOfId: BigFloat
+
+  """Population variance of userId across the matching connection"""
+  userId: BigFloat
+}
+
+"""
+Grouping methods for `DeletedTransaction` for usage during aggregation.
+"""
+enum DeletedTransactionGroupBy {
+  BANK_ACCOUNT_ID
+  DUPLICATE_OF_ID
+  USER_ID
+}
+
+"""Conditions for `DeletedTransaction` aggregates."""
+input DeletedTransactionHavingInput {
+  AND: [DeletedTransactionHavingInput!]
+  OR: [DeletedTransactionHavingInput!]
+  sum: DeletedTransactionHavingSumInput
+  distinctCount: DeletedTransactionHavingDistinctCountInput
+  min: DeletedTransactionHavingMinInput
+  max: DeletedTransactionHavingMaxInput
+  average: DeletedTransactionHavingAverageInput
+  stddevSample: DeletedTransactionHavingStddevSampleInput
+  stddevPopulation: DeletedTransactionHavingStddevPopulationInput
+  varianceSample: DeletedTransactionHavingVarianceSampleInput
+  variancePopulation: DeletedTransactionHavingVariancePopulationInput
+}
+
+input DeletedTransactionHavingSumInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingDistinctCountInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingMinInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingMaxInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingAverageInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingStddevSampleInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingStddevPopulationInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingVarianceSampleInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+input DeletedTransactionHavingVariancePopulationInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  bankAccountId: HavingIntFilter
+  transactionId: HavingIntFilter
+  posted: HavingDatetimeFilter
+  amount: HavingBigintFilter
+  duplicateOfId: HavingIntFilter
+  userId: HavingIntFilter
+}
+
+"""Methods to use when ordering `DeletedTransaction`."""
+enum DeletedTransactionsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  BANK_ACCOUNT_ID_ASC
+  BANK_ACCOUNT_ID_DESC
+  DUPLICATE_OF_ID_ASC
+  DUPLICATE_OF_ID_DESC
+  USER_ID_ASC
+  USER_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `DeletedTransaction` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input DeletedTransactionCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `bankAccountId` field."""
+  bankAccountId: Int
+
+  """Checks for equality with the object’s `duplicateOfId` field."""
+  duplicateOfId: Int
+
+  """Checks for equality with the object’s `userId` field."""
+  userId: Int
+}
+
 """A connection to a list of `CategorySuggestion` values."""
 type CategorySuggestionsConnection {
   """A list of `CategorySuggestion` objects."""
@@ -8991,11 +10195,6 @@ type BankCsvDefinition implements Node {
   """Reads a single `Account` that is related to this `BankCsvDefinition`."""
   accountByAccountId: Account
 }
-
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
-scalar JSON
 
 """A `BankCsvDefinition` edge in the connection."""
 type BankCsvDefinitionsEdge {
@@ -11646,6 +12845,278 @@ enum BankAccountsOrderBy {
   IMPORT_BATCHES_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_USER_ID_DESC
   IMPORT_BATCHES_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_AUTO_CATEGORIZED_COUNT_ASC
   IMPORT_BATCHES_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_AUTO_CATEGORIZED_COUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_COUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_COUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_SUM_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MIN_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_MAX_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_AVERAGE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_NAME_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_NAME_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_REASON_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_REASON_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_USER_ID_DESC
 }
 
 """
@@ -15439,6 +16910,278 @@ enum UsersOrderBy {
   IMPORT_BATCHES_BY_USER_ID_VARIANCE_POPULATION_USER_ID_DESC
   IMPORT_BATCHES_BY_USER_ID_VARIANCE_POPULATION_AUTO_CATEGORIZED_COUNT_ASC
   IMPORT_BATCHES_BY_USER_ID_VARIANCE_POPULATION_AUTO_CATEGORIZED_COUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_COUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_COUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_SUM_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_DISTINCT_COUNT_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MIN_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_MAX_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_AVERAGE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_SAMPLE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_STDDEV_POPULATION_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_SAMPLE_USER_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_CREATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_CREATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_UPDATED_AT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_UPDATED_AT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_TRANSACTION_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_TRANSACTION_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_POSTED_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_POSTED_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_AMOUNT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_AMOUNT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_NAME_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_NAME_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_MEMO_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_MEMO_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_REASON_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_REASON_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_NOTE_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_NOTE_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_DUPLICATE_OF_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_DUPLICATE_OF_ID_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_SNAPSHOT_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_SNAPSHOT_DESC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_USER_ID_ASC
+  DELETED_TRANSACTIONS_BY_USER_ID_VARIANCE_POPULATION_USER_ID_DESC
 }
 
 """
@@ -16409,12 +18152,24 @@ type Mutation {
     """
     input: RemoveAccountUserInput!
   ): RemoveAccountUserPayload
+  removeTransaction(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: RemoveTransactionInput!
+  ): RemoveTransactionPayload
   reorderBankAccounts(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: ReorderBankAccountsInput!
   ): ReorderBankAccountsPayload
+  restoreTransaction(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: RestoreTransactionInput!
+  ): RestoreTransactionPayload
   setEnvelopeCashOnHand(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -16537,6 +18292,16 @@ type Mutation {
     """
     input: UpsertCustomCategoryGroupInput!
   ): UpsertCustomCategoryGroupPayload
+
+  """Upserts a single `DeletedTransaction`."""
+  upsertDeletedTransaction(
+    where: UpsertDeletedTransactionWhere
+
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpsertDeletedTransactionInput!
+  ): UpsertDeletedTransactionPayload
 
   """Upserts a single `ImportBatch`."""
   upsertImportBatch(
@@ -19895,6 +21660,53 @@ input RemoveAccountUserInput {
   userId: Int
 }
 
+"""The output of our `removeTransaction` mutation."""
+type RemoveTransactionPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedTransaction: DeletedTransaction
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `BankAccount` that is related to this `DeletedTransaction`.
+  """
+  bankAccountByBankAccountId: BankAccount
+
+  """
+  Reads a single `Transaction` that is related to this `DeletedTransaction`.
+  """
+  transactionByDuplicateOfId: Transaction
+
+  """Reads a single `User` that is related to this `DeletedTransaction`."""
+  userByUserId: User
+
+  """An edge for our `DeletedTransaction`. May be used by Relay 1."""
+  deletedTransactionEdge(
+    """The method to use when ordering `DeletedTransaction`."""
+    orderBy: [DeletedTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): DeletedTransactionsEdge
+}
+
+"""All input for the `removeTransaction` mutation."""
+input RemoveTransactionInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  transactionId: Int
+  reason: String
+  note: String
+  duplicateOfId: Int
+}
+
 """The output of our `reorderBankAccounts` mutation."""
 type ReorderBankAccountsPayload {
   """
@@ -19919,6 +21731,50 @@ input ReorderBankAccountsInput {
   clientMutationId: String
   accountId: Int!
   bankAccountIds: [Int]!
+}
+
+"""The output of our `restoreTransaction` mutation."""
+type RestoreTransactionPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  deletedTransaction: DeletedTransaction
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `BankAccount` that is related to this `DeletedTransaction`.
+  """
+  bankAccountByBankAccountId: BankAccount
+
+  """
+  Reads a single `Transaction` that is related to this `DeletedTransaction`.
+  """
+  transactionByDuplicateOfId: Transaction
+
+  """Reads a single `User` that is related to this `DeletedTransaction`."""
+  userByUserId: User
+
+  """An edge for our `DeletedTransaction`. May be used by Relay 1."""
+  deletedTransactionEdge(
+    """The method to use when ordering `DeletedTransaction`."""
+    orderBy: [DeletedTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): DeletedTransactionsEdge
+}
+
+"""All input for the `restoreTransaction` mutation."""
+input RestoreTransactionInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  deletedTransactionId: Int
 }
 
 """The output of our `setEnvelopeCashOnHand` mutation."""
@@ -20501,6 +22357,78 @@ input UpsertCustomCategoryGroupInput {
 
   """The `CustomCategoryGroup` to be upserted by this mutation."""
   customCategoryGroup: CustomCategoryGroupInput!
+}
+
+"""The output of our upsert `DeletedTransaction` mutation."""
+type UpsertDeletedTransactionPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `DeletedTransaction` that was upserted by this mutation."""
+  deletedTransaction: DeletedTransaction
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """
+  Reads a single `BankAccount` that is related to this `DeletedTransaction`.
+  """
+  bankAccountByBankAccountId: BankAccount
+
+  """
+  Reads a single `Transaction` that is related to this `DeletedTransaction`.
+  """
+  transactionByDuplicateOfId: Transaction
+
+  """Reads a single `User` that is related to this `DeletedTransaction`."""
+  userByUserId: User
+
+  """An edge for our `DeletedTransaction`. May be used by Relay 1."""
+  deletedTransactionEdge(
+    """The method to use when ordering `DeletedTransaction`."""
+    orderBy: [DeletedTransactionsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): DeletedTransactionsEdge
+}
+
+"""Where conditions for the upsert `DeletedTransaction` mutation."""
+input UpsertDeletedTransactionWhere {
+  id: Int
+  bankAccountId: Int
+  bankTransactionId: String
+}
+
+"""All input for the upsert `DeletedTransaction` mutation."""
+input UpsertDeletedTransactionInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `DeletedTransaction` to be upserted by this mutation."""
+  deletedTransaction: DeletedTransactionInput!
+}
+
+"""An input for mutations affecting `DeletedTransaction`"""
+input DeletedTransactionInput {
+  id: Int
+  createdAt: Datetime
+  updatedAt: Datetime
+  bankAccountId: Int!
+  transactionId: Int!
+  bankTransactionId: String
+  posted: Datetime
+  amount: BigInt
+  name: String
+  memo: String
+  reason: String!
+  note: String
+  duplicateOfId: Int
+  snapshot: JSON!
+  userId: Int
 }
 
 """The output of our upsert `ImportBatch` mutation."""

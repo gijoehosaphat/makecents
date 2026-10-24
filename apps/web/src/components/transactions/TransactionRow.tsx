@@ -15,6 +15,7 @@ import { TransactionMemoEditor } from '../shared/TransactionMemoEditor'
 import { useAppContext } from '../context/AppContextProvider'
 import { useTranslations } from 'next-intl'
 import { TransactionRowFilterOptions, transactionMatchesRowFilter } from '@/lib/transactionRowFilter'
+import { TransactionActionsMenu } from './TransactionActionsMenu'
 
 function TransactionAmount({
   transaction,
@@ -69,7 +70,7 @@ export default function TransactionRow({
   refetchQuery: InternalRefetchQueryDescriptor
   showBankAccount?: boolean
   rowFilter?: TransactionRowFilterOptions
-  /** Hides linking and splitting, for views that only need to categorize (e.g. the budget previews). */
+  /** Hides linking, splitting and the actions menu, for views that only need to categorize (e.g. the budget previews). */
   categorizeOnly?: boolean
 }) {
   const { bankAccounts } = useAppContext()
@@ -130,6 +131,11 @@ export default function TransactionRow({
         <TableCell align={'right'} sx={{ width: '10%' }}>
           <TransactionAmount transaction={transaction} type={'deposit'} showOriginalAmount={hasSplits} />
         </TableCell>
+        {!categorizeOnly && (
+          <TableCell align={'center'} sx={{ width: 48, px: 0 }}>
+            <TransactionActionsMenu transaction={transaction} refetchQuery={refetchQuery} />
+          </TableCell>
+        )}
       </TableRow>
       {splitTransactions.map((splitTransaction) => {
         return (
@@ -159,6 +165,7 @@ export default function TransactionRow({
             <TableCell align={'right'} sx={{ width: '10%' }}>
               <TransactionAmount transaction={splitTransaction} type={'deposit'} />
             </TableCell>
+            {!categorizeOnly && <TableCell />}
           </TableRow>
         )
       })}
