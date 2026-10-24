@@ -31,6 +31,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Tab label={t('budgets.title')} value={`/${currentAccountId}/dashboard/settings/budgets`} />
         <Tab label={t('groups.title')} value={`/${currentAccountId}/dashboard/settings/groups`} />
         <Tab label={t('imports.title')} value={`/${currentAccountId}/dashboard/settings/imports`} />
+        <Tab
+          label={t('deletedTransactions.title')}
+          value={`/${currentAccountId}/dashboard/settings/deleted-transactions`}
+        />
       </Tabs>
       {children}
     </Box>

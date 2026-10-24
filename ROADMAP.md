@@ -4,7 +4,6 @@ Planned and possible work for makecents, roughly in priority order. It comes fro
 
 ## Tier 1: Everyday gaps (small, high value)
 
-- **Manual transaction entry.** Add a transaction by hand (cash spending, accounts you can't export).
 - **Categorization rules.** User-defined rules (match payee, memo or amount, then set the category, optionally a split), applied at import and on demand. This builds on the existing suggestion logic. The old regex remnants were removed, so rules are a fresh design. Not sure I think this should be that high currently.
 - **Fix the uncategorized filter for splits.** A split transaction should show in the "uncategorized" view if any part of it is uncategorized.
 - **Payee clarity and aliases.** Show clearer transaction details, let users rename a cryptic memo or vendor to an alias, and apply the alias to similar transactions. We can already rename, this is an automatic normalization for the name/memo for future transactions.

@@ -17,7 +17,7 @@ import { useMemo, useState } from 'react'
 import SaveCancel from '../forms/SaveCancel'
 import { useTranslations } from 'next-intl'
 import { InternalRefetchQueryDescriptor } from '@apollo/client'
-import { useLazyQuery } from '@apollo/client/react'
+import { useQuery } from '@apollo/client/react'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { formatMoney } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
@@ -35,53 +35,61 @@ export function TransactionLink({
   transaction: Transaction
   refetchQuery: InternalRefetchQueryDescriptor
 }) {
+  const [open, setOpen] = useState<'link' | 'unlink' | null>(null)
+  const hasTransfer = !!transaction.transferByTransactionSourceId || !!transaction.transferByTransactionTargetId
+
+  return (
+    <>
+      {hasTransfer && (
+        <IconButton size={'small'} onClick={() => setOpen('unlink')}>
+          <Link />
+        </IconButton>
+      )}
+      {!hasTransfer && (
+        <IconButton
+          size={'small'}
+          sx={{ visibility: 'hidden' }}
+          className={'transaction-row-hover'}
+          onClick={() => setOpen('link')}
+        >
+          <AddLink />
+        </IconButton>
+      )}
+      {open === 'link' && (
+        <LinkTransferDialog transaction={transaction} refetchQuery={refetchQuery} onClose={() => setOpen(null)} />
+      )}
+      {open === 'unlink' && (
+        <UnlinkTransferDialog transaction={transaction} refetchQuery={refetchQuery} onClose={() => setOpen(null)} />
+      )}
+    </>
+  )
+}
+
+/** Links a transaction to one of the opposite amount, marking both as a transfer between accounts. */
+export function LinkTransferDialog({
+  transaction,
+  refetchQuery,
+  onClose,
+}: {
+  transaction: Transaction
+  refetchQuery: InternalRefetchQueryDescriptor
+  onClose: () => void
+}) {
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [addOpen, setAddOpen] = useState(false)
-  const [deleteOpen, setDeleteOpen] = useState(false)
-
-  const [getTransactionByAmount, getTransactionByAmountResults] = useLazyQuery(TransactionByAmountDocument)
-  const [getTransfer, getTransferResults] = useLazyQuery(GetTransferDocument)
-  const [createTransfer] = useMutationWithToast(CreateTransferDocument, {
-    refetchQueries: [refetchQuery],
+  const { data, loading } = useQuery(TransactionByAmountDocument, {
+    variables: {
+      amount: transaction.amount > 0 ? -transaction.amount : Math.abs(transaction.amount),
+    },
   })
-  const [deleteTransfer] = useMutationWithToast(DeleteTransferDocument, {
+  const [createTransfer] = useMutationWithToast(CreateTransferDocument, {
     refetchQueries: [refetchQuery],
   })
 
   const matchingTransactions: Transaction[] = useMemo(() => {
-    return (getTransactionByAmountResults?.data?.allTransactions?.nodes as Transaction[]) || []
-  }, [getTransactionByAmountResults?.data?.allTransactions?.nodes])
-
-  const loaded: boolean = useMemo(() => {
-    return getTransactionByAmountResults?.called && !getTransactionByAmountResults?.loading
-  }, [getTransactionByAmountResults?.called, getTransactionByAmountResults?.loading])
-
-  const transfer: Transfer | null = useMemo(() => {
-    return transaction.transferByTransactionSourceId || transaction.transferByTransactionTargetId || null
-  }, [transaction.transferByTransactionSourceId, transaction.transferByTransactionTargetId])
-
-  const transferTransaction: Transaction | null = useMemo(() => {
-    return (
-      ((getTransferResults?.data?.transfer?.transactionByTransactionTargetId ||
-        getTransferResults?.data?.transfer?.transactionByTransactionSourceId) as Transaction) || null
-    )
-  }, [
-    getTransferResults?.data?.transfer?.transactionByTransactionTargetId,
-    getTransferResults?.data?.transfer?.transactionByTransactionSourceId,
-  ])
-
-  const hasTransfer = !!transfer
-
-  function handleAddTransfer() {
-    getTransactionByAmount({
-      variables: {
-        amount: transaction.amount > 0 ? -transaction.amount : Math.abs(transaction.amount),
-      },
-    })
-    setAddOpen(true)
-  }
+    return (data?.allTransactions?.nodes as Transaction[]) || []
+  }, [data?.allTransactions?.nodes])
 
   async function handleCreateTransfer() {
     const matchId = matchingTransactions[selectedIndex].id
@@ -98,27 +106,68 @@ export function TransactionLink({
               transactionTargetId: matchId,
             },
     })
-    setAddOpen(false)
+    onClose()
   }
 
-  function handleCreateTransferClose() {
-    setAddOpen(false)
-  }
+  return (
+    <Dialog open onClose={onClose}>
+      <DialogTitle>{t('transfer.matchTransaction')}</DialogTitle>
+      <DialogContent>
+        {matchingTransactions.map((t: Transaction, index: number) => {
+          return (
+            <List key={`matching-transaction-${t.id}`}>
+              <ListItem disablePadding>
+                <ListItemButton selected={index === selectedIndex} onClick={() => setSelectedIndex(index)}>
+                  <ListItemIcon>
+                    {index === selectedIndex ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
+                  </ListItemIcon>
+                  <ListItemText primary={t.name} secondary={t.memo} sx={{ mr: 4 }} />
+                  <ListItemText primary={formatMoney(t.amount / 100, 'CAD', hidden)} />
+                </ListItemButton>
+              </ListItem>
+            </List>
+          )
+        })}
+        {matchingTransactions.length === 0 && !loading && <Alert severity={'warning'}>{t('transactions.none')}</Alert>}
+      </DialogContent>
+      <DialogActions>
+        <SaveCancel
+          handleSave={handleCreateTransfer}
+          handleCancel={onClose}
+          saveDisabled={!matchingTransactions[selectedIndex]}
+        />
+      </DialogActions>
+    </Dialog>
+  )
+}
 
-  function handleSelectMatchingTransaction(index: number) {
-    setSelectedIndex(index)
-  }
+/** Removes the transfer link from a transaction and its counterpart. */
+export function UnlinkTransferDialog({
+  transaction,
+  refetchQuery,
+  onClose,
+}: {
+  transaction: Transaction
+  refetchQuery: InternalRefetchQueryDescriptor
+  onClose: () => void
+}) {
+  const t = useTranslations('common')
+  const { hidden } = useAmountVisibility()
+  const transfer: Transfer | null =
+    transaction.transferByTransactionSourceId || transaction.transferByTransactionTargetId || null
+  const { data } = useQuery(GetTransferDocument, {
+    variables: { nodeId: transfer?.nodeId ?? '' },
+    skip: !transfer?.nodeId,
+  })
+  const [deleteTransfer] = useMutationWithToast(DeleteTransferDocument, {
+    refetchQueries: [refetchQuery],
+  })
 
-  function handleDeleteTransfer() {
-    if (transfer?.nodeId) {
-      getTransfer({
-        variables: {
-          nodeId: transfer?.nodeId,
-        },
-      })
-    }
-    setDeleteOpen(true)
-  }
+  // The transfer query returns both sides; show the one that isn't this transaction.
+  const transferTransaction = [
+    data?.transfer?.transactionByTransactionTargetId,
+    data?.transfer?.transactionByTransactionSourceId,
+  ].find((candidate) => candidate && candidate.id !== transaction.id) as Transaction | undefined
 
   async function handleDeleteTransferSave() {
     if (transfer?.nodeId) {
@@ -128,86 +177,30 @@ export function TransactionLink({
         },
       })
     }
-    setDeleteOpen(false)
-  }
-
-  function handleDeleteTransferClose() {
-    setDeleteOpen(false)
+    onClose()
   }
 
   return (
-    <>
-      {hasTransfer && (
-        <IconButton size={'small'} onClick={() => handleDeleteTransfer()}>
-          <Link />
-        </IconButton>
-      )}
-      {!hasTransfer && (
-        <IconButton
-          size={'small'}
-          sx={{ visibility: 'hidden' }}
-          className={'transaction-row-hover'}
-          onClick={() => handleAddTransfer()}
-        >
-          <AddLink />
-        </IconButton>
-      )}
-      <Dialog open={addOpen}>
-        <DialogTitle>{t('transfer.matchTransaction')}</DialogTitle>
-        <DialogContent>
-          {matchingTransactions.map((t: Transaction, index: number) => {
-            return (
-              <List key={`matching-transaction-${t.id}`}>
-                <ListItem disablePadding>
-                  <ListItemButton
-                    selected={index === selectedIndex}
-                    onClick={() => handleSelectMatchingTransaction(index)}
-                  >
-                    <ListItemIcon>
-                      {index === selectedIndex ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
-                    </ListItemIcon>
-                    <ListItemText primary={t.name} secondary={t.memo} sx={{ mr: 4 }} />
-                    <ListItemText primary={formatMoney(t.amount / 100, 'CAD', hidden)} />
-                  </ListItemButton>
-                </ListItem>
-              </List>
-            )
-          })}
-          {matchingTransactions.length === 0 && loaded && <Alert severity={'warning'}>{t('transactions.none')}</Alert>}
-        </DialogContent>
-        <DialogActions>
-          <SaveCancel
-            handleSave={handleCreateTransfer}
-            handleCancel={handleCreateTransferClose}
-            saveDisabled={!matchingTransactions[selectedIndex]}
-          />
-        </DialogActions>
-      </Dialog>
-      <Dialog open={deleteOpen}>
-        <DialogTitle>{t('transfer.deleteTransfer')}</DialogTitle>
-        <DialogContent>
-          {transferTransaction && (
-            <List key={`matching-transaction-${transferTransaction.id}`}>
-              <ListItem disablePadding>
-                <ListItemButton selected={true}>
-                  <ListItemIcon>
-                    <RadioButtonChecked />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={transferTransaction.name}
-                    secondary={transferTransaction.memo}
-                    sx={{ mr: 4 }}
-                  />
-                  <ListItemText primary={formatMoney(transferTransaction.amount / 100, 'CAD', hidden)} />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <SaveCancel handleSave={handleDeleteTransferSave} handleCancel={handleDeleteTransferClose} />
-        </DialogActions>
-      </Dialog>
-    </>
+    <Dialog open onClose={onClose}>
+      <DialogTitle>{t('transfer.deleteTransfer')}</DialogTitle>
+      <DialogContent>
+        {transferTransaction && (
+          <List key={`matching-transaction-${transferTransaction.id}`}>
+            <ListItem disablePadding>
+              <ListItemButton selected={true}>
+                <ListItemIcon>
+                  <RadioButtonChecked />
+                </ListItemIcon>
+                <ListItemText primary={transferTransaction.name} secondary={transferTransaction.memo} sx={{ mr: 4 }} />
+                <ListItemText primary={formatMoney(transferTransaction.amount / 100, 'CAD', hidden)} />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <SaveCancel handleSave={handleDeleteTransferSave} handleCancel={onClose} />
+      </DialogActions>
+    </Dialog>
   )
 }

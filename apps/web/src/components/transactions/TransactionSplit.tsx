@@ -63,14 +63,50 @@ export function TransactionSplit({
   transaction: Transaction
   refetchQuery: InternalRefetchQueryDescriptor
 }) {
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+
+  return (
+    <>
+      <IconButton
+        size={'small'}
+        color={'secondary'}
+        sx={{ ml: 2, visibility: 'hidden' }}
+        className={'transaction-row-hover'}
+        onClick={() => setIsEditorOpen(true)}
+      >
+        <CallSplit />
+      </IconButton>
+      {isEditorOpen && (
+        <TransactionSplitDialog
+          transaction={transaction}
+          refetchQuery={refetchQuery}
+          onClose={() => setIsEditorOpen(false)}
+        />
+      )}
+    </>
+  )
+}
+
+/**
+ * Splits a transaction into parts. Mounted only while open, so its parts are seeded from the transaction once per
+ * opening and a refetch in the background can't overwrite what the user is editing.
+ */
+export function TransactionSplitDialog({
+  transaction,
+  refetchQuery,
+  onClose,
+}: {
+  transaction: Transaction
+  refetchQuery: InternalRefetchQueryDescriptor
+  onClose: () => void
+}) {
   const t = useTranslations('common')
   const [upsertSplitTransactions] = useMutationWithToast(UpsertSplitTransactionsDocument, {
     refetchQueries: [refetchQuery],
   })
   const hints = useMemo(() => transactionHints(transaction), [transaction])
   const isWithdrawal = transaction.originalAmount < 0
-  const [isEditorOpen, setIsEditorOpen] = useState(false)
-  const [parts, setParts] = useState<SplitPart[]>([])
+  const [parts, setParts] = useState<SplitPart[]>(() => existingParts(transaction))
   const [originalCategoryId, setOriginalCategoryId] = useState<number | null>(transaction.categoryId ?? null)
 
   // The original row keeps whatever the other parts leave, so the parts always add up to the original amount.
@@ -92,18 +128,6 @@ export function TransactionSplit({
 
   function money(cents: number) {
     return `$${fromCents(cents).toFixed(2)}`
-  }
-
-  // Seeded once per opening, so a refetch in the background can't overwrite what the user is editing.
-  function openEditor() {
-    setParts(existingParts(transaction))
-    setOriginalCategoryId(transaction.categoryId ?? null)
-    setIsEditorOpen(true)
-  }
-
-  function handleClose() {
-    setParts([])
-    setIsEditorOpen(false)
   }
 
   function handleSave() {
@@ -137,7 +161,7 @@ export function TransactionSplit({
 
     upsertSplitTransactions({ variables: { toUpdate, toCreate, toDelete } })
 
-    handleClose()
+    onClose()
   }
 
   function updatePart(key: string, changes: Partial<SplitPart>) {
@@ -206,134 +230,116 @@ export function TransactionSplit({
   }
 
   return (
-    <>
-      <IconButton
-        size={'small'}
-        color={'secondary'}
-        sx={{ ml: 2, visibility: 'hidden' }}
-        className={'transaction-row-hover'}
-        onClick={openEditor}
-      >
-        <CallSplit />
-      </IconButton>
-      <Dialog
-        open={isEditorOpen}
-        onClose={handleClose}
-        onKeyDown={handleKeyDown}
-        fullWidth
-        maxWidth={'sm'}
-        PaperProps={{ tabIndex: -1 }}
-      >
-        <DialogTitle sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-          <CallSplit sx={{ mr: 2 }} />
-          {t('categories.splitTransaction')}
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant={'body2'}>{t('categories.splitTotal', { total: money(totalCents) })}</Typography>
-          <Typography variant={'caption'} color={amount < MIN_PART_CENTS ? 'error' : 'text.secondary'}>
-            {t('categories.splitRemainder', { remaining: money(Math.max(amount, 0)) })}
-          </Typography>
-          <Table size={'small'}>
-            <TableBody>
-              <TableRow>
-                <TableCell>
-                  <Typography variant={'body2'}>{transaction.name}</Typography>
-                  <Typography variant={'caption'}>{transaction.memo}</Typography>
-                </TableCell>
-                <TableCell>
-                  <SplitCategoryPicker categoryId={originalCategoryId} onChange={setOriginalCategoryId} hints={hints} />
-                </TableCell>
-                <TableCell sx={{ width: 140 }}>
-                  <CurrencyTextField
-                    size={'small'}
-                    fullWidth
-                    disabled={true}
-                    label={t('categories.splitOriginal')}
-                    value={fromCents(Math.max(amount, 0))}
-                    options={{
-                      minimumValue: '0',
-                      maximumValue: fromCents(totalCents).toFixed(2),
-                    }}
-                  />
-                </TableCell>
-                <TableCell sx={{ width: 48, px: 0 }}></TableCell>
-              </TableRow>
-              {parts.map((part) => {
-                const error = part.removed ? undefined : amountError(part)
-                return (
-                  <TableRow key={part.key} sx={part.removed ? { opacity: 0.5 } : undefined}>
-                    <TableCell>
-                      <Typography variant={'body2'} sx={{ textDecoration: part.removed ? 'line-through' : undefined }}>
-                        {part.name}
-                      </Typography>
-                      <Typography variant={'caption'}>{part.memo}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <SplitCategoryPicker
-                        categoryId={part.categoryId}
-                        onChange={(categoryId) => updatePart(part.key, { categoryId })}
-                        hints={hints}
-                        disabled={part.removed}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ width: 140 }}>
-                      <CurrencyTextField
+    <Dialog open onClose={onClose} onKeyDown={handleKeyDown} fullWidth maxWidth={'sm'} PaperProps={{ tabIndex: -1 }}>
+      <DialogTitle sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+        <CallSplit sx={{ mr: 2 }} />
+        {t('categories.splitTransaction')}
+      </DialogTitle>
+      <DialogContent>
+        <Typography variant={'body2'}>{t('categories.splitTotal', { total: money(totalCents) })}</Typography>
+        <Typography variant={'caption'} color={amount < MIN_PART_CENTS ? 'error' : 'text.secondary'}>
+          {t('categories.splitRemainder', { remaining: money(Math.max(amount, 0)) })}
+        </Typography>
+        <Table size={'small'}>
+          <TableBody>
+            <TableRow>
+              <TableCell>
+                <Typography variant={'body2'}>{transaction.name}</Typography>
+                <Typography variant={'caption'}>{transaction.memo}</Typography>
+              </TableCell>
+              <TableCell>
+                <SplitCategoryPicker categoryId={originalCategoryId} onChange={setOriginalCategoryId} hints={hints} />
+              </TableCell>
+              <TableCell sx={{ width: 140 }}>
+                <CurrencyTextField
+                  size={'small'}
+                  fullWidth
+                  disabled={true}
+                  label={t('categories.splitOriginal')}
+                  value={fromCents(Math.max(amount, 0))}
+                  options={{
+                    minimumValue: '0',
+                    maximumValue: fromCents(totalCents).toFixed(2),
+                  }}
+                />
+              </TableCell>
+              <TableCell sx={{ width: 48, px: 0 }}></TableCell>
+            </TableRow>
+            {parts.map((part) => {
+              const error = part.removed ? undefined : amountError(part)
+              return (
+                <TableRow key={part.key} sx={part.removed ? { opacity: 0.5 } : undefined}>
+                  <TableCell>
+                    <Typography variant={'body2'} sx={{ textDecoration: part.removed ? 'line-through' : undefined }}>
+                      {part.name}
+                    </Typography>
+                    <Typography variant={'caption'}>{part.memo}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <SplitCategoryPicker
+                      categoryId={part.categoryId}
+                      onChange={(categoryId) => updatePart(part.key, { categoryId })}
+                      hints={hints}
+                      disabled={part.removed}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ width: 140 }}>
+                    <CurrencyTextField
+                      size={'small'}
+                      fullWidth
+                      disabled={part.removed}
+                      autoFocus={part.id === undefined}
+                      value={fromCents(part.cents)}
+                      error={Boolean(error)}
+                      helperText={error}
+                      onFocus={(event) => event.target.select()}
+                      onBlur={() => clampPart(part.key)}
+                      onValueChange={(value) => updatePart(part.key, { cents: Math.abs(toCents(value)) })}
+                      options={{
+                        minimumValue: '0',
+                        maximumValue: fromCents(totalCents).toFixed(2),
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ width: 48, px: 0 }}>
+                    {/* One button for both states, so it keeps focus after being clicked. */}
+                    <Tooltip title={part.removed ? t('categories.splitUndoRemove') : t('categories.splitRemove')}>
+                      <IconButton
                         size={'small'}
-                        fullWidth
-                        disabled={part.removed}
-                        autoFocus={part.id === undefined}
-                        value={fromCents(part.cents)}
-                        error={Boolean(error)}
-                        helperText={error}
-                        onFocus={(event) => event.target.select()}
-                        onBlur={() => clampPart(part.key)}
-                        onValueChange={(value) => updatePart(part.key, { cents: Math.abs(toCents(value)) })}
-                        options={{
-                          minimumValue: '0',
-                          maximumValue: fromCents(totalCents).toFixed(2),
+                        data-enter-saves
+                        onClick={(event) => {
+                          if (part.removed) {
+                            updatePart(part.key, { removed: false })
+                            return
+                          }
+                          // A new part's row disappears with its button, so hand focus to the dialog to keep Enter working.
+                          const dialog = event.currentTarget.closest<HTMLElement>('[role="dialog"]')
+                          removePart(part)
+                          if (part.id === undefined) setTimeout(() => dialog?.focus())
                         }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ width: 48, px: 0 }}>
-                      {/* One button for both states, so it keeps focus after being clicked. */}
-                      <Tooltip title={part.removed ? t('categories.splitUndoRemove') : t('categories.splitRemove')}>
-                        <IconButton
-                          size={'small'}
-                          data-enter-saves
-                          onClick={(event) => {
-                            if (part.removed) {
-                              updatePart(part.key, { removed: false })
-                              return
-                            }
-                            // A new part's row disappears with its button, so hand focus to the dialog to keep Enter working.
-                            const dialog = event.currentTarget.closest<HTMLElement>('[role="dialog"]')
-                            removePart(part)
-                            if (part.id === undefined) setTimeout(() => dialog?.focus())
-                          }}
-                          aria-label={part.removed ? t('categories.splitUndoRemove') : t('categories.splitRemove')}
-                        >
-                          {part.removed ? <Undo /> : <DeleteForever />}
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-          <Tooltip title={canAdd ? t('categories.splitAddPartHint') : t('categories.splitNoRoom')}>
-            {/* The span lets the tooltip show while the button is disabled. */}
-            <span>
-              <Button color={'secondary'} startIcon={<Add />} onClick={addPart} disabled={!canAdd} sx={{ mt: 1 }}>
-                {t('categories.splitAddPart')}
-              </Button>
-            </span>
-          </Tooltip>
-        </DialogContent>
-        <DialogActions>
-          <SaveCancel saveDisabled={!isValid || !hasChanges} handleSave={handleSave} handleCancel={handleClose} />
-        </DialogActions>
-      </Dialog>
-    </>
+                        aria-label={part.removed ? t('categories.splitUndoRemove') : t('categories.splitRemove')}
+                      >
+                        {part.removed ? <Undo /> : <DeleteForever />}
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+        <Tooltip title={canAdd ? t('categories.splitAddPartHint') : t('categories.splitNoRoom')}>
+          {/* The span lets the tooltip show while the button is disabled. */}
+          <span>
+            <Button color={'secondary'} startIcon={<Add />} onClick={addPart} disabled={!canAdd} sx={{ mt: 1 }}>
+              {t('categories.splitAddPart')}
+            </Button>
+          </span>
+        </Tooltip>
+      </DialogContent>
+      <DialogActions>
+        <SaveCancel saveDisabled={!isValid || !hasChanges} handleSave={handleSave} handleCancel={onClose} />
+      </DialogActions>
+    </Dialog>
   )
 }

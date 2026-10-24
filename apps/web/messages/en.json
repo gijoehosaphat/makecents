@@ -99,7 +99,10 @@
       "bankAccount": "Bank Account",
       "noCategory": "Uncategorized",
       "searchPlaceholder": "Search name or memo",
-      "splitOfTotal": "of {total}"
+      "splitOfTotal": "of {total}",
+      "moreActions": "More actions",
+      "edit": "Edit transaction",
+      "delete": "Delete transaction"
     },
     "transfer": {
       "matchTransaction": "Link to the selected matching transaction?",
@@ -294,6 +297,41 @@
       "undone": "Removed {count, plural, one {# transaction} other {# transactions}}.",
       "error": "That didn't work. Please try again."
     },
+    "deletedTransactions": {
+      "title": "Deleted",
+      "description": "Transactions deleted from your accounts, and why. Imports skip them, so they stay gone when a file is imported again. Restore one to put it back as it was.",
+      "none": "No transactions have been deleted.",
+      "deletedAt": "Deleted",
+      "transaction": "Transaction",
+      "account": "Account",
+      "reason": "Reason",
+      "deletedBy": "Deleted by",
+      "duplicateOf": "Duplicate of \"{name}\" on {date}",
+      "restore": "Restore",
+      "restoreTitle": "Restore transaction",
+      "restoreConfirm": "Put \"{name}\" back as it was when it was deleted? Its transfer link, if it had one, is not restored.",
+      "restored": "Transaction restored.",
+      "restoredNamed": "Restored \"{name}\".",
+      "restoreError": "That transaction couldn't be restored.",
+      "deleteTitle": "Delete transaction",
+      "deleteError": "That transaction couldn't be deleted.",
+      "deleted": "Transaction deleted. It won't be imported again.",
+      "undo": "Undo",
+      "reasonLabel": "Why delete it?",
+      "reasons": {
+        "duplicate": "It's a duplicate (e.g. a pending charge the bank re-exported once it posted)",
+        "cancelled": "It was cancelled or never went through",
+        "other": "Something else"
+      },
+      "duplicateOfLabel": "Which transaction does it duplicate?",
+      "duplicateOfNone": "None of these",
+      "noCandidates": "No other transaction for this amount within {days} days",
+      "carryOver": "Its category, custom name and memo, splits and transfer link move to that transaction wherever that one has none.",
+      "noteLabel": "Note (optional)",
+      "explain": "It's removed from balances, budgets and reports, and future imports will skip it. You can see and restore it under Settings > Deleted.",
+      "explainSplits": "Its splits are deleted with it.",
+      "explainTransfer": "Its transfer link is removed."
+    },
     "dateEditor": {
       "title": "Edit transaction date"
     },
@@ -301,6 +339,38 @@
       "title": "Edit transaction memo",
       "name": "Name",
       "memo": "Memo"
+    },
+    "editTransaction": {
+      "title": "Edit transaction",
+      "date": "Date",
+      "name": "Name",
+      "memo": "Memo",
+      "fromBank": "Bank: {value}",
+      "revertToBank": "Use the bank's name and memo",
+      "category": "Category",
+      "transferNoCategory": "Transfers between your accounts are not categorized.",
+      "splitAndTransfer": "Split & transfer",
+      "split": "Split…",
+      "editSplit": "Edit split…",
+      "splitDisabled": "Unlink the transfer before splitting",
+      "linkTransfer": "Link transfer…",
+      "unlinkTransfer": "Unlink transfer…",
+      "linkDisabled": "Only uncategorized, unsplit transactions can be linked as a transfer",
+      "savesFirst": "Your changes above are saved before opening these."
+    },
+    "createTransaction": {
+      "open": "Add transaction",
+      "title": "Add transaction",
+      "bankAccount": "Bank account",
+      "date": "Date",
+      "direction": "Withdrawal or deposit",
+      "withdrawal": "Withdrawal",
+      "deposit": "Deposit",
+      "amount": "Amount",
+      "name": "Name",
+      "memo": "Memo",
+      "category": "Category",
+      "create": "Add"
     },
     "privacy": {
       "CHECKING": "Checking Account",

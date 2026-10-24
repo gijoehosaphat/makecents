@@ -18,6 +18,10 @@ describe('countDuplicateRows', () => {
     expect(countDuplicateRows([row('new', 'Spend')], [row('old', 'Withdrawal (executed at 2026-09-21)')])).toBe(1)
   })
 
+  it('counts rows whose id was deleted from the account', () => {
+    expect(countDuplicateRows([row('a'), row('b', 'Other', -1)], [], new Set(['a']))).toBe(1)
+  })
+
   it('keeps legitimate same-day pairs', () => {
     expect(countDuplicateRows([row('a'), row('b')], [])).toBe(0)
   })

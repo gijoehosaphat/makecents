@@ -187,7 +187,10 @@ export function CsvImportDialog({
   }, [isMultiAccountFile, baseRows, bankAccounts])
 
   const { data: existingData, error: existingError } = useQuery(GetTransactionsForCsvAccountMatchingDocument, {
-    variables: { filter: overlapFilter ?? {} },
+    variables: {
+      filter: overlapFilter ?? {},
+      deletedFilter: { bankAccountId: { in: overlapFilter?.bankAccountId.in ?? [] } },
+    },
     skip: !overlapFilter,
     // An earlier import in this session may have added transactions since this was cached.
     fetchPolicy: 'network-only',
@@ -281,16 +284,29 @@ export function CsvImportDialog({
         name: node.name,
         bankTransactionId: node.bankTransactionId,
       }))
+    const deletedIds = new Set(
+      (existingData?.allDeletedTransactions?.nodes ?? []).flatMap((node) =>
+        node?.bankAccountId === selectedAccountId && node.bankTransactionId ? [node.bankTransactionId] : [],
+      ),
+    )
     let isCancelled = false
     buildTransactions(preview.rows, activeMapping, String(selectedAccountId)).then((transactions) => {
       if (!isCancelled) {
-        setDuplicateCount(countDuplicateRows(transactions, existingRows))
+        setDuplicateCount(countDuplicateRows(transactions, existingRows, deletedIds))
       }
     })
     return () => {
       isCancelled = true
     }
-  }, [selectedAccountId, isMultiAccountFile, isMappingUsable, existingTransactions, preview.rows, activeMapping])
+  }, [
+    selectedAccountId,
+    isMultiAccountFile,
+    isMappingUsable,
+    existingTransactions,
+    existingData,
+    preview.rows,
+    activeMapping,
+  ])
 
   const [createBankCsvDefinition] = useMutationWithToast(CreateBankCsvDefinitionDocument, {
     refetchQueries: definitionsRefetch,

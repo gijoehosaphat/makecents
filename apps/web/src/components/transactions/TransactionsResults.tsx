@@ -27,6 +27,7 @@ import { TransactionSort } from '@/lib/transactionSort'
 import { useTransactionSearchParams } from '@/lib/useTransactionSearchParams'
 import { useFilteredTransactions } from '@/lib/useFilteredTransactions'
 import { useAppContext } from '../context/AppContextProvider'
+import { CreateTransactionButton } from './CreateTransactionDialog'
 
 export function TransactionsResults() {
   const searchParams = useSearchParams()
@@ -144,6 +145,7 @@ export function TransactionsResults() {
                       </Typography>
                     </TableSortLabel>
                   </TableCell>
+                  <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -159,17 +161,24 @@ export function TransactionsResults() {
               </TableBody>
             </Table>
           </TableContainer>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-            <Pagination
-              count={Math.ceil(totalCount / limit)}
-              page={page}
-              onChange={handlePagination}
-              variant={'outlined'}
-              shape={'rounded'}
-            />
-          </Box>
         </>
       )}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mt: 4 }}>
+        <CreateTransactionButton
+          refetchQuery={refetchQuery}
+          bankAccountId={selectedBankAccountIds?.length === 1 ? selectedBankAccountIds[0] : undefined}
+        />
+        {transactions.length > 0 && (
+          <Pagination
+            count={Math.ceil(totalCount / limit)}
+            page={page}
+            onChange={handlePagination}
+            variant={'outlined'}
+            shape={'rounded'}
+            sx={{ ml: 'auto' }}
+          />
+        )}
+      </Box>
     </>
   )
 }
