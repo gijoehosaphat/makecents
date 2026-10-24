@@ -128,7 +128,7 @@ fragment BudgetFragment on Budget {
   name
   nodeId
   updatedAt
-  effectiveDate
+  # The opening balance in the account's start month (budgets converted from accruing budgets only).
   startingAmount
 }
 
@@ -153,4 +153,21 @@ fragment CategoryGroupFragment on CategoryGroup {
   customCategoryGroupId
   id
   nodeId
+}
+
+fragment BudgetAssignmentFragment on BudgetAssignment {
+  id
+  nodeId
+  accountId
+  budgetId
+  month
+  amount
+}
+
+fragment EnvelopeStartFragment on Account {
+  id
+  nodeId
+  envelopeStartMonth
+  envelopeStartingBalance
+  envelopeCashOnHand
 }

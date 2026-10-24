@@ -24,6 +24,7 @@
     "start": "./script/start",
     "migrate": "pnpm --filter makecents-api migrate",
     "example-data": "tsx src/generateExampleData.ts",
+    "screenshot": "tsx src/captureScreenshot.ts",
     "test": "pnpm -r --workspace-concurrency=1 test",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",

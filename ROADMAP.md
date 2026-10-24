@@ -12,10 +12,10 @@ Planned and possible work for makecents, roughly in priority order. It comes fro
 
 ## Tier 2: Budgeting depth (the biggest gap versus YNAB)
 
-- **Envelope / zero-based budgeting.** Allocate income into budgets, show an unallocated ("Ready to Assign") amount, and let users move money between budgets, including covering an overspend from another budget.
-- **Rollover.** Carry unspent or overspent amounts into the next month. Accruing budgets are the closest thing today.
-- **Per-category targets.** Monthly amounts per category inside a budget, not just one total.
-- **Savings and debt goals.** Target amount and date, with progress and the monthly amount needed.
+- **Rollover options.** Envelope budgets always carry unspent money forward, and an overspend comes out of the next month's Ready to Assign. Possible per-budget options: reset to zero each month (a pure spending limit), or keep an overspend in the budget until it is covered.
+- **Per-category targets.** Planned monthly amounts per category inside a budget, not just the budget's one planned amount, feeding "Assign planned amounts".
+- **Savings and debt goals.** Target amount and date on a budget, with progress and the monthly amount to assign to get there.
+- **Budget category history (likely not needed).** Activity follows each category's current budget, so moving a category to another budget, removing it, or deleting a budget also changes past months' figures (the app asks before doing any of these). Keeping a dated record of which budget each category belonged to would freeze past months. Probably not worth it: the budget is for planning now and ahead, not a historical record, and past months only matter through what they carry into the current one.
 
 ## Tier 3: Forecasting and reporting
 

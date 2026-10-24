@@ -3,38 +3,20 @@
 import { Budget, Category } from '@/graphql/types'
 import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { MoreVert } from '@mui/icons-material'
-import {
-  Box,
-  Button,
-  FormControlLabel,
-  FormGroup,
-  IconButton,
-  Menu,
-  MenuItem,
-  Switch,
-  TableCell,
-  TableRow,
-  TextField,
-  Typography,
-  lighten,
-} from '@mui/material'
-import { format } from 'date-fns'
+import { IconButton, Menu, MenuItem, TableCell, TableRow, TextField, Typography, lighten } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import SaveCancel from '@/components/forms/SaveCancel'
 import CurrencyTextField from '../shared/CurrencyTextField'
-import { formatMoney, formatMoneyCents, toCents } from '@/lib/formatMoney'
+import { formatMoneyCents, toCents } from '@/lib/formatMoney'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
 import CategoryEditor from './CategoryEditor'
+import ConfirmDialog from '../shared/ConfirmDialog'
 import { DeleteBudgetDocument, GetBudgetsByAccountIdDocument, UpdateBudgetDocument } from '@/graphql/operations'
-import { DatePicker } from '@mui/x-date-pickers'
-import { parse } from 'date-fns'
 
 interface Fields {
   name: string
   amount: number
-  startingAmount: number | null
-  effectiveDate: Date | null
 }
 
 export default function BudgetRow({ budget, accountId }: { budget: Budget; accountId: number | null }) {
@@ -60,33 +42,24 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
   })
   const t = useTranslations('common')
   const { hidden } = useAmountVisibility()
-  const [isSavingsBudget, setIsSavingsBudget] = useState(!!budget.effectiveDate)
   const [fields, setFields] = useState<Fields>({
     name: '',
     amount: budget.amount,
-    startingAmount: budget.startingAmount,
-    effectiveDate: budget.effectiveDate,
   })
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isEditting, setIsEditting] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const open = Boolean(anchorEl)
 
   function handleChange(field: string, value: string | number) {
     let newValue = value
-    if (field === 'amount' || field === 'startingAmount') {
+    if (field === 'amount') {
       newValue = toCents(Number(newValue))
     }
     setFields({
       ...fields,
       [field]: newValue,
-    })
-  }
-
-  function handleDateChange(value: Date | null) {
-    setFields({
-      ...fields,
-      effectiveDate: value,
     })
   }
 
@@ -105,35 +78,31 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
   }
 
   async function handleSave() {
-    if (fields.name || fields.amount) {
-      await updateBudget({
-        variables: {
-          nodeId: budget?.nodeId,
-          name: fields.name || budget?.name || '',
-          amount: fields.amount || budget?.amount,
-          startingAmount: isSavingsBudget === true ? (fields.startingAmount ?? budget?.startingAmount ?? null) : null,
-          effectiveDate: isSavingsBudget === true ? fields.effectiveDate || null : null,
-        },
-      })
-    }
+    // The amount starts as the saved one, so zero (a budget only spent from its balance) can be saved too.
+    await updateBudget({
+      variables: {
+        nodeId: budget?.nodeId,
+        name: fields.name || budget?.name || '',
+        amount: fields.amount ?? budget?.amount,
+      },
+    })
     handleClose()
   }
 
+  // Deleting rewrites past months, so it is confirmed first (see budgets.confirmDelete).
   function handleDelete() {
+    setConfirmingDelete(true)
+    setAnchorEl(null)
+  }
+
+  function handleConfirmDelete() {
+    setConfirmingDelete(false)
     deleteBudget({
       variables: {
         nodeId: budget?.nodeId,
       },
     })
     handleClose()
-  }
-
-  function handleResetAccrual() {
-    setFields({ ...fields, startingAmount: 0, effectiveDate: new Date() })
-  }
-
-  function handleIsSavingsBudget() {
-    setIsSavingsBudget(!isSavingsBudget)
   }
 
   return (
@@ -164,7 +133,7 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
         <TableCell size={'small'} sx={{ width: '10%' }}>
           {isEditting ? (
             <CurrencyTextField
-              label={t('forms.addAmount')}
+              label={t('budgets.plannedAmount')}
               onValueChange={(value) => handleChange('amount', value)}
               size={'small'}
               placeholder={t('forms.amountPlaceholder')}
@@ -178,32 +147,6 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
         </TableCell>
         <TableCell size={'small'} align={'left'}>
           <CategoryEditor budget={budget} budgetCategories={budget.budgetCategoriesByBudgetId?.nodes || []} />
-        </TableCell>
-        <TableCell size={'small'} sx={{ width: '15%' }}>
-          {isEditting && isSavingsBudget && (
-            <CurrencyTextField
-              label={t('budgets.startingAmount')}
-              onValueChange={(value) => handleChange('startingAmount', value)}
-              size={'small'}
-              placeholder={t('forms.amountPlaceholder')}
-              defaultValue={budget.startingAmount / 100}
-              value={fields.startingAmount ? fields.startingAmount / 100 : 0}
-              sx={{ mr: 2 }}
-            />
-          )}
-          {!isEditting && isSavingsBudget && (
-            <Typography variant={'body2'}>{formatMoneyCents(budget.startingAmount, 'CAD', hidden)}</Typography>
-          )}
-        </TableCell>
-        <TableCell size={'small'} align={'right'} sx={{ width: '15%' }}>
-          {isEditting && isSavingsBudget && (
-            <Box sx={{ input: { padding: '8px' } }}>
-              <DatePicker value={new Date(fields.effectiveDate || new Date())} onChange={handleDateChange} />
-            </Box>
-          )}
-          {!isEditting && isSavingsBudget && budget.effectiveDate && (
-            <Typography variant={'body2'}>{format(new Date(budget.effectiveDate), 'MMM dd, yyyy')}</Typography>
-          )}
         </TableCell>
         <TableCell size={'small'} align={'right'} sx={{ width: '10%' }}>
           {isEditting ? (
@@ -221,25 +164,6 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
           )}
         </TableCell>
       </TableRow>
-      {isEditting && (
-        <TableRow sx={(theme) => ({ backgroundColor: lighten(theme.palette.background.default, 0.05) })}>
-          <TableCell colSpan={6}>
-            <FormGroup>
-              <FormControlLabel
-                control={<Switch checked={isSavingsBudget} onChange={handleIsSavingsBudget} size={'small'} />}
-                label={t('budgets.accrue')}
-              />
-              {isSavingsBudget && (
-                <Box>
-                  <Button size={'small'} onClick={handleResetAccrual}>
-                    {t('budgets.resetAccrual')}
-                  </Button>
-                </Box>
-              )}
-            </FormGroup>
-          </TableCell>
-        </TableRow>
-      )}
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -252,6 +176,14 @@ export default function BudgetRow({ budget, accountId }: { budget: Budget; accou
         <MenuItem onClick={handleEdit}>{t('shared.edit')}</MenuItem>
         <MenuItem onClick={handleDelete}>{t('shared.delete')}</MenuItem>
       </Menu>
+      <ConfirmDialog
+        open={confirmingDelete}
+        title={t('budgets.confirmDeleteTitle', { name: budget.name ?? '' })}
+        message={t('budgets.confirmDelete')}
+        confirmLabel={t('shared.delete')}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </>
   )
 }

@@ -34,6 +34,7 @@ See the README for importing data, and `pnpm example-data` for a fake QFX file.
 | `pnpm format` / `pnpm format:check`          | Prettier write / check for the whole repo            |
 | `pnpm --dir apps/web codegen`                | Regenerate GraphQL types (API must be running)       |
 | `./apps/api/script/db-migrate-create <name>` | Create a new migration                               |
+| `pnpm screenshot <page> <output.png>`        | Capture a README screenshot of a page (see below)    |
 
 ## How the pieces fit
 
@@ -72,6 +73,10 @@ browser ──► Next.js (web) ──/api/graphql──► Express (api) ──
 2. QFX/OFX goes through `lib/parsers/OpenFinancialExchange.ts`. CSVs go through `lib/parsers/CsvDetect.ts` (guesses the column mapping) and `lib/parsers/Csv.ts`; a saved mapping is a `bank_csv_definition`. Rows get a stable `bankTransactionId` (the bank's FITID, or a hash of the row for CSVs).
 3. The client calls the `importTransactions` mutation, which wraps the SQL function. Duplicates are skipped in the database (`lib/csvDuplicates.ts` mirrors the matching rules so the preview can count them), and each import is an `import_batch` that can be undone.
 4. Rows are then auto-categorised from prior behaviour (`lib/categorySuggestions.ts` is the UI side of the same idea).
+
+## Screenshots
+
+The README screenshots are taken from the demo data with `pnpm screenshot <page> <output.png>`, for example `pnpm screenshot reporting/budgets screenshot3.png`. The page is relative to `/<accountId>/dashboard/` and may carry the date filter's query string. It drives the installed Google Chrome headless over the DevTools protocol: it signs in as the demo user, opens the page and saves the content column (no sidebar or app bar) at 2x, in the dark theme with `en-CA` money formatting, so new shots match the old ones. Run it against the demo (`docker compose up`, or a database loaded with the seeds), never your real data. `SCREENSHOT_URL` (default `http://localhost:3001`), `SCREENSHOT_EMAIL`, `SCREENSHOT_PASSWORD`, `SCREENSHOT_WIDTH` and `CHROME_PATH` override the defaults.
 
 ## Testing
 

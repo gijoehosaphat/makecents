@@ -102,7 +102,7 @@ importers:
         version: 4.3.3(graphql@16.14.2)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2)
       '@apollo/client-integration-nextjs':
         specifier: ^0.14.4
-        version: 0.14.5(@apollo/client@4.3.3)(@types/react@19.3.0)(graphql@16.14.2)(next@16.4.0)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2)
+        version: 0.14.5(@apollo/client@4.3.3)(@types/react@19.3.0)(graphql@16.14.2)(next@16.4.3)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2)
       '@emotion/react':
         specifier: ^11.11.1
         version: 11.14.0(@types/react@19.3.0)(react@19.3.0)
@@ -173,8 +173,8 @@ importers:
         specifier: ^9
         version: 9.39.5
       eslint-config-next:
-        specifier: ^16.1.6
-        version: 16.4.0(@typescript-eslint/parser@8.71.2)(eslint@9.39.5)(typescript@5.9.3)
+        specifier: ^16.4.3
+        version: 16.4.3(@typescript-eslint/parser@8.71.2)(eslint@9.39.5)(typescript@5.9.3)
       graphql:
         specifier: ^16.13.0
         version: 16.14.2
@@ -185,14 +185,14 @@ importers:
         specifier: ^4.5.2
         version: 4.5.4
       next:
-        specifier: ^16.1.6
-        version: 16.4.0(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
+        specifier: ^16.4.3
+        version: 16.4.3(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
       next-auth:
         specifier: ^5.0.0-beta.30
-        version: 5.0.0-beta.32(next@16.4.0)(react@19.3.0)
+        version: 5.0.0-beta.32(next@16.4.3)(react@19.3.0)
       next-intl:
         specifier: ^4.8.3
-        version: 4.14.9(@types/react@19.3.0)(next@16.4.0)(react@19.3.0)
+        version: 4.14.9(@types/react@19.3.0)(next@16.4.3)(react@19.3.0)
       notistack:
         specifier: ^3.0.1
         version: 3.0.2(csstype@3.2.3)(react-dom@19.3.0)(react@19.3.0)
@@ -235,7 +235,7 @@ importers:
 
 packages:
 
-  /@apollo/client-integration-nextjs@0.14.5(@apollo/client@4.3.3)(@types/react@19.3.0)(graphql@16.14.2)(next@16.4.0)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2):
+  /@apollo/client-integration-nextjs@0.14.5(@apollo/client@4.3.3)(@types/react@19.3.0)(graphql@16.14.2)(next@16.4.3)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2):
     resolution: {integrity: sha512-aNh16zlx5rrGtP946jW+O/J7OUyoSC0dxjicFIztiw/S5tQjNqZgqmlgtOXMn7zAR8qV9VOAiKjK5UROaN8iJg==}
     peerDependencies:
       '@apollo/client': ^4.0.0
@@ -245,7 +245,7 @@ packages:
     dependencies:
       '@apollo/client': 4.3.3(graphql@16.14.2)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2)
       '@apollo/client-react-streaming': 0.14.5(@apollo/client@4.3.3)(@types/react@19.3.0)(graphql@16.14.2)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2)
-      next: 16.4.0(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
+      next: 16.4.3(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
       react: 19.3.0
       rxjs: 7.8.2
     transitivePeerDependencies:
@@ -3049,12 +3049,12 @@ packages:
     dev: false
     optional: true
 
-  /@next/env@16.4.0:
-    resolution: {integrity: sha512-pyLlT5oafGlX8X7xjgGNXz5dNIDSxREm+qD6i9VLSZiZFopA/XWl8NM/KPmLx/8EG/++c49iid3gNWSQW1+2dQ==}
+  /@next/env@16.4.3:
+    resolution: {integrity: sha512-a7tz1QCcWWkwC/rPJcPMJk/UNRu9CFhDd3OHYE5hddbJrs8BqRTalxI6GlKCWEGzRLHN+S/B7a4PAHCtm25aBQ==}
     dev: false
 
-  /@next/eslint-plugin-next@16.4.0(eslint@9.39.5):
-    resolution: {integrity: sha512-ffeflB/dL8RrvWejQximw01pOpKHN692Y3FjDB82DCd0YVvXvBD6vY7mcZp27yvSVFVM6wA73xVodEKF4spizA==}
+  /@next/eslint-plugin-next@16.4.3(eslint@9.39.5):
+    resolution: {integrity: sha512-oxuC06wt/71h6ACYCV9GbKOfnf5a7VlRe/p80YHTut15TNgDEmynDnaq8t/xhy5rlvk7dhItIPs6H3rvIM4kyw==}
     dependencies:
       '@eslint-community/eslint-utils': 4.9.1(eslint@9.39.5)
       fast-glob: 3.3.1
@@ -3062,8 +3062,8 @@ packages:
       - eslint
     dev: false
 
-  /@next/swc-darwin-arm64@16.4.0:
-    resolution: {integrity: sha512-yyZ+9MgViAKLLb5l1gPBGjRwnq3teNLb5Zx6JEw8LzNSTjlsnp+baUHFxTgl7PpjCmKf48VQfyipG1eBflb48Q==}
+  /@next/swc-darwin-arm64@16.4.3:
+    resolution: {integrity: sha512-4yq5EXBt+VDtAZwTyfijaFp5D2C5oz3Ikw5a2kiX2K9nw72vrZX2q5UuAlkPtUMO1tQz6JTKpaKWjS7OOefTDQ==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [darwin]
@@ -3071,8 +3071,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-darwin-x64@16.4.0:
-    resolution: {integrity: sha512-RePEEejEj1Auf5s9qEcG0JbcDP3ceNUS/ofNX8AhxzgIjTVlZIHMatlp16YplcSMpsVo/ZMQHJTjbMYJznjGUg==}
+  /@next/swc-darwin-x64@16.4.3:
+    resolution: {integrity: sha512-1Rvkn/LUhnEF8WxnRkOrqGhbwXui1bkWFxONKIbN+r7C+9KHDSZ+iUoj4CzymVMWUyZIyx9szcb9+kbKhD500A==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [darwin]
@@ -3080,8 +3080,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-arm64-gnu@16.4.0:
-    resolution: {integrity: sha512-HhsyCqd+NpmvDDVY/LqkAN24f+QVvXh3ie+PfcwKinWL2Mu826JymQxJXGjAIfmJ4VlHjp4Pe/nZtXtUoEMAqw==}
+  /@next/swc-linux-arm64-gnu@16.4.3:
+    resolution: {integrity: sha512-dCKpXErGg3abUM6t5JTJV/ottVBTStJB5lRJTbgdUdQaQ+jNHiK56Hsc0YAEg/rinSh42hYG3HWiYmEMdilnxg==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -3089,8 +3089,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-arm64-musl@16.4.0:
-    resolution: {integrity: sha512-sN9Pf+Zh+RpZAOmbR7d8KAA8T61CVhawtbEJ2Bk6QrRzx6Z/6haaF4UiwBzytM96GRRRWZh9/WALIEO3npMamA==}
+  /@next/swc-linux-arm64-musl@16.4.3:
+    resolution: {integrity: sha512-WwYbhWkhYBvBtib1K4W0kL8MW2snBD2A5b3SN4vPpqalZbZs5+bQ1yzAdepVoOqrFfEW3dmREy4Zs1MrWcrFbw==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [linux]
@@ -3098,8 +3098,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-x64-gnu@16.4.0:
-    resolution: {integrity: sha512-D5M5xLWQVd1CvR+L7BickM1weRfmM41x3L1NWcnKY/oyJJqr1qwaCgmu3dMAhLBOMdZwSuDCRV6DJRRpiUkbDQ==}
+  /@next/swc-linux-x64-gnu@16.4.3:
+    resolution: {integrity: sha512-QymWvfUwDEC5/lpJOsxX5VAbyoR2D13+2Jsjz4be7gT4LPqEgdpkeLIR/HFfCLgKzoMhpJbp6I/JnogyNZHcaA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -3107,8 +3107,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-linux-x64-musl@16.4.0:
-    resolution: {integrity: sha512-8d5WLS6a9YalqpOgXdlbvonFu+sIgjA+CO6tGzetrpPVcUL56foa7B7664h41rAlbLi5fJwK4vWji3zf4QDy+w==}
+  /@next/swc-linux-x64-musl@16.4.3:
+    resolution: {integrity: sha512-Vmjd9D7DpA4Vv3cUlr82QWgJD/BQZmns801vtC5VWHg6jCIA4a5vMKpQnfrM2pyCrp2eV0ENdUg4PlN3bAc2Yw==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [linux]
@@ -3116,8 +3116,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-arm64-msvc@16.4.0:
-    resolution: {integrity: sha512-sQuOIiW3snb48UwrBcDMvFA/u03qtw2LeuSIxFIQ9AJuW9UG/4Ddsfo+eV73PnZwBhyncMtsKVh7PrzMol2/fA==}
+  /@next/swc-win32-arm64-msvc@16.4.3:
+    resolution: {integrity: sha512-lG1pPdPLk7gTyGb00n5JIMLdBJgjb+UEhSdZvFbhUMg0DyC6z4B7RnpSKF9VCd4imkLObVbXOFA0kFCpw7yFow==}
     engines: {node: '>= 10'}
     cpu: [arm64]
     os: [win32]
@@ -3125,8 +3125,8 @@ packages:
     dev: false
     optional: true
 
-  /@next/swc-win32-x64-msvc@16.4.0:
-    resolution: {integrity: sha512-6/33lCuxpdHUy27RegyGM/5uTpF7YZd3UR4D0gpkOA/tWY5YR7msbQjqPgCZmSmxrrTLGCXYA4A8vT2H5DPGTQ==}
+  /@next/swc-win32-x64-msvc@16.4.3:
+    resolution: {integrity: sha512-NmQC9RkJdnPXRaMxtkCzobB3teVjqF33oSOnwDfi+XYGWWYpt+xlGK3mtktSKLbdjwaWbJu2OkkMiRFGUUncKg==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -4426,7 +4426,7 @@ packages:
       define-properties: 1.2.1
       es-abstract: 1.24.2
       es-errors: 1.3.0
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
       es-shim-unscopables: 1.1.0
     dev: false
 
@@ -4439,7 +4439,7 @@ packages:
       define-properties: 1.2.1
       es-abstract: 1.24.2
       es-errors: 1.3.0
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
       es-shim-unscopables: 1.1.0
     dev: false
 
@@ -5463,7 +5463,7 @@ packages:
       has-property-descriptors: 1.0.2
       has-proto: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       internal-slot: 1.1.0
       is-array-buffer: 3.0.5
       is-callable: 1.2.7
@@ -5560,7 +5560,7 @@ packages:
     resolution: {integrity: sha512-d9T8ucsEhh8Bi1woXCf+TIKDIROLG5WCkxg8geBCbvk22kzwC5G2OnXVMO6FUsvQlgUUXQ2itephWDLqDzbeCw==}
     engines: {node: '>= 0.4'}
     dependencies:
-      hasown: 2.0.2
+      hasown: 2.0.4
     dev: false
 
   /es-to-primitive@1.3.4:
@@ -5631,8 +5631,8 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  /eslint-config-next@16.4.0(@typescript-eslint/parser@8.71.2)(eslint@9.39.5)(typescript@5.9.3):
-    resolution: {integrity: sha512-2RHLYswzc+hNRktWAjIL6XAvwb1cKcjLawJ5KWywAxn/JivNHtG42ZigL1yobVXDqsimuuL2F9jcEcnHFzbppQ==}
+  /eslint-config-next@16.4.3(@typescript-eslint/parser@8.71.2)(eslint@9.39.5)(typescript@5.9.3):
+    resolution: {integrity: sha512-j9IqBma6abp800frdUURaizYMgXOK+jNGyq6CsYcM9AxpSJs5D/TgMNGeAmRUilZvA7g9V1Tr71gNg9/SVTuMQ==}
     peerDependencies:
       eslint: '>=9.0.0'
       typescript: '>=3.3.1'
@@ -5640,7 +5640,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@next/eslint-plugin-next': 16.4.0(eslint@9.39.5)
+      '@next/eslint-plugin-next': 16.4.3(eslint@9.39.5)
       eslint: 9.39.5
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.5)
@@ -5745,7 +5745,7 @@ packages:
       eslint: 9.39.5
       eslint-import-resolver-node: 0.3.10
       eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.71.2)(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.5)
-      hasown: 2.0.2
+      hasown: 2.0.4
       is-core-module: 2.17.0
       is-glob: 4.0.3
       minimatch: 3.1.5
@@ -5776,7 +5776,7 @@ packages:
       damerau-levenshtein: 1.0.8
       emoji-regex: 9.2.2
       eslint: 9.39.5
-      hasown: 2.0.2
+      hasown: 2.0.4
       jsx-ast-utils: 3.3.5
       language-tags: 1.0.9
       minimatch: 3.1.5
@@ -5815,7 +5815,7 @@ packages:
       es-iterator-helpers: 1.4.0
       eslint: 9.39.5
       estraverse: 5.3.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       jsx-ast-utils: 3.3.5
       minimatch: 3.1.5
       object.entries: 1.1.9
@@ -6754,7 +6754,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       es-errors: 1.3.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       side-channel: 1.1.1
     dev: false
 
@@ -6964,7 +6964,7 @@ packages:
       call-bound: 1.0.4
       gopd: 1.2.0
       has-tostringtag: 1.0.2
-      hasown: 2.0.2
+      hasown: 2.0.4
     dev: false
 
   /is-relative@1.0.0:
@@ -7086,7 +7086,7 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       define-data-property: 1.1.4
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
       get-intrinsic: 1.3.0
       get-proto: 1.0.1
       has-symbols: 1.1.0
@@ -7684,7 +7684,7 @@ packages:
       content-type: 2.1.0
     dev: false
 
-  /next-auth@5.0.0-beta.32(next@16.4.0)(react@19.3.0):
+  /next-auth@5.0.0-beta.32(next@16.4.3)(react@19.3.0):
     resolution: {integrity: sha512-CGlChIEWZ6LltNVxrE5yiySMID+Idpmry47JYA5lLwgD8Sx02a8M65VL0TWVz9nbnOioS/tCW/rP/0+mE7Qp4Q==}
     peerDependencies:
       '@simplewebauthn/browser': ^9.0.1
@@ -7701,7 +7701,7 @@ packages:
         optional: true
     dependencies:
       '@auth/core': 0.41.3
-      next: 16.4.0(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
+      next: 16.4.3(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
       react: 19.3.0
     dev: false
 
@@ -7709,7 +7709,7 @@ packages:
     resolution: {integrity: sha512-8jAkmDwQJo6RDavBHm9QRl1YTn2WXf+rI4SVhMaZxZcxopnwZic6fKTXOoNIo3kzC+a6vJySkOkXmHTVFLAYtg==}
     dev: false
 
-  /next-intl@4.14.9(@types/react@19.3.0)(next@16.4.0)(react@19.3.0):
+  /next-intl@4.14.9(@types/react@19.3.0)(next@16.4.3)(react@19.3.0):
     resolution: {integrity: sha512-uauRtUC+TrYNA1OL/QcwL9irndLrI9jK3Wdaa9W0B5AeKh9cqVdNeT0IWgLnhBqBRrVwppVdI0M+C1+JdGPQ3w==}
     peerDependencies:
       '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -7728,7 +7728,7 @@ packages:
       '@types/react': 19.3.0
       icu-minify: 4.14.9
       negotiator: 1.1.0
-      next: 16.4.0(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
+      next: 16.4.3(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
       next-intl-swc-plugin-extractor: 4.14.9
       react: 19.3.0
       use-intl: 4.14.9(@types/react@19.3.0)(react@19.3.0)
@@ -7736,8 +7736,8 @@ packages:
       - '@swc/helpers'
     dev: false
 
-  /next@16.4.0(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0):
-    resolution: {integrity: sha512-N2C+9q89Z/oLrsepSRS4jRMtwmUZAoZuAHU0e9T6+sAB5DdhADmrnOW+zjYijlrYFmVfmQhGVGy9eMFoB7UgKg==}
+  /next@16.4.3(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0):
+    resolution: {integrity: sha512-OqxKTGi9u80FydydsMNYNjnuje9Au+kvHlt2GZ//ftdpDHm1dxKqAaENoOOTX5wKzn+9vaKUNIfZeyZUuLhCnA==}
     engines: {node: '>=20.9.0'}
     hasBin: true
     peerDependencies:
@@ -7757,7 +7757,7 @@ packages:
       sass:
         optional: true
     dependencies:
-      '@next/env': 16.4.0
+      '@next/env': 16.4.3
       '@swc/helpers': 0.5.23
       baseline-browser-mapping: 2.11.28
       caniuse-lite: 1.0.30001816
@@ -7766,14 +7766,14 @@ packages:
       react-dom: 19.3.0(react@19.3.0)
       styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.3.0)
     optionalDependencies:
-      '@next/swc-darwin-arm64': 16.4.0
-      '@next/swc-darwin-x64': 16.4.0
-      '@next/swc-linux-arm64-gnu': 16.4.0
-      '@next/swc-linux-arm64-musl': 16.4.0
-      '@next/swc-linux-x64-gnu': 16.4.0
-      '@next/swc-linux-x64-musl': 16.4.0
-      '@next/swc-win32-arm64-msvc': 16.4.0
-      '@next/swc-win32-x64-msvc': 16.4.0
+      '@next/swc-darwin-arm64': 16.4.3
+      '@next/swc-darwin-x64': 16.4.3
+      '@next/swc-linux-arm64-gnu': 16.4.3
+      '@next/swc-linux-arm64-musl': 16.4.3
+      '@next/swc-linux-x64-gnu': 16.4.3
+      '@next/swc-linux-x64-musl': 16.4.3
+      '@next/swc-win32-arm64-msvc': 16.4.3
+      '@next/swc-win32-x64-msvc': 16.4.3
       sharp: 0.35.5(@types/node@22.20.5)
     transitivePeerDependencies:
       - '@babel/core'
@@ -7912,7 +7912,7 @@ packages:
       call-bind: 1.0.9
       call-bound: 1.0.4
       define-properties: 1.2.1
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
       has-symbols: 1.1.0
       object-keys: 1.1.1
     dev: false
@@ -7924,7 +7924,7 @@ packages:
       call-bind: 1.0.9
       call-bound: 1.0.4
       define-properties: 1.2.1
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
     dev: false
 
   /object.fromentries@2.0.8:
@@ -7934,7 +7934,7 @@ packages:
       call-bind: 1.0.9
       define-properties: 1.2.1
       es-abstract: 1.24.2
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
     dev: false
 
   /object.groupby@1.0.3:
@@ -7953,7 +7953,7 @@ packages:
       call-bind: 1.0.9
       call-bound: 1.0.4
       define-properties: 1.2.1
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
     dev: false
 
   /obug@3.0.0:

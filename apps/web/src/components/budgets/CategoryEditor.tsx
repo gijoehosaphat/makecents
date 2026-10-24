@@ -7,6 +7,8 @@ import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useAppContext } from '../context/AppContextProvider'
 import CategoryDisplay from '../shared/CategoryDisplay'
 import CategoryMenu from '../shared/CategoryMenu'
+import ConfirmDialog from '../shared/ConfirmDialog'
+import { useTranslations } from 'next-intl'
 import {
   CreateBudgetCategoryDocument,
   DeleteBudgetCategoryDocument,
@@ -50,6 +52,9 @@ export default function CategoryEditor({
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null)
   const isMenuOpen = Boolean(menuAnchorEl)
   const { categories } = useCategories()
+  const t = useTranslations('common')
+  // Removing a category moves its past spending out of this budget, so it is confirmed first.
+  const [removing, setRemoving] = useState<Category | null>(null)
 
   const queryBudgetCategories = useSuspenseQuery<GetBudgetCategoriesByAccountId>(
     GetBudgetCategoriesByAccountIdDocument,
@@ -83,7 +88,14 @@ export default function CategoryEditor({
     setMenuAnchorEl(null)
   }
 
-  async function handleDelete(category: Category) {
+  function handleDelete(category: Category) {
+    setRemoving(category)
+  }
+
+  async function handleConfirmRemove() {
+    const category = removing
+    setRemoving(null)
+    if (!category) return
     const budgetCategory = budget.budgetCategoriesByBudgetId.nodes.find((bc) => bc.categoryId === category.id)
     if (budgetCategory) {
       await deleteBudgetCategory({
@@ -166,6 +178,14 @@ export default function CategoryEditor({
           onComplete={onMenuComplete}
         />
       </Box>
+      <ConfirmDialog
+        open={removing !== null}
+        title={t('budgets.confirmRemoveCategoryTitle', { category: removing?.name ?? '', budget: budget.name ?? '' })}
+        message={t('budgets.confirmRemoveCategory')}
+        confirmLabel={t('budgets.removeCategory')}
+        onConfirm={handleConfirmRemove}
+        onCancel={() => setRemoving(null)}
+      />
     </Box>
   )
 }

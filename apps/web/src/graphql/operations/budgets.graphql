@@ -1,40 +1,13 @@
-mutation CreateBudget(
-  $accountId: Int!
-  $amount: BigInt!
-  $name: String!
-  $startingAmount: BigInt
-  $effectiveDate: Datetime
-) {
-  createBudget(
-    input: {
-      budget: {
-        accountId: $accountId
-        amount: $amount
-        name: $name
-        startingAmount: $startingAmount
-        effectiveDate: $effectiveDate
-      }
-    }
-  ) {
+mutation CreateBudget($accountId: Int!, $amount: BigInt!, $name: String!) {
+  createBudget(input: { budget: { accountId: $accountId, amount: $amount, name: $name } }) {
     budget {
       ...BudgetFragment
     }
   }
 }
 
-mutation UpdateBudget(
-  $nodeId: ID!
-  $amount: BigInt!
-  $name: String!
-  $startingAmount: BigInt
-  $effectiveDate: Datetime
-) {
-  updateBudget(
-    input: {
-      nodeId: $nodeId
-      budgetPatch: { amount: $amount, name: $name, startingAmount: $startingAmount, effectiveDate: $effectiveDate }
-    }
-  ) {
+mutation UpdateBudget($nodeId: ID!, $amount: BigInt!, $name: String!) {
+  updateBudget(input: { nodeId: $nodeId, budgetPatch: { amount: $amount, name: $name } }) {
     budget {
       ...BudgetFragment
       budgetCategoriesByBudgetId {
@@ -102,63 +75,6 @@ query GetBudgetCategoriesByAccountId($accountId: Int!) {
   }
 }
 
-query GetTransactionsGroupedByBudget($accountId: Int!) {
-  allBudgets(filter: { accountId: { equalTo: $accountId } }) {
-    nodes {
-      ...BudgetFragment
-      budgetCategoriesByBudgetId {
-        nodes {
-          ...BudgetCategoryFragment
-          categoryByCategoryId {
-            ...CategoryFragment
-            transactionsByCategoryId {
-              nodes {
-                ...TransactionFragment
-                transferCount
-                categoryByCategoryId {
-                  ...CategoryFragment
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-# Deposit and withdrawal totals for a period, leaving out transfers between the user's own accounts.
-query GetBudgetPeriodTotals($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
-  deposits: allTransactions(
-    filter: {
-      bankAccountId: { in: $bankAccountIds }
-      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
-      transferCount: { equalTo: "0" }
-      amount: { greaterThan: "0" }
-    }
-  ) {
-    aggregates {
-      sum {
-        amount
-      }
-    }
-  }
-  withdrawals: allTransactions(
-    filter: {
-      bankAccountId: { in: $bankAccountIds }
-      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
-      transferCount: { equalTo: "0" }
-      amount: { lessThan: "0" }
-    }
-  ) {
-    aggregates {
-      sum {
-        amount
-      }
-    }
-  }
-}
-
 # Every withdrawal in the period (leaving out transfers), so spending that no budget accounts for can be found and fixed.
 query GetPeriodWithdrawals($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
   allTransactions(
@@ -174,29 +90,6 @@ query GetPeriodWithdrawals($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateT
       ...TransactionFragment
       categoryByCategoryId {
         ...CategoryFragment
-      }
-    }
-  }
-}
-
-# Deposits in payroll categories (or categories in payroll groups): the basis for expected income.
-query GetPayrollTransactions($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateTo: Datetime!) {
-  allTransactions(
-    filter: {
-      bankAccountId: { in: $bankAccountIds }
-      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
-      transferCount: { equalTo: "0" }
-      categoryByCategoryId: { isPayroll: { equalTo: true } }
-    }
-  ) {
-    nodes {
-      id
-      categoryId
-      amount
-      posted
-      categoryByCategoryId {
-        id
-        name
       }
     }
   }
@@ -219,6 +112,101 @@ query GetPayrollCandidates($bankAccountIds: [Int!], $dateFrom: Datetime!, $dateT
       categoryByCategoryId {
         ...CategoryFragment
       }
+    }
+  }
+}
+
+# Everything the envelope budget needs up to the selected month: the account's start, every budget with its
+# categories, every assignment (later months included, since assigning ahead uses money now), and the monthly totals
+# from the start month on. Months are local to $timeZone (the browser's), like the transaction lists' date filters.
+query GetEnvelopeBudget($accountId: Int!, $throughMonth: Date!, $timeZone: String!) {
+  accountById(id: $accountId) {
+    ...EnvelopeStartFragment
+  }
+  allBudgets(filter: { accountId: { equalTo: $accountId } }) {
+    nodes {
+      ...BudgetFragment
+      budgetCategoriesByBudgetId {
+        nodes {
+          ...BudgetCategoryFragment
+          categoryByCategoryId {
+            ...CategoryFragment
+          }
+        }
+      }
+    }
+  }
+  allBudgetAssignments(filter: { accountId: { equalTo: $accountId } }) {
+    nodes {
+      ...BudgetAssignmentFragment
+    }
+  }
+  budgetMonthlyActivity(accountId: $accountId, toMonth: $throughMonth, timeZone: $timeZone) {
+    nodes {
+      budgetId
+      month
+      activity
+    }
+  }
+  envelopeUnbudgetedMonthly(accountId: $accountId, toMonth: $throughMonth, timeZone: $timeZone) {
+    nodes {
+      month
+      payroll
+      unbudgetedInflow
+      unbudgetedOutflow
+    }
+  }
+}
+
+# Moves money between two budgets for a month; a null budget is Ready to Assign.
+mutation MoveBudgetMoney($accountId: Int!, $month: Date!, $fromBudgetId: Int, $toBudgetId: Int, $amount: BigInt!) {
+  moveBudgetMoney(
+    input: {
+      accountId: $accountId
+      month: $month
+      fromBudgetId: $fromBudgetId
+      toBudgetId: $toBudgetId
+      amount: $amount
+    }
+  ) {
+    budgetAssignments {
+      ...BudgetAssignmentFragment
+    }
+  }
+}
+
+# Transactions in a budget's categories for a period, for reviewing and recategorizing its activity.
+query GetBudgetTransactions($categoryIds: [Int!]!, $dateFrom: Datetime!, $dateTo: Datetime!) {
+  allTransactions(
+    filter: {
+      categoryId: { in: $categoryIds }
+      posted: { greaterThanOrEqualTo: $dateFrom, lessThan: $dateTo }
+      transferCount: { equalTo: "0" }
+    }
+    orderBy: POSTED_DESC
+  ) {
+    nodes {
+      ...TransactionFragment
+      categoryByCategoryId {
+        ...CategoryFragment
+      }
+    }
+  }
+}
+
+# Where Ready to Assign starts: the start month, the balance the account was converted with, and the cash on hand
+# entered for the start (which replaces that balance once set).
+query GetEnvelopeStart($accountId: Int!) {
+  accountById(id: $accountId) {
+    ...EnvelopeStartFragment
+  }
+}
+
+# Null clears it, going back to the converted starting balance.
+mutation SetEnvelopeCashOnHand($accountId: Int!, $cashOnHand: BigInt) {
+  setEnvelopeCashOnHand(input: { accountId: $accountId, cashOnHand: $cashOnHand }) {
+    account {
+      ...EnvelopeStartFragment
     }
   }
 }

@@ -5,15 +5,12 @@ import { useTranslations } from 'next-intl'
 import { useSuspenseQuery } from '@apollo/client/react'
 import { useAppContext } from '../context/AppContextProvider'
 import BudgetAdd from './BudgetAdd'
+import StartingCash from './StartingCash'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material'
 import BudgetRow from './BudgetRow'
 import { useMemo } from 'react'
-import { GetBudgetsByAccountIdDocument, GetPayrollTransactionsDocument } from '@/graphql/operations'
-import { expectedMonthlyIncome } from '@/lib/budgetMath'
-import { startOfMonth, subMonths } from 'date-fns'
+import { GetBudgetsByAccountIdDocument } from '@/graphql/operations'
 import { Money } from '../shared/Money'
-
-const HISTORY_MONTHS = 6
 
 export default function Budgets() {
   const t = useTranslations('common')
@@ -24,21 +21,6 @@ export default function Budgets() {
       accountId: Number(currentAccountId),
     },
   })
-
-  // Expected income is always for the current month: this page has no date component.
-  const historyStart = useMemo(() => subMonths(startOfMonth(new Date()), HISTORY_MONTHS), [])
-  const monthStart = useMemo(() => startOfMonth(new Date()), [])
-  const payroll = useSuspenseQuery(GetPayrollTransactionsDocument, {
-    variables: {
-      bankAccountIds: bankAccounts.map((bankAccount) => bankAccount.id),
-      dateFrom: historyStart,
-      dateTo: monthStart,
-    },
-  })
-  const expectedIncome = useMemo(
-    () => expectedMonthlyIncome(payroll.data.allTransactions?.nodes ?? [], historyStart, HISTORY_MONTHS)?.expected ?? 0,
-    [payroll.data.allTransactions?.nodes, historyStart],
-  )
 
   const budgets: Budget[] = useMemo(() => {
     return [...(query?.data?.allBudgets?.nodes || [])]?.sort((a: Budget, b: Budget) => {
@@ -58,13 +40,12 @@ export default function Budgets() {
       <Typography sx={{ mt: 3, mb: 1 }} color={'text.secondary'}>
         {t('budgets.description')}
       </Typography>
-      <Typography>{t('budgets.plan.expectedIncome')}: </Typography>
-      {bankAccounts[0].currency && (
-        <Money amountInCents={expectedIncome} currency={bankAccounts[0].currency} colored={true} />
-      )}
-      <Typography>Budgeted: </Typography>
-      {bankAccounts[0].currency && (
-        <Money amountInCents={totalBudgeted} currency={bankAccounts[0].currency} colored={true} />
+      <Typography>
+        {t('budgets.plannedTotal')}:{' '}
+        <Money amountInCents={totalBudgeted} currency={bankAccounts[0]?.currency || 'CAD'} colored={false} />
+      </Typography>
+      {!!currentAccountId && (
+        <StartingCash accountId={currentAccountId} budgets={budgets} currency={bankAccounts[0]?.currency || 'CAD'} />
       )}
       <TableContainer>
         <Table>
@@ -77,22 +58,12 @@ export default function Budgets() {
               </TableCell>
               <TableCell>
                 <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
-                  {t('shared.amount')}
+                  {t('budgets.plannedAmount')}
                 </Typography>
               </TableCell>
               <TableCell>
                 <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
                   {t('categories.title')}
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
-                  {t('budgets.startingAmount')}
-                </Typography>
-              </TableCell>
-              <TableCell align={'right'}>
-                <Typography variant={'h4'} sx={{ fontWeight: 700 }}>
-                  {t('budgets.effectiveDate')}
                 </Typography>
               </TableCell>
               <TableCell align={'right'}>

@@ -13,7 +13,7 @@ This app is intended to help you manage your personal finances by importing, cat
 ## Features
 
 - Import and categorize bank transactions
-- Create and manage budgets
+- Envelope (zero-based) budgeting: assign income to budgets, carry unspent money forward and cover overspending
 - Generate reports and insights on spending
 - Support for QFX files (QuickBooks) & arbitrary CSVs with included template mapper.
 
