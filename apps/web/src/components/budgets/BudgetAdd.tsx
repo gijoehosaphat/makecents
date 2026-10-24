@@ -72,7 +72,7 @@ export default function BudgetAdd({ accountId }: { accountId: number }) {
               sx={{ mb: 4 }}
             />
             <CurrencyTextField
-              label={t('forms.addAmount')}
+              label={t('budgets.plannedAmount')}
               onValueChange={(value) => handleChange('amount', value)}
               size={'small'}
               placeholder={t('forms.amountPlaceholder')}

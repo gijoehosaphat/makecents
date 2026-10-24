@@ -2,8 +2,8 @@ import { Knex } from 'knex'
 
 const ACCOUNT_ID = 1
 
-// Groups and their categories. Payroll groups hold income, which the app uses to work out expected
-// monthly income and which can never be part of a budget.
+// Groups and their categories. Payroll groups hold income, which fills Ready to Assign and can never be part of a
+// budget.
 const GROUPS: { name: string; kind: 'spending' | 'payroll'; categories: string[] }[] = [
   { name: 'Income', kind: 'payroll', categories: ['Paycheque', 'Freelance'] },
   { name: 'Housing', kind: 'spending', categories: ['Rent', 'Utilities', 'Internet & Phone', 'Home & Garden'] },
@@ -17,30 +17,28 @@ const GROUPS: { name: string; kind: 'spending' | 'payroll'; categories: string[]
   { name: 'Health', kind: 'spending', categories: ['Pharmacy', 'Medical & Dental'] },
 ]
 
-// Amounts are cents. A budget without an effective date is a plain monthly limit. One with an effective
-// date accrues its monthly amount from that date and carries what is left over (or overspent) forward.
-// `accruingMonths` is how many months back the accrual starts, so the demo reads the same in any year.
+// Envelope budgeting starts this many months before the current one, so the demo has history to carry over and
+// reads the same in any year.
+const START_MONTHS_AGO = 3
+
+// Amounts are cents. `amount` is the planned monthly assignment, which every month from the start gets. An
+// `openingBalance` is money the budget already held when envelope budgeting started.
 const BUDGETS: {
   name: string
   amount: number
   categories: string[]
-  accruingMonths?: number
-  startingAmount?: number
+  openingBalance?: number
+  /** Assigned this month instead of the planned amount, so the demo shows an overspent budget to cover. */
+  currentMonthAmount?: number
 }[] = [
   { name: 'Groceries', amount: 70000, categories: ['Groceries'] },
-  { name: 'Eating Out', amount: 35000, categories: ['Restaurants', 'Coffee & Snacks'] },
+  { name: 'Eating Out', amount: 35000, categories: ['Restaurants', 'Coffee & Snacks'], currentMonthAmount: 5000 },
   { name: 'Getting Around', amount: 30000, categories: ['Gas', 'Transit & Rideshare'] },
   { name: 'Utilities & Phone', amount: 35000, categories: ['Utilities', 'Internet & Phone'] },
   { name: 'Fun & Subscriptions', amount: 20000, categories: ['Entertainment', 'Subscriptions'] },
   { name: 'Health', amount: 15000, categories: ['Pharmacy', 'Medical & Dental'] },
-  { name: 'Vacation Fund', amount: 25000, categories: ['Travel'], accruingMonths: 5 },
-  {
-    name: 'Shopping & Home',
-    amount: 15000,
-    categories: ['Shopping', 'Home & Garden'],
-    accruingMonths: 5,
-    startingAmount: 20000,
-  },
+  { name: 'Vacation Fund', amount: 25000, categories: ['Travel'] },
+  { name: 'Shopping & Home', amount: 15000, categories: ['Shopping', 'Home & Garden'], openingBalance: 20000 },
 ]
 
 export async function seed(knex: Knex): Promise<void> {
@@ -65,22 +63,21 @@ export async function seed(knex: Knex): Promise<void> {
     }
   }
 
+  // Months as the first of the month, YYYY-MM-01, from the start month through the current one.
   const now = new Date()
-  for (const budget of BUDGETS) {
-    // Noon UTC on the 1st keeps the calendar date the same in every time zone
-    const effectiveDate =
-      budget.accruingMonths === undefined
-        ? null
-        : new Date(Date.UTC(now.getFullYear(), now.getMonth() - budget.accruingMonths, 1, 12))
+  const months = Array.from({ length: START_MONTHS_AGO + 1 }, (_, index) =>
+    new Date(Date.UTC(now.getFullYear(), now.getMonth() - START_MONTHS_AGO + index, 1)).toISOString().slice(0, 10),
+  )
+  await knex('app_private.account').where({ id: ACCOUNT_ID }).update({ envelope_start_month: months[0] })
 
+  for (const budget of BUDGETS) {
     const [{ id: budgetId }] = await knex('app_private.budget')
       .insert({
         account_id: ACCOUNT_ID,
         user_id: 1,
         name: budget.name,
         amount: budget.amount,
-        effective_date: effectiveDate,
-        starting_amount: effectiveDate ? (budget.startingAmount ?? 0) : null,
+        starting_amount: budget.openingBalance ?? 0,
       })
       .returning('id')
 
@@ -90,6 +87,15 @@ export async function seed(knex: Knex): Promise<void> {
         if (categoryId === undefined) throw new Error(`Budget "${budget.name}" uses unknown category "${name}"`)
         return { account_id: ACCOUNT_ID, user_id: 1, budget_id: budgetId, category_id: categoryId }
       }),
+    )
+
+    await knex('app_private.budget_assignment').insert(
+      months.map((month, index) => ({
+        account_id: ACCOUNT_ID,
+        budget_id: budgetId,
+        month,
+        amount: index === months.length - 1 ? (budget.currentMonthAmount ?? budget.amount) : budget.amount,
+      })),
     )
   }
 }

@@ -223,6 +223,40 @@ type Query implements Node {
     filter: BudgetFilter
   ): BudgetsConnection
 
+  """Reads and enables pagination through a set of `BudgetAssignment`."""
+  allBudgetAssignments(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `BudgetAssignment`."""
+    orderBy: [BudgetAssignmentsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: BudgetAssignmentCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: BudgetAssignmentFilter
+  ): BudgetAssignmentsConnection
+
   """Reads and enables pagination through a set of `BudgetCategory`."""
   allBudgetCategories(
     """Only read the first `n` values of the set."""
@@ -503,8 +537,11 @@ type Query implements Node {
   bankAccountReconciliationByBankAccountIdAndAsOf(bankAccountId: Int!, asOf: Datetime!): BankAccountReconciliation
   bankCsvDefinitionById(id: Int!): BankCsvDefinition
   budgetById(id: Int!): Budget
+  budgetAssignmentById(id: Int!): BudgetAssignment
+  budgetAssignmentByBudgetIdAndMonth(budgetId: Int!, month: Date!): BudgetAssignment
   budgetCategoryById(id: Int!): BudgetCategory
   budgetCategoryByBudgetIdAndCategoryId(budgetId: Int!, categoryId: Int!): BudgetCategory
+  budgetCategoryByCategoryId(categoryId: Int!): BudgetCategory
   categoryById(id: Int!): Category
   categoryGroupById(id: Int!): CategoryGroup
   categoryGroupByAccountIdAndCategoryId(accountId: Int!, categoryId: Int!): CategoryGroup
@@ -519,6 +556,62 @@ type Query implements Node {
   transferByTransactionTargetId(transactionTargetId: Int!): Transfer
   userById(id: Int!): User
   userByEmail(email: String!): User
+  budgetMonthlyActivity(
+    accountId: Int!
+    toMonth: Date!
+    timeZone: String!
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: BudgetMonthlyActivityRecordFilter
+  ): BudgetMonthlyActivityConnection
+  envelopeUnbudgetedMonthly(
+    accountId: Int!
+    toMonth: Date!
+    timeZone: String!
+
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: EnvelopeUnbudgetedMonthlyRecordFilter
+  ): EnvelopeUnbudgetedMonthlyConnection
 
   """Reads and enables pagination through a set of `Transaction`."""
   transactionSearch(
@@ -593,6 +686,14 @@ type Query implements Node {
     """The globally unique `ID` to be used in selecting a single `Budget`."""
     nodeId: ID!
   ): Budget
+
+  """Reads a single `BudgetAssignment` using its globally unique `ID`."""
+  budgetAssignment(
+    """
+    The globally unique `ID` to be used in selecting a single `BudgetAssignment`.
+    """
+    nodeId: ID!
+  ): BudgetAssignment
 
   """Reads a single `BudgetCategory` using its globally unique `ID`."""
   budgetCategory(
@@ -713,6 +814,9 @@ type Account implements Node {
   idToken: String
   sessionState: String
   name: String
+  envelopeStartMonth: Date!
+  envelopeStartingBalance: BigInt!
+  envelopeCashOnHand: BigInt
 
   """Reads a single `User` that is related to this `Account`."""
   userByUserId: User
@@ -988,7 +1092,51 @@ type Account implements Node {
     """
     filter: AccountMemberFilter
   ): AccountMembersConnection!
+
+  """Reads and enables pagination through a set of `BudgetAssignment`."""
+  budgetAssignmentsByAccountId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `BudgetAssignment`."""
+    orderBy: [BudgetAssignmentsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: BudgetAssignmentCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: BudgetAssignmentFilter
+  ): BudgetAssignmentsConnection!
 }
+
+"""The day, does not include a time."""
+scalar Date
+
+"""
+A signed eight-byte integer. The upper big integer values are greater than the
+max value for a JavaScript number. Therefore all big integers will be output as
+strings and not numbers.
+"""
+scalar BigInt
 
 type User implements Node {
   """
@@ -1281,9 +1429,6 @@ A point in time as described by the [ISO
 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone.
 """
 scalar Datetime
-
-"""The day, does not include a time."""
-scalar Date
 
 """A location in a connection that can be used for resuming pagination."""
 scalar Cursor
@@ -1659,8 +1804,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_SUM_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_SUM_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_SUM_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_SUM_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_SUM_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_SUM_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_SUM_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_ASC
@@ -1677,8 +1820,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
@@ -1695,8 +1836,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_MIN_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_MIN_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_MIN_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_MIN_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_MIN_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_MIN_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_MIN_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_MIN_ACCOUNT_ID_ASC
@@ -1713,8 +1852,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_MAX_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_MAX_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_MAX_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_MAX_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_MAX_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_MAX_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_MAX_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_MAX_ACCOUNT_ID_ASC
@@ -1731,8 +1868,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_AVERAGE_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_AVERAGE_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_AVERAGE_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_AVERAGE_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_AVERAGE_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_AVERAGE_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_AVERAGE_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_ASC
@@ -1749,8 +1884,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
@@ -1767,8 +1900,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
@@ -1785,8 +1916,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
@@ -1803,8 +1932,6 @@ enum AccountsOrderBy {
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_NAME_DESC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_AMOUNT_DESC
-  BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_EFFECTIVE_DATE_DESC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_STARTING_AMOUNT_ASC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_STARTING_AMOUNT_DESC
   BUDGETS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
@@ -2287,6 +2414,134 @@ enum AccountsOrderBy {
   ACCOUNT_MEMBERS_BY_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_DESC
   ACCOUNT_MEMBERS_BY_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_ASC
   ACCOUNT_MEMBERS_BY_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_COUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_COUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_SUM_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_DISTINCT_COUNT_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MIN_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_MAX_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_AVERAGE_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_SAMPLE_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_STDDEV_POPULATION_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_ACCOUNT_ID_VARIANCE_POPULATION_AMOUNT_DESC
 }
 
 """
@@ -2363,6 +2618,12 @@ input AccountFilter {
 
   """Some related `accountMembersByAccountId` exist."""
   accountMembersByAccountIdExist: Boolean
+
+  """Filter by the object’s `budgetAssignmentsByAccountId` relation."""
+  budgetAssignmentsByAccountId: AccountToManyBudgetAssignmentFilter
+
+  """Some related `budgetAssignmentsByAccountId` exist."""
+  budgetAssignmentsByAccountIdExist: Boolean
 
   """Filter by the object’s `userByUserId` relation."""
   userByUserId: UserFilter
@@ -2679,13 +2940,6 @@ input BigIntFilter {
   """Greater than or equal to the specified value."""
   greaterThanOrEqualTo: BigInt
 }
-
-"""
-A signed eight-byte integer. The upper big integer values are greater than the
-max value for a JavaScript number. Therefore all big integers will be output as
-strings and not numbers.
-"""
-scalar BigInt
 
 """
 A filter to be used against many `Transaction` object types. All fields are combined with a logical ‘and.’
@@ -3109,11 +3363,11 @@ input CategoryFilter {
   """Some related `transactionsByCategoryId` exist."""
   transactionsByCategoryIdExist: Boolean
 
-  """Filter by the object’s `budgetCategoriesByCategoryId` relation."""
-  budgetCategoriesByCategoryId: CategoryToManyBudgetCategoryFilter
+  """Filter by the object’s `budgetCategoryByCategoryId` relation."""
+  budgetCategoryByCategoryId: BudgetCategoryFilter
 
-  """Some related `budgetCategoriesByCategoryId` exist."""
-  budgetCategoriesByCategoryIdExist: Boolean
+  """A related `budgetCategoryByCategoryId` exists."""
+  budgetCategoryByCategoryIdExists: Boolean
 
   """Filter by the object’s `categoryGroupsByCategoryId` relation."""
   categoryGroupsByCategoryId: CategoryToManyCategoryGroupFilter
@@ -3203,29 +3457,6 @@ input CategoryToManyTransactionFilter {
 
   """Aggregates across related `Transaction` match the filter criteria."""
   aggregates: TransactionAggregatesFilter
-}
-
-"""
-A filter to be used against many `BudgetCategory` object types. All fields are combined with a logical ‘and.’
-"""
-input CategoryToManyBudgetCategoryFilter {
-  """
-  Every related `BudgetCategory` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: BudgetCategoryFilter
-
-  """
-  Some related `BudgetCategory` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: BudgetCategoryFilter
-
-  """
-  No related `BudgetCategory` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: BudgetCategoryFilter
-
-  """Aggregates across related `BudgetCategory` match the filter criteria."""
-  aggregates: BudgetCategoryAggregatesFilter
 }
 
 """
@@ -3403,6 +3634,8 @@ input AccountAggregatesFilter {
 input AccountSumAggregateFilter {
   id: BigIntFilter
   userId: BigIntFilter
+  envelopeStartingBalance: BigFloatFilter
+  envelopeCashOnHand: BigFloatFilter
 }
 
 input AccountDistinctCountAggregateFilter {
@@ -3419,41 +3652,58 @@ input AccountDistinctCountAggregateFilter {
   idToken: BigIntFilter
   sessionState: BigIntFilter
   name: BigIntFilter
+  envelopeStartMonth: BigIntFilter
+  envelopeStartingBalance: BigIntFilter
+  envelopeCashOnHand: BigIntFilter
 }
 
 input AccountMinAggregateFilter {
   id: IntFilter
   userId: IntFilter
+  envelopeStartingBalance: BigIntFilter
+  envelopeCashOnHand: BigIntFilter
 }
 
 input AccountMaxAggregateFilter {
   id: IntFilter
   userId: IntFilter
+  envelopeStartingBalance: BigIntFilter
+  envelopeCashOnHand: BigIntFilter
 }
 
 input AccountAverageAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
+  envelopeStartingBalance: BigFloatFilter
+  envelopeCashOnHand: BigFloatFilter
 }
 
 input AccountStddevSampleAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
+  envelopeStartingBalance: BigFloatFilter
+  envelopeCashOnHand: BigFloatFilter
 }
 
 input AccountStddevPopulationAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
+  envelopeStartingBalance: BigFloatFilter
+  envelopeCashOnHand: BigFloatFilter
 }
 
 input AccountVarianceSampleAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
+  envelopeStartingBalance: BigFloatFilter
+  envelopeCashOnHand: BigFloatFilter
 }
 
 input AccountVariancePopulationAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
+  envelopeStartingBalance: BigFloatFilter
+  envelopeCashOnHand: BigFloatFilter
 }
 
 """
@@ -3759,6 +4009,12 @@ input BudgetFilter {
   """Some related `budgetCategoriesByBudgetId` exist."""
   budgetCategoriesByBudgetIdExist: Boolean
 
+  """Filter by the object’s `budgetAssignmentsByBudgetId` relation."""
+  budgetAssignmentsByBudgetId: BudgetToManyBudgetAssignmentFilter
+
+  """Some related `budgetAssignmentsByBudgetId` exist."""
+  budgetAssignmentsByBudgetIdExist: Boolean
+
   """Filter by the object’s `userByUserId` relation."""
   userByUserId: UserFilter
 
@@ -3914,6 +4170,214 @@ input BudgetCategoryVariancePopulationAggregateFilter {
   accountId: BigFloatFilter
 }
 
+"""
+A filter to be used against many `BudgetAssignment` object types. All fields are combined with a logical ‘and.’
+"""
+input BudgetToManyBudgetAssignmentFilter {
+  """
+  Every related `BudgetAssignment` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: BudgetAssignmentFilter
+
+  """
+  Some related `BudgetAssignment` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: BudgetAssignmentFilter
+
+  """
+  No related `BudgetAssignment` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: BudgetAssignmentFilter
+
+  """
+  Aggregates across related `BudgetAssignment` match the filter criteria.
+  """
+  aggregates: BudgetAssignmentAggregatesFilter
+}
+
+"""
+A filter to be used against `BudgetAssignment` object types. All fields are combined with a logical ‘and.’
+"""
+input BudgetAssignmentFilter {
+  """Filter by the object’s `id` field."""
+  id: IntFilter
+
+  """Filter by the object’s `accountId` field."""
+  accountId: IntFilter
+
+  """Filter by the object’s `budgetId` field."""
+  budgetId: IntFilter
+
+  """Filter by the object’s `month` field."""
+  month: DateFilter
+
+  """Filter by the object’s `accountByAccountId` relation."""
+  accountByAccountId: AccountFilter
+
+  """Filter by the object’s `budgetByBudgetId` relation."""
+  budgetByBudgetId: BudgetFilter
+
+  """Checks for all expressions in this list."""
+  and: [BudgetAssignmentFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [BudgetAssignmentFilter!]
+
+  """Negates the expression."""
+  not: BudgetAssignmentFilter
+}
+
+"""
+A filter to be used against Date fields. All fields are combined with a logical ‘and.’
+"""
+input DateFilter {
+  """
+  Is null (if `true` is specified) or is not null (if `false` is specified).
+  """
+  isNull: Boolean
+
+  """Equal to the specified value."""
+  equalTo: Date
+
+  """Not equal to the specified value."""
+  notEqualTo: Date
+
+  """
+  Not equal to the specified value, treating null like an ordinary value.
+  """
+  distinctFrom: Date
+
+  """Equal to the specified value, treating null like an ordinary value."""
+  notDistinctFrom: Date
+
+  """Included in the specified list."""
+  in: [Date!]
+
+  """Not included in the specified list."""
+  notIn: [Date!]
+
+  """Less than the specified value."""
+  lessThan: Date
+
+  """Less than or equal to the specified value."""
+  lessThanOrEqualTo: Date
+
+  """Greater than the specified value."""
+  greaterThan: Date
+
+  """Greater than or equal to the specified value."""
+  greaterThanOrEqualTo: Date
+}
+
+"""
+A filter to be used against aggregates of `BudgetAssignment` object types.
+"""
+input BudgetAssignmentAggregatesFilter {
+  """
+  A filter that must pass for the relevant `BudgetAssignment` object to be included within the aggregate.
+  """
+  filter: BudgetAssignmentFilter
+
+  """Sum aggregate over matching `BudgetAssignment` objects."""
+  sum: BudgetAssignmentSumAggregateFilter
+
+  """Distinct count aggregate over matching `BudgetAssignment` objects."""
+  distinctCount: BudgetAssignmentDistinctCountAggregateFilter
+
+  """Minimum aggregate over matching `BudgetAssignment` objects."""
+  min: BudgetAssignmentMinAggregateFilter
+
+  """Maximum aggregate over matching `BudgetAssignment` objects."""
+  max: BudgetAssignmentMaxAggregateFilter
+
+  """Mean average aggregate over matching `BudgetAssignment` objects."""
+  average: BudgetAssignmentAverageAggregateFilter
+
+  """
+  Sample standard deviation aggregate over matching `BudgetAssignment` objects.
+  """
+  stddevSample: BudgetAssignmentStddevSampleAggregateFilter
+
+  """
+  Population standard deviation aggregate over matching `BudgetAssignment` objects.
+  """
+  stddevPopulation: BudgetAssignmentStddevPopulationAggregateFilter
+
+  """Sample variance aggregate over matching `BudgetAssignment` objects."""
+  varianceSample: BudgetAssignmentVarianceSampleAggregateFilter
+
+  """
+  Population variance aggregate over matching `BudgetAssignment` objects.
+  """
+  variancePopulation: BudgetAssignmentVariancePopulationAggregateFilter
+}
+
+input BudgetAssignmentSumAggregateFilter {
+  id: BigIntFilter
+  accountId: BigIntFilter
+  budgetId: BigIntFilter
+  amount: BigFloatFilter
+}
+
+input BudgetAssignmentDistinctCountAggregateFilter {
+  id: BigIntFilter
+  createdAt: BigIntFilter
+  updatedAt: BigIntFilter
+  accountId: BigIntFilter
+  budgetId: BigIntFilter
+  month: BigIntFilter
+  amount: BigIntFilter
+}
+
+input BudgetAssignmentMinAggregateFilter {
+  id: IntFilter
+  accountId: IntFilter
+  budgetId: IntFilter
+  amount: BigIntFilter
+}
+
+input BudgetAssignmentMaxAggregateFilter {
+  id: IntFilter
+  accountId: IntFilter
+  budgetId: IntFilter
+  amount: BigIntFilter
+}
+
+input BudgetAssignmentAverageAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  budgetId: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input BudgetAssignmentStddevSampleAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  budgetId: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input BudgetAssignmentStddevPopulationAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  budgetId: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input BudgetAssignmentVarianceSampleAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  budgetId: BigFloatFilter
+  amount: BigFloatFilter
+}
+
+input BudgetAssignmentVariancePopulationAggregateFilter {
+  id: BigFloatFilter
+  accountId: BigFloatFilter
+  budgetId: BigFloatFilter
+  amount: BigFloatFilter
+}
+
 """A filter to be used against aggregates of `Budget` object types."""
 input BudgetAggregatesFilter {
   """
@@ -3966,7 +4430,6 @@ input BudgetDistinctCountAggregateFilter {
   userId: BigIntFilter
   name: BigIntFilter
   amount: BigIntFilter
-  effectiveDate: BigIntFilter
   startingAmount: BigIntFilter
   accountId: BigIntFilter
 }
@@ -5255,6 +5718,31 @@ input AccountToManyAccountMemberFilter {
   aggregates: AccountMemberAggregatesFilter
 }
 
+"""
+A filter to be used against many `BudgetAssignment` object types. All fields are combined with a logical ‘and.’
+"""
+input AccountToManyBudgetAssignmentFilter {
+  """
+  Every related `BudgetAssignment` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  every: BudgetAssignmentFilter
+
+  """
+  Some related `BudgetAssignment` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  some: BudgetAssignmentFilter
+
+  """
+  No related `BudgetAssignment` matches the filter criteria. All fields are combined with a logical ‘and.’
+  """
+  none: BudgetAssignmentFilter
+
+  """
+  Aggregates across related `BudgetAssignment` match the filter criteria.
+  """
+  aggregates: BudgetAssignmentAggregatesFilter
+}
+
 """A connection to a list of `BankAccount` values."""
 type BankAccountsConnection {
   """A list of `BankAccount` objects."""
@@ -5709,6 +6197,9 @@ type Category implements Node {
     filter: TransactionFilter
   ): TransactionsConnection!
 
+  """Reads a single `BudgetCategory` that is related to this `Category`."""
+  budgetCategoryByCategoryId: BudgetCategory
+
   """Reads and enables pagination through a set of `BudgetCategory`."""
   budgetCategoriesByCategoryId(
     """Only read the first `n` values of the set."""
@@ -5741,7 +6232,7 @@ type Category implements Node {
     A filter to be used in determining which values should be returned by the collection.
     """
     filter: BudgetCategoryFilter
-  ): BudgetCategoriesConnection!
+  ): BudgetCategoriesConnection! @deprecated(reason: "Please use budgetCategoryByCategoryId instead")
 
   """Reads and enables pagination through a set of `CategoryGroup`."""
   categoryGroupsByCategoryId(
@@ -6186,39 +6677,6 @@ input TransactionCondition {
   categorySource: String
 }
 
-"""A connection to a list of `BudgetCategory` values."""
-type BudgetCategoriesConnection {
-  """A list of `BudgetCategory` objects."""
-  nodes: [BudgetCategory!]!
-
-  """
-  A list of edges which contains the `BudgetCategory` and cursor to aid in pagination.
-  """
-  edges: [BudgetCategoriesEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `BudgetCategory` you could get from the connection."""
-  totalCount: Int!
-
-  """
-  Aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  aggregates: BudgetCategoryAggregates
-
-  """
-  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  groupedAggregates(
-    """The method to use when grouping `BudgetCategory` for these aggregates."""
-    groupBy: [BudgetCategoryGroupBy!]!
-
-    """Conditions on the grouped aggregates."""
-    having: BudgetCategoryHavingInput
-  ): [BudgetCategoryAggregates!]
-}
-
 """ This enables bulk create, delete and update mutations."""
 type BudgetCategory implements Node {
   """
@@ -6255,8 +6713,7 @@ type Budget implements Node {
   userId: Int
   name: String
   amount: BigInt!
-  effectiveDate: Datetime
-  startingAmount: BigInt
+  startingAmount: BigInt!
   accountId: Int!
 
   """Reads a single `User` that is related to this `Budget`."""
@@ -6298,44 +6755,73 @@ type Budget implements Node {
     """
     filter: BudgetCategoryFilter
   ): BudgetCategoriesConnection!
+
+  """Reads and enables pagination through a set of `BudgetAssignment`."""
+  budgetAssignmentsByBudgetId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `BudgetAssignment`."""
+    orderBy: [BudgetAssignmentsOrderBy!] = [PRIMARY_KEY_ASC]
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: BudgetAssignmentCondition
+
+    """
+    A filter to be used in determining which values should be returned by the collection.
+    """
+    filter: BudgetAssignmentFilter
+  ): BudgetAssignmentsConnection!
 }
 
-"""Methods to use when ordering `BudgetCategory`."""
-enum BudgetCategoriesOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
-  BUDGET_ID_ASC
-  BUDGET_ID_DESC
-  CATEGORY_ID_ASC
-  CATEGORY_ID_DESC
-  ACCOUNT_ID_ASC
-  ACCOUNT_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
+"""A connection to a list of `BudgetCategory` values."""
+type BudgetCategoriesConnection {
+  """A list of `BudgetCategory` objects."""
+  nodes: [BudgetCategory!]!
 
-"""
-A condition to be used against `BudgetCategory` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input BudgetCategoryCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
+  """
+  A list of edges which contains the `BudgetCategory` and cursor to aid in pagination.
+  """
+  edges: [BudgetCategoriesEdge!]!
 
-  """Checks for equality with the object’s `userId` field."""
-  userId: Int
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
 
-  """Checks for equality with the object’s `budgetId` field."""
-  budgetId: Int
+  """The count of *all* `BudgetCategory` you could get from the connection."""
+  totalCount: Int!
 
-  """Checks for equality with the object’s `categoryId` field."""
-  categoryId: Int
+  """
+  Aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  aggregates: BudgetCategoryAggregates
 
-  """Checks for equality with the object’s `accountId` field."""
-  accountId: Int
+  """
+  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  groupedAggregates(
+    """The method to use when grouping `BudgetCategory` for these aggregates."""
+    groupBy: [BudgetCategoryGroupBy!]!
+
+    """Conditions on the grouped aggregates."""
+    having: BudgetCategoryHavingInput
+  ): [BudgetCategoryAggregates!]
 }
 
 """A `BudgetCategory` edge in the connection."""
@@ -6574,7 +7060,6 @@ type BudgetCategoryVariancePopulationAggregates {
 enum BudgetCategoryGroupBy {
   USER_ID
   BUDGET_ID
-  CATEGORY_ID
   ACCOUNT_ID
 }
 
@@ -6672,6 +7157,461 @@ input BudgetCategoryHavingVariancePopulationInput {
   budgetId: HavingIntFilter
   categoryId: HavingIntFilter
   accountId: HavingIntFilter
+}
+
+"""Methods to use when ordering `BudgetCategory`."""
+enum BudgetCategoriesOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  USER_ID_ASC
+  USER_ID_DESC
+  BUDGET_ID_ASC
+  BUDGET_ID_DESC
+  CATEGORY_ID_ASC
+  CATEGORY_ID_DESC
+  ACCOUNT_ID_ASC
+  ACCOUNT_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `BudgetCategory` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input BudgetCategoryCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `userId` field."""
+  userId: Int
+
+  """Checks for equality with the object’s `budgetId` field."""
+  budgetId: Int
+
+  """Checks for equality with the object’s `categoryId` field."""
+  categoryId: Int
+
+  """Checks for equality with the object’s `accountId` field."""
+  accountId: Int
+}
+
+"""A connection to a list of `BudgetAssignment` values."""
+type BudgetAssignmentsConnection {
+  """A list of `BudgetAssignment` objects."""
+  nodes: [BudgetAssignment!]!
+
+  """
+  A list of edges which contains the `BudgetAssignment` and cursor to aid in pagination.
+  """
+  edges: [BudgetAssignmentsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `BudgetAssignment` you could get from the connection.
+  """
+  totalCount: Int!
+
+  """
+  Aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  aggregates: BudgetAssignmentAggregates
+
+  """
+  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  groupedAggregates(
+    """
+    The method to use when grouping `BudgetAssignment` for these aggregates.
+    """
+    groupBy: [BudgetAssignmentGroupBy!]!
+
+    """Conditions on the grouped aggregates."""
+    having: BudgetAssignmentHavingInput
+  ): [BudgetAssignmentAggregates!]
+}
+
+type BudgetAssignment implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  createdAt: Datetime!
+  updatedAt: Datetime!
+  accountId: Int!
+  budgetId: Int!
+  month: Date!
+  amount: BigInt!
+
+  """Reads a single `Account` that is related to this `BudgetAssignment`."""
+  accountByAccountId: Account
+
+  """Reads a single `Budget` that is related to this `BudgetAssignment`."""
+  budgetByBudgetId: Budget
+}
+
+"""A `BudgetAssignment` edge in the connection."""
+type BudgetAssignmentsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `BudgetAssignment` at the end of the edge."""
+  node: BudgetAssignment!
+}
+
+type BudgetAssignmentAggregates {
+  keys: [String!]
+
+  """
+  Sum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  sum: BudgetAssignmentSumAggregates
+
+  """
+  Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  distinctCount: BudgetAssignmentDistinctCountAggregates
+
+  """
+  Minimum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  min: BudgetAssignmentMinAggregates
+
+  """
+  Maximum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  max: BudgetAssignmentMaxAggregates
+
+  """
+  Mean average aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  average: BudgetAssignmentAverageAggregates
+
+  """
+  Sample standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevSample: BudgetAssignmentStddevSampleAggregates
+
+  """
+  Population standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevPopulation: BudgetAssignmentStddevPopulationAggregates
+
+  """
+  Sample variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  varianceSample: BudgetAssignmentVarianceSampleAggregates
+
+  """
+  Population variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  variancePopulation: BudgetAssignmentVariancePopulationAggregates
+}
+
+type BudgetAssignmentSumAggregates {
+  """Sum of id across the matching connection"""
+  id: BigInt!
+
+  """Sum of accountId across the matching connection"""
+  accountId: BigInt!
+
+  """Sum of budgetId across the matching connection"""
+  budgetId: BigInt!
+
+  """Sum of amount across the matching connection"""
+  amount: BigFloat!
+}
+
+type BudgetAssignmentDistinctCountAggregates {
+  """Distinct count of id across the matching connection"""
+  id: BigInt
+
+  """Distinct count of createdAt across the matching connection"""
+  createdAt: BigInt
+
+  """Distinct count of updatedAt across the matching connection"""
+  updatedAt: BigInt
+
+  """Distinct count of accountId across the matching connection"""
+  accountId: BigInt
+
+  """Distinct count of budgetId across the matching connection"""
+  budgetId: BigInt
+
+  """Distinct count of month across the matching connection"""
+  month: BigInt
+
+  """Distinct count of amount across the matching connection"""
+  amount: BigInt
+}
+
+type BudgetAssignmentMinAggregates {
+  """Minimum of id across the matching connection"""
+  id: Int
+
+  """Minimum of accountId across the matching connection"""
+  accountId: Int
+
+  """Minimum of budgetId across the matching connection"""
+  budgetId: Int
+
+  """Minimum of amount across the matching connection"""
+  amount: BigInt
+}
+
+type BudgetAssignmentMaxAggregates {
+  """Maximum of id across the matching connection"""
+  id: Int
+
+  """Maximum of accountId across the matching connection"""
+  accountId: Int
+
+  """Maximum of budgetId across the matching connection"""
+  budgetId: Int
+
+  """Maximum of amount across the matching connection"""
+  amount: BigInt
+}
+
+type BudgetAssignmentAverageAggregates {
+  """Mean average of id across the matching connection"""
+  id: BigFloat
+
+  """Mean average of accountId across the matching connection"""
+  accountId: BigFloat
+
+  """Mean average of budgetId across the matching connection"""
+  budgetId: BigFloat
+
+  """Mean average of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type BudgetAssignmentStddevSampleAggregates {
+  """Sample standard deviation of id across the matching connection"""
+  id: BigFloat
+
+  """Sample standard deviation of accountId across the matching connection"""
+  accountId: BigFloat
+
+  """Sample standard deviation of budgetId across the matching connection"""
+  budgetId: BigFloat
+
+  """Sample standard deviation of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type BudgetAssignmentStddevPopulationAggregates {
+  """Population standard deviation of id across the matching connection"""
+  id: BigFloat
+
+  """
+  Population standard deviation of accountId across the matching connection
+  """
+  accountId: BigFloat
+
+  """
+  Population standard deviation of budgetId across the matching connection
+  """
+  budgetId: BigFloat
+
+  """Population standard deviation of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type BudgetAssignmentVarianceSampleAggregates {
+  """Sample variance of id across the matching connection"""
+  id: BigFloat
+
+  """Sample variance of accountId across the matching connection"""
+  accountId: BigFloat
+
+  """Sample variance of budgetId across the matching connection"""
+  budgetId: BigFloat
+
+  """Sample variance of amount across the matching connection"""
+  amount: BigFloat
+}
+
+type BudgetAssignmentVariancePopulationAggregates {
+  """Population variance of id across the matching connection"""
+  id: BigFloat
+
+  """Population variance of accountId across the matching connection"""
+  accountId: BigFloat
+
+  """Population variance of budgetId across the matching connection"""
+  budgetId: BigFloat
+
+  """Population variance of amount across the matching connection"""
+  amount: BigFloat
+}
+
+"""Grouping methods for `BudgetAssignment` for usage during aggregation."""
+enum BudgetAssignmentGroupBy {
+  ACCOUNT_ID
+  BUDGET_ID
+  MONTH
+}
+
+"""Conditions for `BudgetAssignment` aggregates."""
+input BudgetAssignmentHavingInput {
+  AND: [BudgetAssignmentHavingInput!]
+  OR: [BudgetAssignmentHavingInput!]
+  sum: BudgetAssignmentHavingSumInput
+  distinctCount: BudgetAssignmentHavingDistinctCountInput
+  min: BudgetAssignmentHavingMinInput
+  max: BudgetAssignmentHavingMaxInput
+  average: BudgetAssignmentHavingAverageInput
+  stddevSample: BudgetAssignmentHavingStddevSampleInput
+  stddevPopulation: BudgetAssignmentHavingStddevPopulationInput
+  varianceSample: BudgetAssignmentHavingVarianceSampleInput
+  variancePopulation: BudgetAssignmentHavingVariancePopulationInput
+}
+
+input BudgetAssignmentHavingSumInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input HavingDatetimeFilter {
+  equalTo: Datetime
+  notEqualTo: Datetime
+  greaterThan: Datetime
+  greaterThanOrEqualTo: Datetime
+  lessThan: Datetime
+  lessThanOrEqualTo: Datetime
+}
+
+input HavingBigintFilter {
+  equalTo: BigInt
+  notEqualTo: BigInt
+  greaterThan: BigInt
+  greaterThanOrEqualTo: BigInt
+  lessThan: BigInt
+  lessThanOrEqualTo: BigInt
+}
+
+input BudgetAssignmentHavingDistinctCountInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input BudgetAssignmentHavingMinInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input BudgetAssignmentHavingMaxInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input BudgetAssignmentHavingAverageInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input BudgetAssignmentHavingStddevSampleInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input BudgetAssignmentHavingStddevPopulationInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input BudgetAssignmentHavingVarianceSampleInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+input BudgetAssignmentHavingVariancePopulationInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  accountId: HavingIntFilter
+  budgetId: HavingIntFilter
+  month: HavingDatetimeFilter
+  amount: HavingBigintFilter
+}
+
+"""Methods to use when ordering `BudgetAssignment`."""
+enum BudgetAssignmentsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  ACCOUNT_ID_ASC
+  ACCOUNT_ID_DESC
+  BUDGET_ID_ASC
+  BUDGET_ID_DESC
+  MONTH_ASC
+  MONTH_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `BudgetAssignment` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input BudgetAssignmentCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `accountId` field."""
+  accountId: Int
+
+  """Checks for equality with the object’s `budgetId` field."""
+  budgetId: Int
+
+  """Checks for equality with the object’s `month` field."""
+  month: Date
 }
 
 """A connection to a list of `CategoryGroup` values."""
@@ -7822,24 +8762,6 @@ input TransactionHavingSumInput {
   originalPosted: HavingDatetimeFilter
   importBatchId: HavingIntFilter
   transferCount: TransactionHavingSumTransactionTransferCountInput
-}
-
-input HavingDatetimeFilter {
-  equalTo: Datetime
-  notEqualTo: Datetime
-  greaterThan: Datetime
-  greaterThanOrEqualTo: Datetime
-  lessThan: Datetime
-  lessThanOrEqualTo: Datetime
-}
-
-input HavingBigintFilter {
-  equalTo: BigInt
-  notEqualTo: BigInt
-  greaterThan: BigInt
-  greaterThanOrEqualTo: BigInt
-  lessThan: BigInt
-  lessThanOrEqualTo: BigInt
 }
 
 input TransactionHavingSumTransactionTransferCountInput {
@@ -11402,98 +12324,6 @@ enum CategoriesOrderBy {
   TRANSACTIONS_BY_CATEGORY_ID_VARIANCE_POPULATION_IMPORT_BATCH_ID_DESC
   TRANSACTIONS_BY_CATEGORY_ID_VARIANCE_POPULATION_CATEGORY_SOURCE_ASC
   TRANSACTIONS_BY_CATEGORY_ID_VARIANCE_POPULATION_CATEGORY_SOURCE_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_COUNT_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_COUNT_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_SUM_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MIN_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_MAX_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_AVERAGE_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_USER_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_USER_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_BUDGET_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_BUDGET_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_CATEGORY_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_CATEGORY_ID_DESC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
-  BUDGET_CATEGORIES_BY_CATEGORY_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
   CATEGORY_GROUPS_BY_CATEGORY_ID_COUNT_ASC
   CATEGORY_GROUPS_BY_CATEGORY_ID_COUNT_DESC
   CATEGORY_GROUPS_BY_CATEGORY_ID_SUM_ID_ASC
@@ -11715,9 +12545,6 @@ type BudgetDistinctCountAggregates {
   """Distinct count of amount across the matching connection"""
   amount: BigInt
 
-  """Distinct count of effectiveDate across the matching connection"""
-  effectiveDate: BigInt
-
   """Distinct count of startingAmount across the matching connection"""
   startingAmount: BigInt
 
@@ -11877,7 +12704,6 @@ input BudgetHavingSumInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11888,7 +12714,6 @@ input BudgetHavingDistinctCountInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11899,7 +12724,6 @@ input BudgetHavingMinInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11910,7 +12734,6 @@ input BudgetHavingMaxInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11921,7 +12744,6 @@ input BudgetHavingAverageInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11932,7 +12754,6 @@ input BudgetHavingStddevSampleInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11943,7 +12764,6 @@ input BudgetHavingStddevPopulationInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11954,7 +12774,6 @@ input BudgetHavingVarianceSampleInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -11965,7 +12784,6 @@ input BudgetHavingVariancePopulationInput {
   updatedAt: HavingDatetimeFilter
   userId: HavingIntFilter
   amount: HavingBigintFilter
-  effectiveDate: HavingDatetimeFilter
   startingAmount: HavingBigintFilter
   accountId: HavingIntFilter
 }
@@ -12073,6 +12891,134 @@ enum BudgetsOrderBy {
   BUDGET_CATEGORIES_BY_BUDGET_ID_VARIANCE_POPULATION_CATEGORY_ID_DESC
   BUDGET_CATEGORIES_BY_BUDGET_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
   BUDGET_CATEGORIES_BY_BUDGET_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_COUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_COUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_SUM_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_DISTINCT_COUNT_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MIN_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_MAX_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_AVERAGE_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_SAMPLE_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_STDDEV_POPULATION_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_SAMPLE_AMOUNT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_CREATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_CREATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_UPDATED_AT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_UPDATED_AT_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_BUDGET_ID_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_BUDGET_ID_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_MONTH_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_MONTH_DESC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_AMOUNT_ASC
+  BUDGET_ASSIGNMENTS_BY_BUDGET_ID_VARIANCE_POPULATION_AMOUNT_DESC
 }
 
 """
@@ -12797,6 +13743,12 @@ type AccountSumAggregates {
 
   """Sum of userId across the matching connection"""
   userId: BigInt!
+
+  """Sum of envelopeStartingBalance across the matching connection"""
+  envelopeStartingBalance: BigFloat!
+
+  """Sum of envelopeCashOnHand across the matching connection"""
+  envelopeCashOnHand: BigFloat!
 }
 
 type AccountDistinctCountAggregates {
@@ -12838,6 +13790,17 @@ type AccountDistinctCountAggregates {
 
   """Distinct count of name across the matching connection"""
   name: BigInt
+
+  """Distinct count of envelopeStartMonth across the matching connection"""
+  envelopeStartMonth: BigInt
+
+  """
+  Distinct count of envelopeStartingBalance across the matching connection
+  """
+  envelopeStartingBalance: BigInt
+
+  """Distinct count of envelopeCashOnHand across the matching connection"""
+  envelopeCashOnHand: BigInt
 }
 
 type AccountMinAggregates {
@@ -12846,6 +13809,12 @@ type AccountMinAggregates {
 
   """Minimum of userId across the matching connection"""
   userId: Int
+
+  """Minimum of envelopeStartingBalance across the matching connection"""
+  envelopeStartingBalance: BigInt
+
+  """Minimum of envelopeCashOnHand across the matching connection"""
+  envelopeCashOnHand: BigInt
 }
 
 type AccountMaxAggregates {
@@ -12854,6 +13823,12 @@ type AccountMaxAggregates {
 
   """Maximum of userId across the matching connection"""
   userId: Int
+
+  """Maximum of envelopeStartingBalance across the matching connection"""
+  envelopeStartingBalance: BigInt
+
+  """Maximum of envelopeCashOnHand across the matching connection"""
+  envelopeCashOnHand: BigInt
 }
 
 type AccountAverageAggregates {
@@ -12862,6 +13837,12 @@ type AccountAverageAggregates {
 
   """Mean average of userId across the matching connection"""
   userId: BigFloat
+
+  """Mean average of envelopeStartingBalance across the matching connection"""
+  envelopeStartingBalance: BigFloat
+
+  """Mean average of envelopeCashOnHand across the matching connection"""
+  envelopeCashOnHand: BigFloat
 }
 
 type AccountStddevSampleAggregates {
@@ -12870,6 +13851,16 @@ type AccountStddevSampleAggregates {
 
   """Sample standard deviation of userId across the matching connection"""
   userId: BigFloat
+
+  """
+  Sample standard deviation of envelopeStartingBalance across the matching connection
+  """
+  envelopeStartingBalance: BigFloat
+
+  """
+  Sample standard deviation of envelopeCashOnHand across the matching connection
+  """
+  envelopeCashOnHand: BigFloat
 }
 
 type AccountStddevPopulationAggregates {
@@ -12878,6 +13869,16 @@ type AccountStddevPopulationAggregates {
 
   """Population standard deviation of userId across the matching connection"""
   userId: BigFloat
+
+  """
+  Population standard deviation of envelopeStartingBalance across the matching connection
+  """
+  envelopeStartingBalance: BigFloat
+
+  """
+  Population standard deviation of envelopeCashOnHand across the matching connection
+  """
+  envelopeCashOnHand: BigFloat
 }
 
 type AccountVarianceSampleAggregates {
@@ -12886,6 +13887,14 @@ type AccountVarianceSampleAggregates {
 
   """Sample variance of userId across the matching connection"""
   userId: BigFloat
+
+  """
+  Sample variance of envelopeStartingBalance across the matching connection
+  """
+  envelopeStartingBalance: BigFloat
+
+  """Sample variance of envelopeCashOnHand across the matching connection"""
+  envelopeCashOnHand: BigFloat
 }
 
 type AccountVariancePopulationAggregates {
@@ -12894,6 +13903,16 @@ type AccountVariancePopulationAggregates {
 
   """Population variance of userId across the matching connection"""
   userId: BigFloat
+
+  """
+  Population variance of envelopeStartingBalance across the matching connection
+  """
+  envelopeStartingBalance: BigFloat
+
+  """
+  Population variance of envelopeCashOnHand across the matching connection
+  """
+  envelopeCashOnHand: BigFloat
 }
 
 """Grouping methods for `Account` for usage during aggregation."""
@@ -12920,46 +13939,73 @@ input AccountHavingInput {
 input AccountHavingSumInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingDistinctCountInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingMinInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingMaxInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingAverageInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingStddevSampleInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingStddevPopulationInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingVarianceSampleInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 input AccountHavingVariancePopulationInput {
   id: HavingIntFilter
   userId: HavingIntFilter
+  envelopeStartMonth: HavingDatetimeFilter
+  envelopeStartingBalance: HavingBigintFilter
+  envelopeCashOnHand: HavingBigintFilter
 }
 
 """A connection to a list of `User` values."""
@@ -13145,6 +14191,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_SUM_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_SUM_NAME_ASC
   ACCOUNTS_BY_USER_ID_SUM_NAME_DESC
+  ACCOUNTS_BY_USER_ID_SUM_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_SUM_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_SUM_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_SUM_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_SUM_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_SUM_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ID_ASC
   ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ID_DESC
   ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_USER_ID_ASC
@@ -13171,6 +14223,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_NAME_ASC
   ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_NAME_DESC
+  ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_DISTINCT_COUNT_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_MIN_ID_ASC
   ACCOUNTS_BY_USER_ID_MIN_ID_DESC
   ACCOUNTS_BY_USER_ID_MIN_USER_ID_ASC
@@ -13197,6 +14255,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_MIN_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_MIN_NAME_ASC
   ACCOUNTS_BY_USER_ID_MIN_NAME_DESC
+  ACCOUNTS_BY_USER_ID_MIN_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_MIN_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_MIN_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_MIN_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_MIN_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_MIN_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_MAX_ID_ASC
   ACCOUNTS_BY_USER_ID_MAX_ID_DESC
   ACCOUNTS_BY_USER_ID_MAX_USER_ID_ASC
@@ -13223,6 +14287,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_MAX_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_MAX_NAME_ASC
   ACCOUNTS_BY_USER_ID_MAX_NAME_DESC
+  ACCOUNTS_BY_USER_ID_MAX_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_MAX_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_MAX_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_MAX_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_MAX_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_MAX_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_AVERAGE_ID_ASC
   ACCOUNTS_BY_USER_ID_AVERAGE_ID_DESC
   ACCOUNTS_BY_USER_ID_AVERAGE_USER_ID_ASC
@@ -13249,6 +14319,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_AVERAGE_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_AVERAGE_NAME_ASC
   ACCOUNTS_BY_USER_ID_AVERAGE_NAME_DESC
+  ACCOUNTS_BY_USER_ID_AVERAGE_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_AVERAGE_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_AVERAGE_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_AVERAGE_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_AVERAGE_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_AVERAGE_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ID_ASC
   ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ID_DESC
   ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_USER_ID_ASC
@@ -13275,6 +14351,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_NAME_ASC
   ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_NAME_DESC
+  ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_STDDEV_SAMPLE_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ID_ASC
   ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ID_DESC
   ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_USER_ID_ASC
@@ -13301,6 +14383,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_NAME_ASC
   ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_NAME_DESC
+  ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_STDDEV_POPULATION_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ID_ASC
   ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ID_DESC
   ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_USER_ID_ASC
@@ -13327,6 +14415,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_NAME_ASC
   ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_NAME_DESC
+  ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_VARIANCE_SAMPLE_ENVELOPE_CASH_ON_HAND_DESC
   ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ID_ASC
   ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ID_DESC
   ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_USER_ID_ASC
@@ -13353,6 +14447,12 @@ enum UsersOrderBy {
   ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_SESSION_STATE_DESC
   ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_NAME_ASC
   ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_NAME_DESC
+  ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ENVELOPE_START_MONTH_ASC
+  ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ENVELOPE_START_MONTH_DESC
+  ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ENVELOPE_STARTING_BALANCE_ASC
+  ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ENVELOPE_STARTING_BALANCE_DESC
+  ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ENVELOPE_CASH_ON_HAND_ASC
+  ACCOUNTS_BY_USER_ID_VARIANCE_POPULATION_ENVELOPE_CASH_ON_HAND_DESC
   BANK_ACCOUNTS_BY_USER_ID_COUNT_ASC
   BANK_ACCOUNTS_BY_USER_ID_COUNT_DESC
   BANK_ACCOUNTS_BY_USER_ID_SUM_ID_ASC
@@ -13713,8 +14813,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_SUM_NAME_DESC
   BUDGETS_BY_USER_ID_SUM_AMOUNT_ASC
   BUDGETS_BY_USER_ID_SUM_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_SUM_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_SUM_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_SUM_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_SUM_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_SUM_ACCOUNT_ID_ASC
@@ -13731,8 +14829,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_DISTINCT_COUNT_NAME_DESC
   BUDGETS_BY_USER_ID_DISTINCT_COUNT_AMOUNT_ASC
   BUDGETS_BY_USER_ID_DISTINCT_COUNT_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_DISTINCT_COUNT_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_DISTINCT_COUNT_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_DISTINCT_COUNT_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_DISTINCT_COUNT_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
@@ -13749,8 +14845,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_MIN_NAME_DESC
   BUDGETS_BY_USER_ID_MIN_AMOUNT_ASC
   BUDGETS_BY_USER_ID_MIN_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_MIN_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_MIN_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_MIN_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_MIN_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_MIN_ACCOUNT_ID_ASC
@@ -13767,8 +14861,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_MAX_NAME_DESC
   BUDGETS_BY_USER_ID_MAX_AMOUNT_ASC
   BUDGETS_BY_USER_ID_MAX_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_MAX_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_MAX_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_MAX_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_MAX_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_MAX_ACCOUNT_ID_ASC
@@ -13785,8 +14877,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_AVERAGE_NAME_DESC
   BUDGETS_BY_USER_ID_AVERAGE_AMOUNT_ASC
   BUDGETS_BY_USER_ID_AVERAGE_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_AVERAGE_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_AVERAGE_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_AVERAGE_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_AVERAGE_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_AVERAGE_ACCOUNT_ID_ASC
@@ -13803,8 +14893,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_STDDEV_SAMPLE_NAME_DESC
   BUDGETS_BY_USER_ID_STDDEV_SAMPLE_AMOUNT_ASC
   BUDGETS_BY_USER_ID_STDDEV_SAMPLE_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_STDDEV_SAMPLE_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_STDDEV_SAMPLE_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_STDDEV_SAMPLE_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_STDDEV_SAMPLE_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
@@ -13821,8 +14909,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_STDDEV_POPULATION_NAME_DESC
   BUDGETS_BY_USER_ID_STDDEV_POPULATION_AMOUNT_ASC
   BUDGETS_BY_USER_ID_STDDEV_POPULATION_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_STDDEV_POPULATION_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_STDDEV_POPULATION_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_STDDEV_POPULATION_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_STDDEV_POPULATION_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
@@ -13839,8 +14925,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_NAME_DESC
   BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_AMOUNT_ASC
   BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
@@ -13857,8 +14941,6 @@ enum UsersOrderBy {
   BUDGETS_BY_USER_ID_VARIANCE_POPULATION_NAME_DESC
   BUDGETS_BY_USER_ID_VARIANCE_POPULATION_AMOUNT_ASC
   BUDGETS_BY_USER_ID_VARIANCE_POPULATION_AMOUNT_DESC
-  BUDGETS_BY_USER_ID_VARIANCE_POPULATION_EFFECTIVE_DATE_ASC
-  BUDGETS_BY_USER_ID_VARIANCE_POPULATION_EFFECTIVE_DATE_DESC
   BUDGETS_BY_USER_ID_VARIANCE_POPULATION_STARTING_AMOUNT_ASC
   BUDGETS_BY_USER_ID_VARIANCE_POPULATION_STARTING_AMOUNT_DESC
   BUDGETS_BY_USER_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
@@ -14370,6 +15452,120 @@ input UserCondition {
   email: String
 }
 
+"""A connection to a list of `BudgetMonthlyActivityRecord` values."""
+type BudgetMonthlyActivityConnection {
+  """A list of `BudgetMonthlyActivityRecord` objects."""
+  nodes: [BudgetMonthlyActivityRecord!]!
+
+  """
+  A list of edges which contains the `BudgetMonthlyActivityRecord` and cursor to aid in pagination.
+  """
+  edges: [BudgetMonthlyActivityEdge!]!
+
+  """
+  The count of *all* `BudgetMonthlyActivityRecord` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""The return type of our `budgetMonthlyActivity` query."""
+type BudgetMonthlyActivityRecord {
+  budgetId: Int
+  month: Date
+  activity: BigInt
+}
+
+"""A `BudgetMonthlyActivityRecord` edge in the connection."""
+type BudgetMonthlyActivityEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `BudgetMonthlyActivityRecord` at the end of the edge."""
+  node: BudgetMonthlyActivityRecord!
+}
+
+"""
+A filter to be used against `BudgetMonthlyActivityRecord` object types. All fields are combined with a logical ‘and.’
+"""
+input BudgetMonthlyActivityRecordFilter {
+  """Filter by the object’s `budgetId` field."""
+  budgetId: IntFilter
+
+  """Filter by the object’s `month` field."""
+  month: DateFilter
+
+  """Filter by the object’s `activity` field."""
+  activity: BigIntFilter
+
+  """Checks for all expressions in this list."""
+  and: [BudgetMonthlyActivityRecordFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [BudgetMonthlyActivityRecordFilter!]
+
+  """Negates the expression."""
+  not: BudgetMonthlyActivityRecordFilter
+}
+
+"""A connection to a list of `EnvelopeUnbudgetedMonthlyRecord` values."""
+type EnvelopeUnbudgetedMonthlyConnection {
+  """A list of `EnvelopeUnbudgetedMonthlyRecord` objects."""
+  nodes: [EnvelopeUnbudgetedMonthlyRecord!]!
+
+  """
+  A list of edges which contains the `EnvelopeUnbudgetedMonthlyRecord` and cursor to aid in pagination.
+  """
+  edges: [EnvelopeUnbudgetedMonthlyEdge!]!
+
+  """
+  The count of *all* `EnvelopeUnbudgetedMonthlyRecord` you could get from the connection.
+  """
+  totalCount: Int!
+}
+
+"""The return type of our `envelopeUnbudgetedMonthly` query."""
+type EnvelopeUnbudgetedMonthlyRecord {
+  month: Date
+  payroll: BigInt
+  unbudgetedInflow: BigInt
+  unbudgetedOutflow: BigInt
+}
+
+"""A `EnvelopeUnbudgetedMonthlyRecord` edge in the connection."""
+type EnvelopeUnbudgetedMonthlyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `EnvelopeUnbudgetedMonthlyRecord` at the end of the edge."""
+  node: EnvelopeUnbudgetedMonthlyRecord!
+}
+
+"""
+A filter to be used against `EnvelopeUnbudgetedMonthlyRecord` object types. All fields are combined with a logical ‘and.’
+"""
+input EnvelopeUnbudgetedMonthlyRecordFilter {
+  """Filter by the object’s `month` field."""
+  month: DateFilter
+
+  """Filter by the object’s `payroll` field."""
+  payroll: BigIntFilter
+
+  """Filter by the object’s `unbudgetedInflow` field."""
+  unbudgetedInflow: BigIntFilter
+
+  """Filter by the object’s `unbudgetedOutflow` field."""
+  unbudgetedOutflow: BigIntFilter
+
+  """Checks for all expressions in this list."""
+  and: [EnvelopeUnbudgetedMonthlyRecordFilter!]
+
+  """Checks for any expressions in this list."""
+  or: [EnvelopeUnbudgetedMonthlyRecordFilter!]
+
+  """Negates the expression."""
+  not: EnvelopeUnbudgetedMonthlyRecordFilter
+}
+
 """
 The root mutation type which contains root level fields which mutate data.
 """
@@ -14421,6 +15617,14 @@ type Mutation {
     """
     input: CreateBudgetInput!
   ): CreateBudgetPayload
+
+  """Creates a single `BudgetAssignment`."""
+  createBudgetAssignment(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreateBudgetAssignmentInput!
+  ): CreateBudgetAssignmentPayload
 
   """Creates a single `BudgetCategory`."""
   createBudgetCategory(
@@ -14611,6 +15815,32 @@ type Mutation {
   ): UpdateBudgetPayload
 
   """
+  Updates a single `BudgetAssignment` using its globally unique id and a patch.
+  """
+  updateBudgetAssignment(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateBudgetAssignmentInput!
+  ): UpdateBudgetAssignmentPayload
+
+  """Updates a single `BudgetAssignment` using a unique key and a patch."""
+  updateBudgetAssignmentById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateBudgetAssignmentByIdInput!
+  ): UpdateBudgetAssignmentPayload
+
+  """Updates a single `BudgetAssignment` using a unique key and a patch."""
+  updateBudgetAssignmentByBudgetIdAndMonth(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateBudgetAssignmentByBudgetIdAndMonthInput!
+  ): UpdateBudgetAssignmentPayload
+
+  """
   Updates a single `BudgetCategory` using its globally unique id and a patch.
   """
   updateBudgetCategory(
@@ -14634,6 +15864,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: UpdateBudgetCategoryByBudgetIdAndCategoryIdInput!
+  ): UpdateBudgetCategoryPayload
+
+  """Updates a single `BudgetCategory` using a unique key and a patch."""
+  updateBudgetCategoryByCategoryId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateBudgetCategoryByCategoryIdInput!
   ): UpdateBudgetCategoryPayload
 
   """Updates a single `Category` using its globally unique id and a patch."""
@@ -14916,6 +16154,30 @@ type Mutation {
     input: DeleteBudgetByIdInput!
   ): DeleteBudgetPayload
 
+  """Deletes a single `BudgetAssignment` using its globally unique id."""
+  deleteBudgetAssignment(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteBudgetAssignmentInput!
+  ): DeleteBudgetAssignmentPayload
+
+  """Deletes a single `BudgetAssignment` using a unique key."""
+  deleteBudgetAssignmentById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteBudgetAssignmentByIdInput!
+  ): DeleteBudgetAssignmentPayload
+
+  """Deletes a single `BudgetAssignment` using a unique key."""
+  deleteBudgetAssignmentByBudgetIdAndMonth(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteBudgetAssignmentByBudgetIdAndMonthInput!
+  ): DeleteBudgetAssignmentPayload
+
   """Deletes a single `BudgetCategory` using its globally unique id."""
   deleteBudgetCategory(
     """
@@ -14938,6 +16200,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: DeleteBudgetCategoryByBudgetIdAndCategoryIdInput!
+  ): DeleteBudgetCategoryPayload
+
+  """Deletes a single `BudgetCategory` using a unique key."""
+  deleteBudgetCategoryByCategoryId(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteBudgetCategoryByCategoryIdInput!
   ): DeleteBudgetCategoryPayload
 
   """Deletes a single `Category` using its globally unique id."""
@@ -15115,6 +16385,12 @@ type Mutation {
     """
     input: ImportTransactionsInput!
   ): ImportTransactionsPayload
+  moveBudgetMoney(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: MoveBudgetMoneyInput!
+  ): MoveBudgetMoneyPayload
   moveImportBatch(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -15139,6 +16415,12 @@ type Mutation {
     """
     input: ReorderBankAccountsInput!
   ): ReorderBankAccountsPayload
+  setEnvelopeCashOnHand(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: SetEnvelopeCashOnHandInput!
+  ): SetEnvelopeCashOnHandPayload
   undoImportBatch(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
@@ -15205,6 +16487,16 @@ type Mutation {
     """
     input: UpsertBudgetInput!
   ): UpsertBudgetPayload
+
+  """Upserts a single `BudgetAssignment`."""
+  upsertBudgetAssignment(
+    where: UpsertBudgetAssignmentWhere
+
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpsertBudgetAssignmentInput!
+  ): UpsertBudgetAssignmentPayload
 
   """Upserts a single `BudgetCategory`."""
   upsertBudgetCategory(
@@ -15412,6 +16704,9 @@ input AccountInput {
   idToken: String
   sessionState: String
   name: String
+  envelopeStartMonth: Date
+  envelopeStartingBalance: BigInt
+  envelopeCashOnHand: BigInt
 }
 
 """The output of our create `AccountMember` mutation."""
@@ -15678,9 +16973,60 @@ input BudgetInput {
   userId: Int
   name: String
   amount: BigInt!
-  effectiveDate: Datetime
   startingAmount: BigInt
   accountId: Int!
+}
+
+"""The output of our create `BudgetAssignment` mutation."""
+type CreateBudgetAssignmentPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `BudgetAssignment` that was created by this mutation."""
+  budgetAssignment: BudgetAssignment
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Account` that is related to this `BudgetAssignment`."""
+  accountByAccountId: Account
+
+  """Reads a single `Budget` that is related to this `BudgetAssignment`."""
+  budgetByBudgetId: Budget
+
+  """An edge for our `BudgetAssignment`. May be used by Relay 1."""
+  budgetAssignmentEdge(
+    """The method to use when ordering `BudgetAssignment`."""
+    orderBy: [BudgetAssignmentsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): BudgetAssignmentsEdge
+}
+
+"""All input for the create `BudgetAssignment` mutation."""
+input CreateBudgetAssignmentInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `BudgetAssignment` to be created by this mutation."""
+  budgetAssignment: BudgetAssignmentInput!
+}
+
+"""An input for mutations affecting `BudgetAssignment`"""
+input BudgetAssignmentInput {
+  id: Int
+  createdAt: Datetime
+  updatedAt: Datetime
+  accountId: Int!
+  budgetId: Int!
+  month: Date!
+  amount: BigInt!
 }
 
 """The output of our create `BudgetCategory` mutation."""
@@ -16121,6 +17467,9 @@ input AccountPatch {
   idToken: String
   sessionState: String
   name: String
+  envelopeStartMonth: Date
+  envelopeStartingBalance: BigInt
+  envelopeCashOnHand: BigInt
 }
 
 """All input for the `updateAccountById` mutation."""
@@ -16562,7 +17911,6 @@ input BudgetPatch {
   userId: Int
   name: String
   amount: BigInt
-  effectiveDate: Datetime
   startingAmount: BigInt
   accountId: Int
 }
@@ -16580,6 +17928,98 @@ input UpdateBudgetByIdInput {
   """
   budgetPatch: BudgetPatch!
   id: Int!
+}
+
+"""The output of our update `BudgetAssignment` mutation."""
+type UpdateBudgetAssignmentPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `BudgetAssignment` that was updated by this mutation."""
+  budgetAssignment: BudgetAssignment
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Account` that is related to this `BudgetAssignment`."""
+  accountByAccountId: Account
+
+  """Reads a single `Budget` that is related to this `BudgetAssignment`."""
+  budgetByBudgetId: Budget
+
+  """An edge for our `BudgetAssignment`. May be used by Relay 1."""
+  budgetAssignmentEdge(
+    """The method to use when ordering `BudgetAssignment`."""
+    orderBy: [BudgetAssignmentsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): BudgetAssignmentsEdge
+}
+
+"""All input for the `updateBudgetAssignment` mutation."""
+input UpdateBudgetAssignmentInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `BudgetAssignment` to be updated.
+  """
+  nodeId: ID!
+
+  """
+  An object where the defined keys will be set on the `BudgetAssignment` being updated.
+  """
+  budgetAssignmentPatch: BudgetAssignmentPatch!
+}
+
+"""
+Represents an update to a `BudgetAssignment`. Fields that are set will be updated.
+"""
+input BudgetAssignmentPatch {
+  id: Int
+  createdAt: Datetime
+  updatedAt: Datetime
+  accountId: Int
+  budgetId: Int
+  month: Date
+  amount: BigInt
+}
+
+"""All input for the `updateBudgetAssignmentById` mutation."""
+input UpdateBudgetAssignmentByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `BudgetAssignment` being updated.
+  """
+  budgetAssignmentPatch: BudgetAssignmentPatch!
+  id: Int!
+}
+
+"""All input for the `updateBudgetAssignmentByBudgetIdAndMonth` mutation."""
+input UpdateBudgetAssignmentByBudgetIdAndMonthInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `BudgetAssignment` being updated.
+  """
+  budgetAssignmentPatch: BudgetAssignmentPatch!
+  budgetId: Int!
+  month: Date!
 }
 
 """The output of our update `BudgetCategory` mutation."""
@@ -16677,6 +18117,21 @@ input UpdateBudgetCategoryByBudgetIdAndCategoryIdInput {
   """
   budgetCategoryPatch: BudgetCategoryPatch!
   budgetId: Int!
+  categoryId: Int!
+}
+
+"""All input for the `updateBudgetCategoryByCategoryId` mutation."""
+input UpdateBudgetCategoryByCategoryIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `BudgetCategory` being updated.
+  """
+  budgetCategoryPatch: BudgetCategoryPatch!
   categoryId: Int!
 }
 
@@ -17624,6 +19079,71 @@ input DeleteBudgetByIdInput {
   id: Int!
 }
 
+"""The output of our delete `BudgetAssignment` mutation."""
+type DeleteBudgetAssignmentPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `BudgetAssignment` that was deleted by this mutation."""
+  budgetAssignment: BudgetAssignment
+  deletedBudgetAssignmentId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Account` that is related to this `BudgetAssignment`."""
+  accountByAccountId: Account
+
+  """Reads a single `Budget` that is related to this `BudgetAssignment`."""
+  budgetByBudgetId: Budget
+
+  """An edge for our `BudgetAssignment`. May be used by Relay 1."""
+  budgetAssignmentEdge(
+    """The method to use when ordering `BudgetAssignment`."""
+    orderBy: [BudgetAssignmentsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): BudgetAssignmentsEdge
+}
+
+"""All input for the `deleteBudgetAssignment` mutation."""
+input DeleteBudgetAssignmentInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `BudgetAssignment` to be deleted.
+  """
+  nodeId: ID!
+}
+
+"""All input for the `deleteBudgetAssignmentById` mutation."""
+input DeleteBudgetAssignmentByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  id: Int!
+}
+
+"""All input for the `deleteBudgetAssignmentByBudgetIdAndMonth` mutation."""
+input DeleteBudgetAssignmentByBudgetIdAndMonthInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  budgetId: Int!
+  month: Date!
+}
+
 """The output of our delete `BudgetCategory` mutation."""
 type DeleteBudgetCategoryPayload {
   """
@@ -17694,6 +19214,16 @@ input DeleteBudgetCategoryByBudgetIdAndCategoryIdInput {
   """
   clientMutationId: String
   budgetId: Int!
+  categoryId: Int!
+}
+
+"""All input for the `deleteBudgetCategoryByCategoryId` mutation."""
+input DeleteBudgetCategoryByCategoryIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
   categoryId: Int!
 }
 
@@ -18239,6 +19769,35 @@ input ImportTransactionsInput {
   transactions: JSON
 }
 
+"""The output of our `moveBudgetMoney` mutation."""
+type MoveBudgetMoneyPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  budgetAssignments: [BudgetAssignment!]
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+}
+
+"""All input for the `moveBudgetMoney` mutation."""
+input MoveBudgetMoneyInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  accountId: Int
+  month: Date
+  fromBudgetId: Int
+  toBudgetId: Int
+  amount: BigInt
+}
+
 """The output of our `moveImportBatch` mutation."""
 type MoveImportBatchPayload {
   """
@@ -18360,6 +19919,41 @@ input ReorderBankAccountsInput {
   clientMutationId: String
   accountId: Int!
   bankAccountIds: [Int]!
+}
+
+"""The output of our `setEnvelopeCashOnHand` mutation."""
+type SetEnvelopeCashOnHandPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+  account: Account
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `User` that is related to this `Account`."""
+  userByUserId: User
+
+  """An edge for our `Account`. May be used by Relay 1."""
+  accountEdge(
+    """The method to use when ordering `Account`."""
+    orderBy: [AccountsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): AccountsEdge
+}
+
+"""All input for the `setEnvelopeCashOnHand` mutation."""
+input SetEnvelopeCashOnHandInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  accountId: Int
+  cashOnHand: BigInt
 }
 
 """The output of our `undoImportBatch` mutation."""
@@ -18669,6 +20263,52 @@ input UpsertBudgetInput {
 
   """The `Budget` to be upserted by this mutation."""
   budget: BudgetInput!
+}
+
+"""The output of our upsert `BudgetAssignment` mutation."""
+type UpsertBudgetAssignmentPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `BudgetAssignment` that was upserted by this mutation."""
+  budgetAssignment: BudgetAssignment
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """Reads a single `Account` that is related to this `BudgetAssignment`."""
+  accountByAccountId: Account
+
+  """Reads a single `Budget` that is related to this `BudgetAssignment`."""
+  budgetByBudgetId: Budget
+
+  """An edge for our `BudgetAssignment`. May be used by Relay 1."""
+  budgetAssignmentEdge(
+    """The method to use when ordering `BudgetAssignment`."""
+    orderBy: [BudgetAssignmentsOrderBy!] = [PRIMARY_KEY_ASC]
+  ): BudgetAssignmentsEdge
+}
+
+"""Where conditions for the upsert `BudgetAssignment` mutation."""
+input UpsertBudgetAssignmentWhere {
+  id: Int
+  budgetId: Int
+  month: Date
+}
+
+"""All input for the upsert `BudgetAssignment` mutation."""
+input UpsertBudgetAssignmentInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `BudgetAssignment` to be upserted by this mutation."""
+  budgetAssignment: BudgetAssignmentInput!
 }
 
 """The output of our upsert `BudgetCategory` mutation."""
