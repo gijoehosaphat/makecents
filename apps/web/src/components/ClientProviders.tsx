@@ -1,6 +1,6 @@
 'use client'
 
-import { lightTheme } from '@/lib/theme'
+import { defaultTheme } from '@/lib/theme'
 import { Account, BankAccount, User } from '@/graphql/types'
 import { Button, ThemeProvider } from '@mui/material'
 import { SessionProvider } from 'next-auth/react'
@@ -43,7 +43,7 @@ export function ClientProviders({
         <ApolloProvider>
           <AppContextProvider user={user} accounts={accounts} bankAccounts={bankAccounts}>
             <AmountVisibilityProvider>
-              <ThemeProvider theme={lightTheme}>
+              <ThemeProvider theme={defaultTheme}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>{children}</LocalizationProvider>
               </ThemeProvider>
             </AmountVisibilityProvider>

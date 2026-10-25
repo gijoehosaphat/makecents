@@ -1,0 +1,12 @@
+/* Loaded by the root layout, so it applies to every page (globals.css is only used by the account pages). */
+
+/* Cross-fade full page loads (e.g. a refresh or deep link) instead of cutting to a blank page. Both the old and new
+   documents must opt in, which is why this lives in the root layout. Unsupported browsers just skip the animation. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+}

@@ -45,7 +45,7 @@ For working on the code. See [CONTRIBUTING.md](CONTRIBUTING.md) for the architec
 ### Set up and run
 
 1. `pnpm setup` installs dependencies for the whole workspace.
-2. Copy `apps/api/.env.example` to `apps/api/.env` and `apps/web/.env.example` to `apps/web/.env`, then set `DATABASE_URL` in the API file to your database. Change both `AUTH_SECRET` values (and `BETTER_AUTH_SECRET`) if you will use real data.
+2. Copy `apps/api/.env.example` to `apps/api/.env` and `apps/web/.env.example` to `apps/web/.env`, then set `DATABASE_URL` in the API file to your database. Change both `AUTH_SECRET` values if you will use real data.
 3. `pnpm migrate` creates the tables.
 4. `pnpm dev` runs the API (port 3002) and the web app (port 3001) with reloading. `pnpm start` runs a production build instead.
 5. Open <http://localhost:3001>, sign up, and import your own bank export or a fake file from `pnpm example-data` (see [Fresh example data](#fresh-example-data)).

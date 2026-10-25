@@ -5,9 +5,11 @@ import { Alert, Box, Button, Link as MuiLink, TextField } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function SignIn() {
   const t = useTranslations('common')
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
@@ -24,12 +26,12 @@ export default function SignIn() {
       redirect: false,
     })
 
-    setSubmitting(false)
-
     if (result?.error) {
+      setSubmitting(false)
       setError(true)
     } else {
-      window.location.href = '/'
+      // Navigate within the app rather than reloading the document, so the themed page stays on screen
+      router.replace('/')
     }
   }
 
