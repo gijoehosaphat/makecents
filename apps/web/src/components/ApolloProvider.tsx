@@ -6,7 +6,9 @@ import { ApolloClient, ApolloNextAppProvider, InMemoryCache, SSRMultipartLink } 
 
 function makeClient() {
   const httpLink = new HttpLink({
-    uri: GRAPH_URL,
+    // In the browser, use a same-origin path so the app works from other machines on the network
+    // (an absolute localhost URL would point at the visitor's own machine). SSR still needs the absolute URL.
+    uri: typeof window === 'undefined' ? GRAPH_URL : new URL(GRAPH_URL!).pathname,
   })
 
   return new ApolloClient({

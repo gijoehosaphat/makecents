@@ -6,10 +6,12 @@ import { useMutationWithToast } from '@/lib/useMutationWithToast'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { RegisterUserDocument } from '@/graphql/operations'
 
 export default function SignUp() {
   const t = useTranslations('common')
+  const router = useRouter()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -38,7 +40,8 @@ export default function SignUp() {
     if (result?.error) {
       setError(t('auth.invalidCredentials'))
     } else {
-      window.location.href = '/'
+      // Navigate within the app rather than reloading the document, so the themed page stays on screen
+      router.replace('/')
     }
   }
 

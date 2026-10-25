@@ -1,4 +1,4 @@
-import { ThemeOptions, createTheme, lighten } from '@mui/material/styles'
+import { ThemeOptions, createTheme } from '@mui/material/styles'
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -174,20 +174,7 @@ const baseTheme: ThemeOptions = {
   },
 }
 
-export const lightTheme = createTheme(baseTheme)
+export const darkTheme = createTheme(baseTheme)
 
-export const darkTheme = createTheme({
-  ...baseTheme,
-  palette: {
-    ...baseTheme.palette,
-    mode: 'dark',
-    contrastThreshold: 3,
-    primary: {
-      // Our primary color clashes with our dark background.
-      main: lighten(lightTheme.palette.primary.main, 0.3),
-    },
-    background: {
-      default: 'rgb(50, 50, 50)',
-    },
-  },
-})
+// The theme the app renders with. Swap this (or choose per user) once a light theme exists.
+export const defaultTheme = darkTheme

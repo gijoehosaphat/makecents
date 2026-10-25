@@ -27,9 +27,8 @@ services:
       WEB_PORT: 3001
       # Change this before using real data.
       AUTH_SECRET: ${AUTH_SECRET:-atruesecretkeythatshouldbechanged}
-      AUTH_URL: http://localhost:3001
-      BETTER_AUTH_URL: http://localhost:3001
-      BETTER_AUTH_SECRET: ${AUTH_SECRET:-atruesecretkeythatshouldbechanged}
+      # Trust the request host so the app works from other machines on the network, not just localhost
+      AUTH_TRUST_HOST: 'true'
       NEXT_PUBLIC_GRAPH_URL: http://localhost:3001/api/graphql
       NEXT_PUBLIC_CODEGEN_GRAPH_URL: http://localhost:3002/api/graphql
     # Apply migrations (idempotent) and load the demo seed into an empty database before starting

@@ -103,6 +103,9 @@ importers:
       '@apollo/client-integration-nextjs':
         specifier: ^0.14.4
         version: 0.14.5(@apollo/client@4.3.3)(@types/react@19.3.0)(graphql@16.14.2)(next@16.4.3)(react-dom@19.3.0)(react@19.3.0)(rxjs@7.8.2)
+      '@emotion/cache':
+        specifier: ^11.14.0
+        version: 11.14.0
       '@emotion/react':
         specifier: ^11.11.1
         version: 11.14.0(@types/react@19.3.0)(react@19.3.0)
@@ -139,6 +142,9 @@ importers:
       '@mui/material':
         specifier: ^7.3.8
         version: 7.3.11(@emotion/react@11.14.0)(@emotion/styled@11.14.1)(@types/react@19.3.0)(react-dom@19.3.0)(react@19.3.0)
+      '@mui/material-nextjs':
+        specifier: ^7
+        version: 7.3.10(@emotion/cache@11.14.0)(@emotion/react@11.14.0)(@types/react@19.3.0)(next@16.4.3)(react@19.3.0)
       '@mui/x-date-pickers':
         specifier: ^8.27.2
         version: 8.29.4(@emotion/react@11.14.0)(@emotion/styled@11.14.1)(@mui/material@7.3.11)(@mui/system@7.3.11)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.0)(react@19.3.0)
@@ -2820,6 +2826,32 @@ packages:
       '@babel/runtime': 7.29.10
       '@mui/material': 7.3.11(@emotion/react@11.14.0)(@emotion/styled@11.14.1)(@types/react@19.3.0)(react-dom@19.3.0)(react@19.3.0)
       '@types/react': 19.3.0
+      react: 19.3.0
+    dev: false
+
+  /@mui/material-nextjs@7.3.10(@emotion/cache@11.14.0)(@emotion/react@11.14.0)(@types/react@19.3.0)(next@16.4.3)(react@19.3.0):
+    resolution: {integrity: sha512-gJzAFPA3pPg2gg8QUTDEzcI1yLm8A2XLFxis8ejt3DlwCnEt6q1q91dtmeynwsu47XDiJl/l62PVuER6kgFzkA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      '@emotion/cache': ^11.11.0
+      '@emotion/react': ^11.11.4
+      '@emotion/server': ^11.11.0
+      '@types/react': ^17.0.0 || ^18.0.0 || ^19.0.0
+      next: ^13.0.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@emotion/cache':
+        optional: true
+      '@emotion/server':
+        optional: true
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.29.10
+      '@emotion/cache': 11.14.0
+      '@emotion/react': 11.14.0(@types/react@19.3.0)(react@19.3.0)
+      '@types/react': 19.3.0
+      next: 16.4.3(@babel/core@7.29.7)(@types/node@22.20.5)(react-dom@19.3.0)(react@19.3.0)
       react: 19.3.0
     dev: false
 

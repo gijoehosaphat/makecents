@@ -232,7 +232,7 @@ export default function Layout({ children }: { children?: React.ReactNode }) {
             sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, maxHeight: '100vh', overflow: 'hidden' }}
           >
             <DrawerHeader />
-            <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+            <Box sx={{ flexGrow: 1, overflow: 'auto', position: 'relative' }}>
               <Box pl={4} pr={4} pt={2} pb={2}>
                 {!!user && children}
               </Box>

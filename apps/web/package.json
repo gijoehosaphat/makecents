@@ -16,6 +16,7 @@
   "dependencies": {
     "@apollo/client": "^4.1.6",
     "@apollo/client-integration-nextjs": "^0.14.4",
+    "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@graphql-codegen/cli": "^6.1.2",
@@ -28,6 +29,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
+    "@mui/material-nextjs": "^7",
     "@mui/x-date-pickers": "^8.27.2",
     "@types/node": "^22.19.0",
     "@types/papaparse": "^5.5.2",
