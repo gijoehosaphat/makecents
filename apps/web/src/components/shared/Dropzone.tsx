@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 // import { useSnackbar } from 'notistack'
 import { Box, Backdrop, Paper, Typography, LinearProgress, Divider } from '@mui/material'
 import { useDropzone } from 'react-dropzone'
@@ -18,6 +18,44 @@ import { useSnackbar } from 'notistack'
 import { CsvImportDialog } from './CsvImportDialog'
 import { toCents } from '@/lib/formatMoney'
 import { accountTypeFromOfx } from '@/lib/bankAccountTypes'
+
+const INTERNAL_DRAG_TYPE = 'application/x-makecents-internal'
+
+// While dragging, browsers expose each file's MIME type but not its name. OFX/QFX/QBO files usually have no type or a
+// vendor/text one, so only files whose type rules them out (e.g. application/pdf, image/png) count as unsupported; the
+// rest are checked by content once dropped.
+function isPossiblyImportableType(type: string) {
+  return (
+    !type ||
+    type.startsWith('text/') ||
+    type.startsWith('application/vnd.intu.') ||
+    [
+      'application/csv',
+      'application/vnd.ms-excel',
+      'application/x-ofx',
+      'application/ofx',
+      'application/x-qfx',
+      'application/x-qbo',
+      'application/xml',
+      'application/octet-stream',
+    ].includes(type)
+  )
+}
+
+function isUnsupportedDrag(dataTransfer: DataTransfer | null) {
+  const types = Array.from(dataTransfer?.types ?? [])
+  if (types.includes(INTERNAL_DRAG_TYPE)) {
+    return false
+  }
+  if (!types.includes('Files') && !types.includes('application/x-moz-file')) {
+    return true
+  }
+  const fileTypes = Array.from(dataTransfer?.items ?? [])
+    .filter((item) => item.kind === 'file')
+    .map((item) => item.type)
+  // Mixed drags still show the import overlay; the unsupported files are reported once dropped.
+  return fileTypes.length > 0 && !fileTypes.some(isPossiblyImportableType)
+}
 
 function parseDate(dateString: string) {
   const dateParts = String(dateString).split('[')
@@ -173,65 +211,70 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
   )
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const csvFiles = acceptedFiles.filter((file) => file.name.toLowerCase().endsWith('.csv'))
-      const ofxFiles = acceptedFiles.filter((file) => !csvFiles.includes(file))
+    async (acceptedFiles: File[]) => {
+      let readFiles: { file: File; text: string }[]
+      try {
+        readFiles = await Promise.all(acceptedFiles.map(async (file) => ({ file, text: await file.text() })))
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar(t('upload.error'), {
+          variant: 'error',
+        })
+        return
+      }
 
-      csvFiles.forEach((file) => {
-        const reader = new FileReader()
-        reader.readAsText(file)
-
-        reader.onload = () => {
-          const text = String(reader.result || '')
+      // Recognized by content rather than extension (banks use .ofx, .qfx, .qbo, ...), so anything else is
+      // reported as unsupported instead of failing inside the OFX parser.
+      const ofxFiles: { file: File; text: string }[] = []
+      const unsupportedFileNames: string[] = []
+      readFiles.forEach(({ file, text }) => {
+        if (file.name.toLowerCase().endsWith('.csv')) {
           if (text) {
             setCsvQueue((queue) => [...queue, { id: crypto.randomUUID(), fileName: file.name, text }])
           }
-        }
-
-        reader.onerror = () => {
-          console.error(reader.error)
-          enqueueSnackbar(t('upload.error'), {
-            variant: 'error',
-          })
+        } else if (text.includes('<OFX>')) {
+          ofxFiles.push({ file, text })
+        } else {
+          unsupportedFileNames.push(file.name)
         }
       })
+
+      if (unsupportedFileNames.length) {
+        enqueueSnackbar(t('upload.unsupportedFiles', { fileNames: unsupportedFileNames.join(', ') }), {
+          variant: 'warning',
+        })
+      }
 
       if (!ofxFiles.length) {
         return
       }
 
       setIsProcessing(true)
-      const parsedFiles: OpenFinancialExchangeFormat[] = []
-
-      //Large files may be slow to read/process? Webworkers might help?
-      ofxFiles.forEach(async (file: File) => {
-        const reader = new FileReader()
-        reader.readAsText(file)
-
-        reader.onload = () => {
-          const result = String(reader.result)
-          if (result) {
-            parseFile(result).then((ofxData) => {
-              parsedFiles.push(ofxData)
-
-              if (ofxFiles.length === parsedFiles.length) {
-                processParsedFiles(parsedFiles, ofxFiles.map((ofxFile) => ofxFile.name).join(', '))
-              }
-            })
-          }
-        }
-
-        reader.onerror = () => {
-          console.error(reader.error)
-          enqueueSnackbar(t('upload.error'), {
-            variant: 'error',
-          })
-          setIsProcessing(false)
-        }
-      })
+      try {
+        const parsedFiles = await Promise.all(ofxFiles.map(({ text }) => parseFile(text)))
+        processParsedFiles(parsedFiles, ofxFiles.map(({ file }) => file.name).join(', '))
+      } catch (error) {
+        console.error(error)
+        enqueueSnackbar(t('upload.error'), {
+          variant: 'error',
+        })
+        setIsProcessing(false)
+      }
     },
     [processParsedFiles, enqueueSnackbar, t],
   )
+
+  // Track drags that can't be imported (no files at all, e.g. links, text or a file the browser can't hand over, or only
+  // files of an unsupported type) to tell the user so instead of showing the import overlay. Drags started within the
+  // page (e.g. reordering bank accounts) are left alone.
+  const [unsupportedDragDepth, setUnsupportedDragDepth] = useState(0)
+
+  useEffect(() => {
+    // Tag drags that start within the page, since the drag data is all a drop target can see of where a drag came from
+    const handleDragStart = (event: DragEvent) => event.dataTransfer?.setData(INTERNAL_DRAG_TYPE, '1')
+    window.addEventListener('dragstart', handleDragStart)
+    return () => window.removeEventListener('dragstart', handleDragStart)
+  }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     noClick: true,
@@ -252,17 +295,38 @@ export function Dropzone({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Box {...getRootProps()} sx={styles.dropzone}>
+    <Box
+      {...getRootProps({
+        onDragEnter: (event) => {
+          if (isUnsupportedDrag(event.dataTransfer)) {
+            setUnsupportedDragDepth((depth) => depth + 1)
+          }
+        },
+        onDragLeave: () => setUnsupportedDragDepth((depth) => Math.max(depth - 1, 0)),
+        onDrop: () => setUnsupportedDragDepth(0),
+      })}
+      sx={styles.dropzone}
+    >
       <input {...getInputProps()} />
       {children}
       {/* <pre>{JSON.stringify(input, null, 2)}</pre> */}
-      <Backdrop sx={styles.backdrop} open={isDragActive}>
+      <Backdrop sx={styles.backdrop} open={isDragActive && unsupportedDragDepth === 0}>
         <Paper>
           <Box p={4}>
             <Typography variant={'h1'} sx={{ mb: 4 }}>
               {t('upload.instructions')}
             </Typography>
             <LinearProgress color="secondary" />
+          </Box>
+        </Paper>
+      </Backdrop>
+      <Backdrop sx={styles.backdrop} open={unsupportedDragDepth > 0}>
+        <Paper>
+          <Box p={4}>
+            <Typography variant={'h1'} sx={{ mb: 2 }}>
+              {t('upload.unsupported')}
+            </Typography>
+            <Typography>{t('upload.supportedTypes')}</Typography>
           </Box>
         </Paper>
       </Backdrop>

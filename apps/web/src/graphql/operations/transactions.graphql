@@ -200,10 +200,18 @@ query TransactionSearch($match: String) {
   }
 }
 
-query TransactionByAmount($amount: BigInt!) {
-  allTransactions(filter: { amount: { equalTo: $amount } }, orderBy: POSTED_DESC) {
-    nodes {
-      ...TransactionFragment
+# Transfer link candidates, ranked in the database (see transaction_transfer_candidates): nearby ones
+# first, with the total so the dialog can offer the older ones.
+query GetTransferCandidates($nodeId: ID!, $withinDays: Int) {
+  transaction(nodeId: $nodeId) {
+    nodeId
+    transferCandidates(withinDays: $withinDays) {
+      nodes {
+        ...TransactionFragment
+      }
+    }
+    allTransferCandidates: transferCandidates {
+      totalCount
     }
   }
 }

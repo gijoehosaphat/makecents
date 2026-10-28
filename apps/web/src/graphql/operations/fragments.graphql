@@ -76,6 +76,12 @@ fragment TransactionSuggestionsFragment on Transaction {
       autoApply
     }
   }
+  suggestedTransfer {
+    id
+    nodeId
+    posted
+    bankAccountId
+  }
 }
 
 fragment BankAccountReconciliationFragment on BankAccountReconciliation {
