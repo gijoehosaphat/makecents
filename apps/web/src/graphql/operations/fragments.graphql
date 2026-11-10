@@ -95,7 +95,8 @@ fragment BankAccountReconciliationFragment on BankAccountReconciliation {
 }
 
 fragment BankCsvDefinitionFragment on BankCsvDefinition {
-  bankAccountId
+  bankAccountIds
+  fingerprint
   createdAt
   id
   mapping

@@ -44,15 +44,26 @@ import {
 import { BankCsvDefinition } from '@/graphql/types'
 import {
   buildTransactions,
+  describeColumns,
   findAccountIdColumn,
-  getMappedColumns,
   groupRowsByAccountId,
   hasAmountColumns,
   parseHeaders,
   parsePreview,
   parseRowDateAndAmount,
+  readMemo,
+  readName,
 } from '@/lib/parsers/Csv'
 import { detectMapping } from '@/lib/parsers/CsvDetect'
+import {
+  adaptTemplateToFile,
+  changesRowIds,
+  CsvTemplate,
+  findChangedFormat,
+  findTemplatesForFile,
+  fingerprintFile,
+  resolveAccountColumn,
+} from '@/lib/parsers/CsvTemplates'
 import {
   AccountMatch,
   DatedAmount,
@@ -70,12 +81,15 @@ const PREVIEW_ROWS = 5
 
 type AccountChoice = number | typeof NEW_ACCOUNT | ''
 
-/** Whether a saved template fits this file: every column it uses exists when read with its own settings. */
-function definitionFitsFile(definition: BankCsvDefinition, csvText: string): boolean {
-  const mapping = definition.mapping as CsvColumnMapping
-  const headers = parseHeaders(csvText, mapping)
-  const referenced = getMappedColumns(mapping)
-  return referenced.length > 0 && referenced.every((column) => headers.includes(column))
+function toTemplate(definition: BankCsvDefinition): CsvTemplate {
+  return {
+    id: definition.id,
+    nodeId: definition.nodeId,
+    name: definition.name ?? '',
+    fingerprint: definition.fingerprint,
+    mapping: definition.mapping as CsvColumnMapping,
+    bankAccountIds: (definition.bankAccountIds ?? []).filter((id): id is number => typeof id === 'number'),
+  }
 }
 
 /** "Chase ••1234" for Chase's "Chase1234_Activity…" exports, otherwise the bare file name. */
@@ -133,25 +147,47 @@ export function CsvImportDialog({
   const definitionsRefetch = [
     { query: GetBankCsvDefinitionsDocument, variables: { accountId: Number(currentAccountId) } },
   ]
-  const fittingDefinitions = useMemo(
+  const detected = useMemo(() => detectMapping(csvText), [csvText])
+  const templates = useMemo(
+    () => ((definitionsData?.allBankCsvDefinitions?.nodes as BankCsvDefinition[]) ?? []).map(toTemplate),
+    [definitionsData],
+  )
+  // Templates are identified by the file's format, so only those made for exactly this format
+  // apply. Without one, a template for an earlier version of the format (the bank has since added
+  // or dropped a few columns) is carried over to the new columns.
+  const matchingTemplates = useMemo(
+    () => findTemplatesForFile(csvText, templates, detected.mapping),
+    [csvText, templates, detected],
+  )
+  const changedFormat = useMemo(
+    () => (matchingTemplates.length ? undefined : findChangedFormat(csvText, templates, detected.mapping)),
+    [matchingTemplates, csvText, templates, detected],
+  )
+  const changedFormatMapping = useMemo(
     () =>
-      ((definitionsData?.allBankCsvDefinitions?.nodes as BankCsvDefinition[]) ?? []).filter((definition) =>
-        definitionFitsFile(definition, csvText),
-      ),
-    [definitionsData, csvText],
+      changedFormat
+        ? adaptTemplateToFile(
+            changedFormat.template.mapping,
+            detected.mapping,
+            parseHeaders(csvText, detected.mapping),
+            changedFormat.added,
+          )
+        : undefined,
+    [changedFormat, detected, csvText],
   )
 
-  const detected = useMemo(() => detectMapping(csvText), [csvText])
-
-  // How to read the file before we know its account: a saved template that fits, else detection.
-  // Note a template only describes the file's *format*, never which account it belongs to — two
-  // cards from the same bank export identical columns.
-  const baseMapping = (fittingDefinitions[0]?.mapping as CsvColumnMapping | undefined) ?? detected.mapping
+  // How to read the file before we know its account. A template only describes the file's
+  // *format*, never which account it belongs to: several accounts at one bank export identical
+  // columns, and share the template.
+  const baseMapping = matchingTemplates[0]?.mapping ?? changedFormatMapping ?? detected.mapping
   const basePreview = useMemo(() => parsePreview(csvText, baseMapping), [csvText, baseMapping])
 
-  // A column that looks like it holds the bank's own account identifier (e.g. "Card No."), and
+  // The column holding the bank's own account identifier (e.g. "account_number", "Card No."), and
   // the distinct values it takes across the file's rows.
-  const accountIdColumn = useMemo(() => findAccountIdColumn(basePreview.headers), [basePreview.headers])
+  const accountIdColumn = useMemo(
+    () => resolveAccountColumn(baseMapping, basePreview.headers, findAccountIdColumn),
+    [baseMapping, basePreview.headers],
+  )
   const distinctAccountIds = useMemo(
     () => (accountIdColumn ? Array.from(groupRowsByAccountId(basePreview.rows, accountIdColumn).keys()) : []),
     [accountIdColumn, basePreview.rows],
@@ -216,8 +252,19 @@ export function CsvImportDialog({
       accountColumnValue: distinctAccountIds.length === 1 ? distinctAccountIds[0] : undefined,
       fileName,
       overlapScores: scoreOverlap(baseRows, existing),
+      templateAccountIds: (matchingTemplates[0] ?? changedFormat?.template)?.bankAccountIds,
     })
-  }, [isMultiAccountFile, isDetecting, bankAccounts, existingTransactions, distinctAccountIds, fileName, baseRows])
+  }, [
+    isMultiAccountFile,
+    isDetecting,
+    bankAccounts,
+    existingTransactions,
+    distinctAccountIds,
+    fileName,
+    baseRows,
+    matchingTemplates,
+    changedFormat,
+  ])
 
   const matchedAccount = useMemo(
     () => (accountMatch ? bankAccounts?.find((account) => account.id === accountMatch.accountId) : undefined),
@@ -238,19 +285,28 @@ export function CsvImportDialog({
     return fileNameIdentifiers.length === 1 ? fileNameIdentifiers[0] : undefined
   }, [distinctAccountIds, fileName])
 
-  // The template saved for this account wins over any other that merely fits the file; with none
-  // saved, the detected columns are used and saved on import.
-  const sourceDefinition = useMemo(
+  // Two formats can only look alike without a header row (same column count); then the one this
+  // account used before wins. With no template at all, the detected columns are used and saved.
+  const matchedTemplate = useMemo(
     () =>
       (selectedAccountId
-        ? fittingDefinitions.find((definition) => definition.bankAccountId === selectedAccountId)
-        : undefined) ?? fittingDefinitions[0],
-    [fittingDefinitions, selectedAccountId],
+        ? matchingTemplates.find((template) => template.bankAccountIds.includes(selectedAccountId))
+        : undefined) ?? matchingTemplates[0],
+    [matchingTemplates, selectedAccountId],
   )
-  const activeMapping: CsvColumnMapping =
-    editedMapping ?? (sourceDefinition?.mapping as CsvColumnMapping | undefined) ?? detected.mapping
+  const savedMapping = matchedTemplate?.mapping ?? changedFormatMapping
+  const activeMapping: CsvColumnMapping = editedMapping ?? savedMapping ?? detected.mapping
+  const activeAccountColumn = useMemo(
+    () => resolveAccountColumn(activeMapping, parseHeaders(csvText, activeMapping), findAccountIdColumn),
+    [activeMapping, csvText],
+  )
+  // Carrying a template over to a changed format gives rows new ids when the columns they're
+  // built from changed, so rows imported before can come in again.
+  const changedFormatChangesIds =
+    !!changedFormat && changesRowIds(changedFormat.template.mapping, editedMapping ?? changedFormatMapping!)
 
   const preview = useMemo(() => parsePreview(csvText, activeMapping), [csvText, activeMapping])
+  const columnLabels = useMemo(() => describeColumns(csvText, activeMapping), [csvText, activeMapping])
   const parsedRows = useMemo(
     () =>
       preview.rows
@@ -258,7 +314,8 @@ export function CsvImportDialog({
         .filter((row): row is DatedAmount => Boolean(row)),
     [preview.rows, activeMapping],
   )
-  const isMappingUsable = parsedRows.length > 0 && !!activeMapping.descriptionColumn && hasAmountColumns(activeMapping)
+  const isMappingUsable =
+    parsedRows.length > 0 && activeMapping.nameColumns.length > 0 && hasAmountColumns(activeMapping)
   const isColumnsOpen = showColumns || !isMappingUsable
 
   const dateRange = useMemo(() => {
@@ -333,6 +390,8 @@ export function CsvImportDialog({
         return t('csvImport.autoDetectedAccount', { account })
       case 'fileName':
         return t('csvImport.autoMatchedByFileName', { account, identifier: accountMatch.detail })
+      case 'template':
+        return t('csvImport.autoMatchedByTemplate', { account })
       case 'overlap':
         return t('csvImport.autoMatchedByOverlap', { account, count: Number(accountMatch.detail) })
     }
@@ -343,18 +402,31 @@ export function CsvImportDialog({
   }
 
   /**
-   * Remembers how this file was read, without asking for a template name: columns we detected
-   * (or the user corrected) are saved against the account so its next file reads the same way.
+   * Remembers how this file's format was read, without asking for a template name, so the next
+   * file in this format (for any account) reads the same way, and which accounts it went into. A
+   * template for an earlier version of the format is replaced rather than joined by a second one.
    */
-  async function saveTemplate(accountId: number, bankAccountId: number | undefined, name: string) {
-    if (sourceDefinition && !editedMapping) {
+  async function saveTemplate(accountId: number, importedInto: number[], name: string) {
+    const fingerprint = fingerprintFile(csvText, activeMapping)
+    const template = matchedTemplate ?? changedFormat?.template
+    if (!template) {
+      await createBankCsvDefinition({
+        variables: { accountId, name, fingerprint, mapping: activeMapping, bankAccountIds: importedInto },
+      })
       return
     }
-    if (sourceDefinition && bankAccountId && sourceDefinition.bankAccountId === bankAccountId) {
-      await updateBankCsvDefinition({ variables: { nodeId: sourceDefinition.nodeId, mapping: activeMapping } })
+    const bankAccountIds = Array.from(new Set([...template.bankAccountIds, ...importedInto]))
+    const isChanged = !!editedMapping || !matchedTemplate || fingerprint !== template.fingerprint
+    if (!isChanged && bankAccountIds.length === template.bankAccountIds.length) {
       return
     }
-    await createBankCsvDefinition({ variables: { accountId, name, mapping: activeMapping, bankAccountId } })
+    await updateBankCsvDefinition({
+      variables: {
+        nodeId: template.nodeId,
+        bankAccountIds,
+        ...(isChanged ? { fingerprint, mapping: activeMapping } : {}),
+      },
+    })
   }
 
   async function handleImport() {
@@ -363,8 +435,8 @@ export function CsvImportDialog({
     }
     setIsProcessing(true)
     try {
-      if (isMultiAccountFile && accountIdColumn) {
-        const groups = groupRowsByAccountId(preview.rows, accountIdColumn)
+      if (isMultiAccountFile && activeAccountColumn) {
+        const groups = groupRowsByAccountId(preview.rows, activeAccountColumn)
         const importGroups: { bankAccountId: number; transactions: InputTransaction[] }[] = []
         for (const [accountId, rows] of groups) {
           const identifierMatches =
@@ -395,7 +467,11 @@ export function CsvImportDialog({
         }
 
         await importCsvTransactions(importGroups, fileName)
-        await saveTemplate(currentAccountId, undefined, fileName.replace(/\.csv$/i, '')).catch(console.error)
+        await saveTemplate(
+          currentAccountId,
+          importGroups.map((group) => group.bankAccountId),
+          fileName.replace(/\.csv$/i, ''),
+        ).catch(console.error)
         onClose()
         return
       }
@@ -434,7 +510,7 @@ export function CsvImportDialog({
       const transactions = await buildTransactions(preview.rows, activeMapping, String(bankAccountId))
       await importCsvTransactions([{ bankAccountId, transactions }], fileName)
       // After the import, so a template that fails to save never blocks the transactions.
-      await saveTemplate(currentAccountId, bankAccountId, accountName || fileName.replace(/\.csv$/i, '')).catch(
+      await saveTemplate(currentAccountId, [bankAccountId], accountName || fileName.replace(/\.csv$/i, '')).catch(
         console.error,
       )
       onClose()
@@ -532,6 +608,16 @@ export function CsvImportDialog({
               </Typography>
             )}
 
+            {changedFormat && (
+              <Alert severity={changedFormatChangesIds ? 'warning' : 'info'}>
+                {t('csvImport.formatChanged', {
+                  added: changedFormat.added.join(', ') || t('csvImport.noColumns'),
+                  removed: changedFormat.removed.join(', ') || t('csvImport.noColumns'),
+                })}
+                {changedFormatChangesIds && ` ${t('csvImport.formatChangedIds')}`}
+              </Alert>
+            )}
+
             {!isMappingUsable && <Alert severity={'warning'}>{t('csvImport.columnsUndetected')}</Alert>}
 
             {isMappingUsable && (
@@ -550,7 +636,12 @@ export function CsvImportDialog({
             )}
 
             <Collapse in={isColumnsOpen}>
-              <MappingEditor mapping={activeMapping} headers={preview.headers} onChange={updateMapping} />
+              <MappingEditor
+                mapping={activeMapping}
+                headers={preview.headers}
+                columnLabels={columnLabels}
+                onChange={updateMapping}
+              />
             </Collapse>
           </Box>
         )}
@@ -568,16 +659,23 @@ export function CsvImportDialog({
 function MappingEditor({
   mapping,
   headers,
+  columnLabels,
   onChange,
 }: {
   mapping: CsvColumnMapping
   headers: string[]
+  /** Shown beside numbered columns (files read without a header row). */
+  columnLabels: Record<string, string>
   onChange: (patch: Partial<CsvColumnMapping>) => void
 }) {
   const t = useTranslations('common')
+  const columnLabel = (header: string) => (columnLabels[header] ? `${header} (${columnLabels[header]})` : header)
+  // Multi-selects hand back a list (or, autofilled, a comma-separated string), in the order picked.
+  const selectedColumns = (value: unknown) => (typeof value === 'string' ? value.split(',') : (value as string[]))
+  const renderColumns = (selected: unknown) => (selected as string[]).map(columnLabel).join(' + ')
   const columnOptions = headers.map((header) => (
     <MenuItem key={header} value={header}>
-      {header}
+      {columnLabel(header)}
     </MenuItem>
   ))
 
@@ -604,24 +702,61 @@ function MappingEditor({
       <Box sx={{ display: 'flex', gap: 2 }}>
         <TextField
           select
-          label={t('csvImport.descriptionColumn')}
-          value={mapping.descriptionColumn}
-          onChange={(e) => onChange({ descriptionColumn: e.target.value })}
+          label={t('csvImport.timeColumn')}
+          value={mapping.timeColumn || ''}
+          onChange={(e) =>
+            onChange({ timeColumn: e.target.value || null, timeFormat: mapping.timeFormat || 'H:mm:ss' })
+          }
+          sx={{ flex: 1 }}
+        >
+          <MenuItem value={''}>{t('csvImport.none')}</MenuItem>
+          {columnOptions}
+        </TextField>
+        <TextField
+          label={t('csvImport.timeFormat')}
+          value={mapping.timeFormat || ''}
+          onChange={(e) => onChange({ timeFormat: e.target.value })}
+          disabled={!mapping.timeColumn}
+          sx={{ flex: 1 }}
+        />
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <TextField
+          select
+          label={t('csvImport.nameColumns')}
+          value={mapping.nameColumns}
+          onChange={(e) => onChange({ nameColumns: selectedColumns(e.target.value) })}
+          SelectProps={{ multiple: true, renderValue: renderColumns }}
+          helperText={t('csvImport.nameColumnsHelp')}
           sx={{ flex: 1 }}
         >
           {columnOptions}
         </TextField>
         <TextField
           select
-          label={t('csvImport.memoColumn')}
-          value={mapping.memoColumn || ''}
-          onChange={(e) => onChange({ memoColumn: e.target.value || undefined })}
+          label={t('csvImport.memoColumns')}
+          value={mapping.memoColumns}
+          onChange={(e) => onChange({ memoColumns: selectedColumns(e.target.value) })}
+          SelectProps={{ multiple: true, renderValue: renderColumns }}
+          helperText={t('csvImport.memoColumnsHelp')}
           sx={{ flex: 1 }}
         >
-          <MenuItem value={''}>{t('csvImport.none')}</MenuItem>
           {columnOptions}
         </TextField>
       </Box>
+
+      <TextField
+        select
+        label={t('csvImport.accountColumn')}
+        value={mapping.accountColumn ?? (mapping.hasHeaderRow ? (findAccountIdColumn(headers) ?? '') : '')}
+        onChange={(e) => onChange({ accountColumn: e.target.value || null })}
+        helperText={t('csvImport.accountColumnHelp')}
+        sx={{ width: '50%' }}
+      >
+        <MenuItem value={''}>{t('csvImport.none')}</MenuItem>
+        {columnOptions}
+      </TextField>
 
       <RadioGroup
         row
@@ -719,9 +854,11 @@ function PreviewTable({ rows, mapping }: { rows: Record<string, string>[]; mappi
           const parsed = parseRowDateAndAmount(row, mapping)
           return (
             <TableRow key={index}>
-              <TableCell>{parsed ? format(parsed.posted, 'MMM d, yyyy') : '—'}</TableCell>
-              <TableCell>{row[mapping.descriptionColumn]}</TableCell>
-              <TableCell>{mapping.memoColumn ? row[mapping.memoColumn] : ''}</TableCell>
+              <TableCell>
+                {parsed ? format(parsed.posted, mapping.timeColumn ? 'MMM d, yyyy h:mm a' : 'MMM d, yyyy') : '—'}
+              </TableCell>
+              <TableCell>{readName(row, mapping)}</TableCell>
+              <TableCell>{readMemo(row, mapping)}</TableCell>
               <TableCell align={'right'}>{parsed ? formatMoneyCents(parsed.amount, 'USD', hidden) : '—'}</TableCell>
             </TableRow>
           )

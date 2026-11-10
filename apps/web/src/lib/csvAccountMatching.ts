@@ -15,7 +15,7 @@ export interface ExistingTransaction extends DatedAmount {
   bankAccountId: number
 }
 
-export type AccountMatchReason = 'accountColumn' | 'fileName' | 'overlap'
+export type AccountMatchReason = 'accountColumn' | 'fileName' | 'template' | 'overlap'
 
 export interface AccountMatch {
   accountId: number
@@ -138,19 +138,24 @@ function clearOverlapWinner(scores: Map<number, number>): { accountId: number; s
 
 /**
  * Decides which existing account a single-account CSV belongs to, or returns undefined when the
- * evidence is missing or conflicting so the user is asked instead. A saved template is never
- * evidence: several accounts at the same bank export identical columns.
+ * evidence is missing or conflicting so the user is asked instead. The file's own account column
+ * comes first, then an identifier in its name. Lacking both, a template that has only ever
+ * imported into one account suggests that account, unless the file's transactions clearly live
+ * in another; several accounts at one bank export identical columns, so it's only a hint.
  */
 export function matchAccount({
   accounts,
   accountColumnValue,
   fileName,
   overlapScores,
+  templateAccountIds = [],
 }: {
   accounts: MatchableAccount[]
   accountColumnValue?: string
   fileName: string
   overlapScores: Map<number, number>
+  /** The accounts the file's template has imported into. */
+  templateAccountIds?: number[]
 }): AccountMatch | undefined {
   const identifierMatches: AccountMatch[] = []
   if (accountColumnValue) {
@@ -184,6 +189,10 @@ export function matchAccount({
     return overlap && identifierAccountIds.has(overlap.accountId)
       ? { accountId: overlap.accountId, reason: 'overlap', detail: String(overlap.score) }
       : undefined
+  }
+  const templateAccounts = accounts.filter((account) => templateAccountIds.includes(account.id))
+  if (templateAccounts.length === 1 && (!overlap || overlap.accountId === templateAccounts[0].id)) {
+    return { accountId: templateAccounts[0].id, reason: 'template', detail: '' }
   }
   return overlap ? { accountId: overlap.accountId, reason: 'overlap', detail: String(overlap.score) } : undefined
 }

@@ -570,6 +570,7 @@ type Query implements Node {
   bankAccountReconciliationById(id: Int!): BankAccountReconciliation
   bankAccountReconciliationByBankAccountIdAndAsOf(bankAccountId: Int!, asOf: Datetime!): BankAccountReconciliation
   bankCsvDefinitionById(id: Int!): BankCsvDefinition
+  bankCsvDefinitionByAccountIdAndFingerprint(accountId: Int!, fingerprint: String!): BankCsvDefinition
   budgetById(id: Int!): Budget
   budgetAssignmentById(id: Int!): BudgetAssignment
   budgetAssignmentByBudgetIdAndMonth(budgetId: Int!, month: Date!): BudgetAssignment
@@ -2268,10 +2269,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_SUM_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_ASC
@@ -2284,10 +2287,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_CREATED_AT_ASC
@@ -2300,10 +2305,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MIN_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_CREATED_AT_ASC
@@ -2316,10 +2323,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_MAX_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_CREATED_AT_ASC
@@ -2332,10 +2341,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_ASC
@@ -2348,10 +2359,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_ASC
@@ -2364,10 +2377,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
@@ -2380,10 +2395,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_ASC
@@ -2396,10 +2413,12 @@ enum AccountsOrderBy {
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_IDS_DESC
   ACCOUNT_MEMBERS_BY_ACCOUNT_ID_COUNT_ASC
   ACCOUNT_MEMBERS_BY_ACCOUNT_ID_COUNT_DESC
   ACCOUNT_MEMBERS_BY_ACCOUNT_ID_SUM_ACCOUNT_ID_ASC
@@ -2937,12 +2956,6 @@ input BankAccountFilter {
 
   """Some related `transactionsByBankAccountId` exist."""
   transactionsByBankAccountIdExist: Boolean
-
-  """Filter by the object’s `bankCsvDefinitionsByBankAccountId` relation."""
-  bankCsvDefinitionsByBankAccountId: BankAccountToManyBankCsvDefinitionFilter
-
-  """Some related `bankCsvDefinitionsByBankAccountId` exist."""
-  bankCsvDefinitionsByBankAccountIdExist: Boolean
 
   """
   Filter by the object’s `bankAccountReconciliationsByBankAccountId` relation.
@@ -4937,9 +4950,6 @@ input BankCsvDefinitionFilter {
   """Filter by the object’s `userId` field."""
   userId: IntFilter
 
-  """Filter by the object’s `bankAccountId` field."""
-  bankAccountId: IntFilter
-
   """Filter by the object’s `accountId` field."""
   accountId: IntFilter
 
@@ -4948,12 +4958,6 @@ input BankCsvDefinitionFilter {
 
   """A related `userByUserId` exists."""
   userByUserIdExists: Boolean
-
-  """Filter by the object’s `bankAccountByBankAccountId` relation."""
-  bankAccountByBankAccountId: BankAccountFilter
-
-  """A related `bankAccountByBankAccountId` exists."""
-  bankAccountByBankAccountIdExists: Boolean
 
   """Filter by the object’s `accountByAccountId` relation."""
   accountByAccountId: AccountFilter
@@ -5014,7 +5018,6 @@ input BankCsvDefinitionAggregatesFilter {
 input BankCsvDefinitionSumAggregateFilter {
   id: BigIntFilter
   userId: BigIntFilter
-  bankAccountId: BigIntFilter
   accountId: BigIntFilter
 }
 
@@ -5025,56 +5028,50 @@ input BankCsvDefinitionDistinctCountAggregateFilter {
   name: BigIntFilter
   mapping: BigIntFilter
   userId: BigIntFilter
-  bankAccountId: BigIntFilter
   accountId: BigIntFilter
+  fingerprint: BigIntFilter
+  bankAccountIds: BigIntFilter
 }
 
 input BankCsvDefinitionMinAggregateFilter {
   id: IntFilter
   userId: IntFilter
-  bankAccountId: IntFilter
   accountId: IntFilter
 }
 
 input BankCsvDefinitionMaxAggregateFilter {
   id: IntFilter
   userId: IntFilter
-  bankAccountId: IntFilter
   accountId: IntFilter
 }
 
 input BankCsvDefinitionAverageAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
-  bankAccountId: BigFloatFilter
   accountId: BigFloatFilter
 }
 
 input BankCsvDefinitionStddevSampleAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
-  bankAccountId: BigFloatFilter
   accountId: BigFloatFilter
 }
 
 input BankCsvDefinitionStddevPopulationAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
-  bankAccountId: BigFloatFilter
   accountId: BigFloatFilter
 }
 
 input BankCsvDefinitionVarianceSampleAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
-  bankAccountId: BigFloatFilter
   accountId: BigFloatFilter
 }
 
 input BankCsvDefinitionVariancePopulationAggregateFilter {
   id: BigFloatFilter
   userId: BigFloatFilter
-  bankAccountId: BigFloatFilter
   accountId: BigFloatFilter
 }
 
@@ -5579,31 +5576,6 @@ input DeletedTransactionVariancePopulationAggregateFilter {
   amount: BigFloatFilter
   duplicateOfId: BigFloatFilter
   userId: BigFloatFilter
-}
-
-"""
-A filter to be used against many `BankCsvDefinition` object types. All fields are combined with a logical ‘and.’
-"""
-input BankAccountToManyBankCsvDefinitionFilter {
-  """
-  Every related `BankCsvDefinition` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  every: BankCsvDefinitionFilter
-
-  """
-  Some related `BankCsvDefinition` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  some: BankCsvDefinitionFilter
-
-  """
-  No related `BankCsvDefinition` matches the filter criteria. All fields are combined with a logical ‘and.’
-  """
-  none: BankCsvDefinitionFilter
-
-  """
-  Aggregates across related `BankCsvDefinition` match the filter criteria.
-  """
-  aggregates: BankCsvDefinitionAggregatesFilter
 }
 
 """
@@ -6178,40 +6150,6 @@ type BankAccount implements Node {
     """
     filter: TransactionFilter
   ): TransactionsConnection!
-
-  """Reads and enables pagination through a set of `BankCsvDefinition`."""
-  bankCsvDefinitionsByBankAccountId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """The method to use when ordering `BankCsvDefinition`."""
-    orderBy: [BankCsvDefinitionsOrderBy!] = [PRIMARY_KEY_ASC]
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: BankCsvDefinitionCondition
-
-    """
-    A filter to be used in determining which values should be returned by the collection.
-    """
-    filter: BankCsvDefinitionFilter
-  ): BankCsvDefinitionsConnection!
 
   """
   Reads and enables pagination through a set of `BankAccountReconciliation`.
@@ -10165,407 +10103,6 @@ input TransactionHavingVariancePopulationTransactionTransferCountInput {
   filter: HavingBigfloatFilter
 }
 
-"""A connection to a list of `BankCsvDefinition` values."""
-type BankCsvDefinitionsConnection {
-  """A list of `BankCsvDefinition` objects."""
-  nodes: [BankCsvDefinition!]!
-
-  """
-  A list of edges which contains the `BankCsvDefinition` and cursor to aid in pagination.
-  """
-  edges: [BankCsvDefinitionsEdge!]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """
-  The count of *all* `BankCsvDefinition` you could get from the connection.
-  """
-  totalCount: Int!
-
-  """
-  Aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  aggregates: BankCsvDefinitionAggregates
-
-  """
-  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  groupedAggregates(
-    """
-    The method to use when grouping `BankCsvDefinition` for these aggregates.
-    """
-    groupBy: [BankCsvDefinitionGroupBy!]!
-
-    """Conditions on the grouped aggregates."""
-    having: BankCsvDefinitionHavingInput
-  ): [BankCsvDefinitionAggregates!]
-}
-
-type BankCsvDefinition implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  nodeId: ID!
-  id: Int!
-  createdAt: Datetime!
-  updatedAt: Datetime!
-  name: String!
-  mapping: JSON!
-  userId: Int
-  bankAccountId: Int
-  accountId: Int!
-
-  """Reads a single `User` that is related to this `BankCsvDefinition`."""
-  userByUserId: User
-
-  """
-  Reads a single `BankAccount` that is related to this `BankCsvDefinition`.
-  """
-  bankAccountByBankAccountId: BankAccount
-
-  """Reads a single `Account` that is related to this `BankCsvDefinition`."""
-  accountByAccountId: Account
-}
-
-"""A `BankCsvDefinition` edge in the connection."""
-type BankCsvDefinitionsEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `BankCsvDefinition` at the end of the edge."""
-  node: BankCsvDefinition!
-}
-
-type BankCsvDefinitionAggregates {
-  keys: [String!]
-
-  """
-  Sum aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  sum: BankCsvDefinitionSumAggregates
-
-  """
-  Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  distinctCount: BankCsvDefinitionDistinctCountAggregates
-
-  """
-  Minimum aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  min: BankCsvDefinitionMinAggregates
-
-  """
-  Maximum aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  max: BankCsvDefinitionMaxAggregates
-
-  """
-  Mean average aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  average: BankCsvDefinitionAverageAggregates
-
-  """
-  Sample standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  stddevSample: BankCsvDefinitionStddevSampleAggregates
-
-  """
-  Population standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  stddevPopulation: BankCsvDefinitionStddevPopulationAggregates
-
-  """
-  Sample variance aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  varianceSample: BankCsvDefinitionVarianceSampleAggregates
-
-  """
-  Population variance aggregates across the matching connection (ignoring before/after/first/last/offset)
-  """
-  variancePopulation: BankCsvDefinitionVariancePopulationAggregates
-}
-
-type BankCsvDefinitionSumAggregates {
-  """Sum of id across the matching connection"""
-  id: BigInt!
-
-  """Sum of userId across the matching connection"""
-  userId: BigInt!
-
-  """Sum of bankAccountId across the matching connection"""
-  bankAccountId: BigInt!
-
-  """Sum of accountId across the matching connection"""
-  accountId: BigInt!
-}
-
-type BankCsvDefinitionDistinctCountAggregates {
-  """Distinct count of id across the matching connection"""
-  id: BigInt
-
-  """Distinct count of createdAt across the matching connection"""
-  createdAt: BigInt
-
-  """Distinct count of updatedAt across the matching connection"""
-  updatedAt: BigInt
-
-  """Distinct count of name across the matching connection"""
-  name: BigInt
-
-  """Distinct count of mapping across the matching connection"""
-  mapping: BigInt
-
-  """Distinct count of userId across the matching connection"""
-  userId: BigInt
-
-  """Distinct count of bankAccountId across the matching connection"""
-  bankAccountId: BigInt
-
-  """Distinct count of accountId across the matching connection"""
-  accountId: BigInt
-}
-
-type BankCsvDefinitionMinAggregates {
-  """Minimum of id across the matching connection"""
-  id: Int
-
-  """Minimum of userId across the matching connection"""
-  userId: Int
-
-  """Minimum of bankAccountId across the matching connection"""
-  bankAccountId: Int
-
-  """Minimum of accountId across the matching connection"""
-  accountId: Int
-}
-
-type BankCsvDefinitionMaxAggregates {
-  """Maximum of id across the matching connection"""
-  id: Int
-
-  """Maximum of userId across the matching connection"""
-  userId: Int
-
-  """Maximum of bankAccountId across the matching connection"""
-  bankAccountId: Int
-
-  """Maximum of accountId across the matching connection"""
-  accountId: Int
-}
-
-type BankCsvDefinitionAverageAggregates {
-  """Mean average of id across the matching connection"""
-  id: BigFloat
-
-  """Mean average of userId across the matching connection"""
-  userId: BigFloat
-
-  """Mean average of bankAccountId across the matching connection"""
-  bankAccountId: BigFloat
-
-  """Mean average of accountId across the matching connection"""
-  accountId: BigFloat
-}
-
-type BankCsvDefinitionStddevSampleAggregates {
-  """Sample standard deviation of id across the matching connection"""
-  id: BigFloat
-
-  """Sample standard deviation of userId across the matching connection"""
-  userId: BigFloat
-
-  """
-  Sample standard deviation of bankAccountId across the matching connection
-  """
-  bankAccountId: BigFloat
-
-  """Sample standard deviation of accountId across the matching connection"""
-  accountId: BigFloat
-}
-
-type BankCsvDefinitionStddevPopulationAggregates {
-  """Population standard deviation of id across the matching connection"""
-  id: BigFloat
-
-  """Population standard deviation of userId across the matching connection"""
-  userId: BigFloat
-
-  """
-  Population standard deviation of bankAccountId across the matching connection
-  """
-  bankAccountId: BigFloat
-
-  """
-  Population standard deviation of accountId across the matching connection
-  """
-  accountId: BigFloat
-}
-
-type BankCsvDefinitionVarianceSampleAggregates {
-  """Sample variance of id across the matching connection"""
-  id: BigFloat
-
-  """Sample variance of userId across the matching connection"""
-  userId: BigFloat
-
-  """Sample variance of bankAccountId across the matching connection"""
-  bankAccountId: BigFloat
-
-  """Sample variance of accountId across the matching connection"""
-  accountId: BigFloat
-}
-
-type BankCsvDefinitionVariancePopulationAggregates {
-  """Population variance of id across the matching connection"""
-  id: BigFloat
-
-  """Population variance of userId across the matching connection"""
-  userId: BigFloat
-
-  """Population variance of bankAccountId across the matching connection"""
-  bankAccountId: BigFloat
-
-  """Population variance of accountId across the matching connection"""
-  accountId: BigFloat
-}
-
-"""Grouping methods for `BankCsvDefinition` for usage during aggregation."""
-enum BankCsvDefinitionGroupBy {
-  USER_ID
-  BANK_ACCOUNT_ID
-  ACCOUNT_ID
-}
-
-"""Conditions for `BankCsvDefinition` aggregates."""
-input BankCsvDefinitionHavingInput {
-  AND: [BankCsvDefinitionHavingInput!]
-  OR: [BankCsvDefinitionHavingInput!]
-  sum: BankCsvDefinitionHavingSumInput
-  distinctCount: BankCsvDefinitionHavingDistinctCountInput
-  min: BankCsvDefinitionHavingMinInput
-  max: BankCsvDefinitionHavingMaxInput
-  average: BankCsvDefinitionHavingAverageInput
-  stddevSample: BankCsvDefinitionHavingStddevSampleInput
-  stddevPopulation: BankCsvDefinitionHavingStddevPopulationInput
-  varianceSample: BankCsvDefinitionHavingVarianceSampleInput
-  variancePopulation: BankCsvDefinitionHavingVariancePopulationInput
-}
-
-input BankCsvDefinitionHavingSumInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingDistinctCountInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingMinInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingMaxInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingAverageInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingStddevSampleInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingStddevPopulationInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingVarianceSampleInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-input BankCsvDefinitionHavingVariancePopulationInput {
-  id: HavingIntFilter
-  createdAt: HavingDatetimeFilter
-  updatedAt: HavingDatetimeFilter
-  userId: HavingIntFilter
-  bankAccountId: HavingIntFilter
-  accountId: HavingIntFilter
-}
-
-"""Methods to use when ordering `BankCsvDefinition`."""
-enum BankCsvDefinitionsOrderBy {
-  NATURAL
-  ID_ASC
-  ID_DESC
-  USER_ID_ASC
-  USER_ID_DESC
-  BANK_ACCOUNT_ID_ASC
-  BANK_ACCOUNT_ID_DESC
-  ACCOUNT_ID_ASC
-  ACCOUNT_ID_DESC
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `BankCsvDefinition` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input BankCsvDefinitionCondition {
-  """Checks for equality with the object’s `id` field."""
-  id: Int
-
-  """Checks for equality with the object’s `userId` field."""
-  userId: Int
-
-  """Checks for equality with the object’s `bankAccountId` field."""
-  bankAccountId: Int
-
-  """Checks for equality with the object’s `accountId` field."""
-  accountId: Int
-}
-
 """A connection to a list of `BankAccountReconciliation` values."""
 type BankAccountReconciliationsConnection {
   """A list of `BankAccountReconciliation` objects."""
@@ -12457,152 +11994,6 @@ enum BankAccountsOrderBy {
   TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_IMPORT_BATCH_ID_DESC
   TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_CATEGORY_SOURCE_ASC
   TRANSACTIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_CATEGORY_SOURCE_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_COUNT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_COUNT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_SUM_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MIN_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_MAX_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_AVERAGE_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_CREATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_UPDATED_AT_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_NAME_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_NAME_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_MAPPING_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_MAPPING_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_USER_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_BANK_ACCOUNT_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
   BANK_ACCOUNT_RECONCILIATIONS_BY_BANK_ACCOUNT_ID_COUNT_ASC
   BANK_ACCOUNT_RECONCILIATIONS_BY_BANK_ACCOUNT_ID_COUNT_DESC
   BANK_ACCOUNT_RECONCILIATIONS_BY_BANK_ACCOUNT_ID_SUM_ID_ASC
@@ -14528,6 +13919,369 @@ enum BudgetsOrderBy {
 A condition to be used against `Budget` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
 input BudgetCondition {
+  """Checks for equality with the object’s `id` field."""
+  id: Int
+
+  """Checks for equality with the object’s `userId` field."""
+  userId: Int
+
+  """Checks for equality with the object’s `accountId` field."""
+  accountId: Int
+}
+
+"""A connection to a list of `BankCsvDefinition` values."""
+type BankCsvDefinitionsConnection {
+  """A list of `BankCsvDefinition` objects."""
+  nodes: [BankCsvDefinition!]!
+
+  """
+  A list of edges which contains the `BankCsvDefinition` and cursor to aid in pagination.
+  """
+  edges: [BankCsvDefinitionsEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """
+  The count of *all* `BankCsvDefinition` you could get from the connection.
+  """
+  totalCount: Int!
+
+  """
+  Aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  aggregates: BankCsvDefinitionAggregates
+
+  """
+  Grouped aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  groupedAggregates(
+    """
+    The method to use when grouping `BankCsvDefinition` for these aggregates.
+    """
+    groupBy: [BankCsvDefinitionGroupBy!]!
+
+    """Conditions on the grouped aggregates."""
+    having: BankCsvDefinitionHavingInput
+  ): [BankCsvDefinitionAggregates!]
+}
+
+type BankCsvDefinition implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  nodeId: ID!
+  id: Int!
+  createdAt: Datetime!
+  updatedAt: Datetime!
+  name: String!
+  mapping: JSON!
+  userId: Int
+  accountId: Int!
+
+  """
+  The file format this template reads: its sorted header names, or its column count when it has no header row.
+  """
+  fingerprint: String!
+
+  """The bank accounts this template has imported into."""
+  bankAccountIds: [Int]!
+
+  """Reads a single `User` that is related to this `BankCsvDefinition`."""
+  userByUserId: User
+
+  """Reads a single `Account` that is related to this `BankCsvDefinition`."""
+  accountByAccountId: Account
+}
+
+"""A `BankCsvDefinition` edge in the connection."""
+type BankCsvDefinitionsEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `BankCsvDefinition` at the end of the edge."""
+  node: BankCsvDefinition!
+}
+
+type BankCsvDefinitionAggregates {
+  keys: [String!]
+
+  """
+  Sum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  sum: BankCsvDefinitionSumAggregates
+
+  """
+  Distinct count aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  distinctCount: BankCsvDefinitionDistinctCountAggregates
+
+  """
+  Minimum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  min: BankCsvDefinitionMinAggregates
+
+  """
+  Maximum aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  max: BankCsvDefinitionMaxAggregates
+
+  """
+  Mean average aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  average: BankCsvDefinitionAverageAggregates
+
+  """
+  Sample standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevSample: BankCsvDefinitionStddevSampleAggregates
+
+  """
+  Population standard deviation aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  stddevPopulation: BankCsvDefinitionStddevPopulationAggregates
+
+  """
+  Sample variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  varianceSample: BankCsvDefinitionVarianceSampleAggregates
+
+  """
+  Population variance aggregates across the matching connection (ignoring before/after/first/last/offset)
+  """
+  variancePopulation: BankCsvDefinitionVariancePopulationAggregates
+}
+
+type BankCsvDefinitionSumAggregates {
+  """Sum of id across the matching connection"""
+  id: BigInt!
+
+  """Sum of userId across the matching connection"""
+  userId: BigInt!
+
+  """Sum of accountId across the matching connection"""
+  accountId: BigInt!
+}
+
+type BankCsvDefinitionDistinctCountAggregates {
+  """Distinct count of id across the matching connection"""
+  id: BigInt
+
+  """Distinct count of createdAt across the matching connection"""
+  createdAt: BigInt
+
+  """Distinct count of updatedAt across the matching connection"""
+  updatedAt: BigInt
+
+  """Distinct count of name across the matching connection"""
+  name: BigInt
+
+  """Distinct count of mapping across the matching connection"""
+  mapping: BigInt
+
+  """Distinct count of userId across the matching connection"""
+  userId: BigInt
+
+  """Distinct count of accountId across the matching connection"""
+  accountId: BigInt
+
+  """Distinct count of fingerprint across the matching connection"""
+  fingerprint: BigInt
+
+  """Distinct count of bankAccountIds across the matching connection"""
+  bankAccountIds: BigInt
+}
+
+type BankCsvDefinitionMinAggregates {
+  """Minimum of id across the matching connection"""
+  id: Int
+
+  """Minimum of userId across the matching connection"""
+  userId: Int
+
+  """Minimum of accountId across the matching connection"""
+  accountId: Int
+}
+
+type BankCsvDefinitionMaxAggregates {
+  """Maximum of id across the matching connection"""
+  id: Int
+
+  """Maximum of userId across the matching connection"""
+  userId: Int
+
+  """Maximum of accountId across the matching connection"""
+  accountId: Int
+}
+
+type BankCsvDefinitionAverageAggregates {
+  """Mean average of id across the matching connection"""
+  id: BigFloat
+
+  """Mean average of userId across the matching connection"""
+  userId: BigFloat
+
+  """Mean average of accountId across the matching connection"""
+  accountId: BigFloat
+}
+
+type BankCsvDefinitionStddevSampleAggregates {
+  """Sample standard deviation of id across the matching connection"""
+  id: BigFloat
+
+  """Sample standard deviation of userId across the matching connection"""
+  userId: BigFloat
+
+  """Sample standard deviation of accountId across the matching connection"""
+  accountId: BigFloat
+}
+
+type BankCsvDefinitionStddevPopulationAggregates {
+  """Population standard deviation of id across the matching connection"""
+  id: BigFloat
+
+  """Population standard deviation of userId across the matching connection"""
+  userId: BigFloat
+
+  """
+  Population standard deviation of accountId across the matching connection
+  """
+  accountId: BigFloat
+}
+
+type BankCsvDefinitionVarianceSampleAggregates {
+  """Sample variance of id across the matching connection"""
+  id: BigFloat
+
+  """Sample variance of userId across the matching connection"""
+  userId: BigFloat
+
+  """Sample variance of accountId across the matching connection"""
+  accountId: BigFloat
+}
+
+type BankCsvDefinitionVariancePopulationAggregates {
+  """Population variance of id across the matching connection"""
+  id: BigFloat
+
+  """Population variance of userId across the matching connection"""
+  userId: BigFloat
+
+  """Population variance of accountId across the matching connection"""
+  accountId: BigFloat
+}
+
+"""Grouping methods for `BankCsvDefinition` for usage during aggregation."""
+enum BankCsvDefinitionGroupBy {
+  USER_ID
+  ACCOUNT_ID
+}
+
+"""Conditions for `BankCsvDefinition` aggregates."""
+input BankCsvDefinitionHavingInput {
+  AND: [BankCsvDefinitionHavingInput!]
+  OR: [BankCsvDefinitionHavingInput!]
+  sum: BankCsvDefinitionHavingSumInput
+  distinctCount: BankCsvDefinitionHavingDistinctCountInput
+  min: BankCsvDefinitionHavingMinInput
+  max: BankCsvDefinitionHavingMaxInput
+  average: BankCsvDefinitionHavingAverageInput
+  stddevSample: BankCsvDefinitionHavingStddevSampleInput
+  stddevPopulation: BankCsvDefinitionHavingStddevPopulationInput
+  varianceSample: BankCsvDefinitionHavingVarianceSampleInput
+  variancePopulation: BankCsvDefinitionHavingVariancePopulationInput
+}
+
+input BankCsvDefinitionHavingSumInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingDistinctCountInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingMinInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingMaxInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingAverageInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingStddevSampleInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingStddevPopulationInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingVarianceSampleInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+input BankCsvDefinitionHavingVariancePopulationInput {
+  id: HavingIntFilter
+  createdAt: HavingDatetimeFilter
+  updatedAt: HavingDatetimeFilter
+  userId: HavingIntFilter
+  accountId: HavingIntFilter
+}
+
+"""Methods to use when ordering `BankCsvDefinition`."""
+enum BankCsvDefinitionsOrderBy {
+  NATURAL
+  ID_ASC
+  ID_DESC
+  USER_ID_ASC
+  USER_ID_DESC
+  ACCOUNT_ID_ASC
+  ACCOUNT_ID_DESC
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A condition to be used against `BankCsvDefinition` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input BankCsvDefinitionCondition {
   """Checks for equality with the object’s `id` field."""
   id: Int
 
@@ -16554,10 +16308,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_SUM_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_CREATED_AT_ASC
@@ -16570,10 +16326,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_DISTINCT_COUNT_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_CREATED_AT_ASC
@@ -16586,10 +16344,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MIN_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_CREATED_AT_ASC
@@ -16602,10 +16362,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_MAX_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_CREATED_AT_ASC
@@ -16618,10 +16380,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_AVERAGE_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_CREATED_AT_ASC
@@ -16634,10 +16398,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_SAMPLE_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_CREATED_AT_ASC
@@ -16650,10 +16416,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_STDDEV_POPULATION_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_CREATED_AT_ASC
@@ -16666,10 +16434,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_SAMPLE_BANK_ACCOUNT_IDS_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_CREATED_AT_ASC
@@ -16682,10 +16452,12 @@ enum UsersOrderBy {
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_MAPPING_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_USER_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_USER_ID_DESC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_ASC
-  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_ACCOUNT_ID_DESC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_ACCOUNT_ID_ASC
   BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_ACCOUNT_ID_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_FINGERPRINT_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_FINGERPRINT_DESC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_ACCOUNT_IDS_ASC
+  BANK_CSV_DEFINITIONS_BY_USER_ID_VARIANCE_POPULATION_BANK_ACCOUNT_IDS_DESC
   ACCOUNT_MEMBERS_BY_USER_ID_COUNT_ASC
   ACCOUNT_MEMBERS_BY_USER_ID_COUNT_DESC
   ACCOUNT_MEMBERS_BY_USER_ID_SUM_ACCOUNT_ID_ASC
@@ -17573,6 +17345,14 @@ type Mutation {
     input: UpdateBankCsvDefinitionByIdInput!
   ): UpdateBankCsvDefinitionPayload
 
+  """Updates a single `BankCsvDefinition` using a unique key and a patch."""
+  updateBankCsvDefinitionByAccountIdAndFingerprint(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdateBankCsvDefinitionByAccountIdAndFingerprintInput!
+  ): UpdateBankCsvDefinitionPayload
+
   """Updates a single `Budget` using its globally unique id and a patch."""
   updateBudget(
     """
@@ -17911,6 +17691,14 @@ type Mutation {
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
     input: DeleteBankCsvDefinitionByIdInput!
+  ): DeleteBankCsvDefinitionPayload
+
+  """Deletes a single `BankCsvDefinition` using a unique key."""
+  deleteBankCsvDefinitionByAccountIdAndFingerprint(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeleteBankCsvDefinitionByAccountIdAndFingerprintInput!
   ): DeleteBankCsvDefinitionPayload
 
   """Deletes a single `Budget` using its globally unique id."""
@@ -18682,11 +18470,6 @@ type CreateBankCsvDefinitionPayload {
   """Reads a single `User` that is related to this `BankCsvDefinition`."""
   userByUserId: User
 
-  """
-  Reads a single `BankAccount` that is related to this `BankCsvDefinition`.
-  """
-  bankAccountByBankAccountId: BankAccount
-
   """Reads a single `Account` that is related to this `BankCsvDefinition`."""
   accountByAccountId: Account
 
@@ -18717,8 +18500,15 @@ input BankCsvDefinitionInput {
   name: String!
   mapping: JSON!
   userId: Int
-  bankAccountId: Int
   accountId: Int!
+
+  """
+  The file format this template reads: its sorted header names, or its column count when it has no header row.
+  """
+  fingerprint: String!
+
+  """The bank accounts this template has imported into."""
+  bankAccountIds: [Int]
 }
 
 """The output of our create `Budget` mutation."""
@@ -19587,11 +19377,6 @@ type UpdateBankCsvDefinitionPayload {
   """Reads a single `User` that is related to this `BankCsvDefinition`."""
   userByUserId: User
 
-  """
-  Reads a single `BankAccount` that is related to this `BankCsvDefinition`.
-  """
-  bankAccountByBankAccountId: BankAccount
-
   """Reads a single `Account` that is related to this `BankCsvDefinition`."""
   accountByAccountId: Account
 
@@ -19631,8 +19416,15 @@ input BankCsvDefinitionPatch {
   name: String
   mapping: JSON
   userId: Int
-  bankAccountId: Int
   accountId: Int
+
+  """
+  The file format this template reads: its sorted header names, or its column count when it has no header row.
+  """
+  fingerprint: String
+
+  """The bank accounts this template has imported into."""
+  bankAccountIds: [Int]
 }
 
 """All input for the `updateBankCsvDefinitionById` mutation."""
@@ -19648,6 +19440,28 @@ input UpdateBankCsvDefinitionByIdInput {
   """
   bankCsvDefinitionPatch: BankCsvDefinitionPatch!
   id: Int!
+}
+
+"""
+All input for the `updateBankCsvDefinitionByAccountIdAndFingerprint` mutation.
+"""
+input UpdateBankCsvDefinitionByAccountIdAndFingerprintInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  An object where the defined keys will be set on the `BankCsvDefinition` being updated.
+  """
+  bankCsvDefinitionPatch: BankCsvDefinitionPatch!
+  accountId: Int!
+
+  """
+  The file format this template reads: its sorted header names, or its column count when it has no header row.
+  """
+  fingerprint: String!
 }
 
 """The output of our update `Budget` mutation."""
@@ -20783,11 +20597,6 @@ type DeleteBankCsvDefinitionPayload {
   """Reads a single `User` that is related to this `BankCsvDefinition`."""
   userByUserId: User
 
-  """
-  Reads a single `BankAccount` that is related to this `BankCsvDefinition`.
-  """
-  bankAccountByBankAccountId: BankAccount
-
   """Reads a single `Account` that is related to this `BankCsvDefinition`."""
   accountByAccountId: Account
 
@@ -20820,6 +20629,23 @@ input DeleteBankCsvDefinitionByIdInput {
   """
   clientMutationId: String
   id: Int!
+}
+
+"""
+All input for the `deleteBankCsvDefinitionByAccountIdAndFingerprint` mutation.
+"""
+input DeleteBankCsvDefinitionByAccountIdAndFingerprintInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+  accountId: Int!
+
+  """
+  The file format this template reads: its sorted header names, or its column count when it has no header row.
+  """
+  fingerprint: String!
 }
 
 """The output of our delete `Budget` mutation."""
@@ -22078,11 +21904,6 @@ type UpsertBankCsvDefinitionPayload {
   """Reads a single `User` that is related to this `BankCsvDefinition`."""
   userByUserId: User
 
-  """
-  Reads a single `BankAccount` that is related to this `BankCsvDefinition`.
-  """
-  bankAccountByBankAccountId: BankAccount
-
   """Reads a single `Account` that is related to this `BankCsvDefinition`."""
   accountByAccountId: Account
 
@@ -22096,6 +21917,8 @@ type UpsertBankCsvDefinitionPayload {
 """Where conditions for the upsert `BankCsvDefinition` mutation."""
 input UpsertBankCsvDefinitionWhere {
   id: Int
+  accountId: Int
+  fingerprint: String
 }
 
 """All input for the upsert `BankCsvDefinition` mutation."""

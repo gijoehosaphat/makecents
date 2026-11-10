@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildTransactions,
   computeAmount,
+  describeColumns,
   findAccountIdColumn,
   groupRowsByAccountId,
   normalizeHeader,
@@ -17,7 +18,8 @@ const mapping: CsvColumnMapping = {
   skipRows: 0,
   dateColumn: 'Date',
   dateFormat: 'MM/dd/yyyy',
-  descriptionColumn: 'Description',
+  nameColumns: ['Description'],
+  memoColumns: [],
   amountMode: 'single',
   amountColumn: 'Amount',
   amountSign: 'asIs',
@@ -142,6 +144,21 @@ describe('parseRowDateAndAmount', () => {
     expect(parsed?.posted.getDate()).toBe(2)
   })
 
+  it('adds the time of day from a time column', () => {
+    const timed = { ...mapping, timeColumn: 'Time', timeFormat: 'H:mm:ss' }
+    const parsed = parseRowDateAndAmount({ Date: '01/02/2024', Time: '14:32:05', Amount: '-4.50' }, timed)
+    expect([parsed?.posted.getDate(), parsed?.posted.getHours(), parsed?.posted.getMinutes()]).toEqual([2, 14, 32])
+    expect(parsed?.posted.getSeconds()).toBe(5)
+  })
+
+  it('keeps a row at midnight when its time is missing or unreadable', () => {
+    const timed = { ...mapping, timeColumn: 'Time', timeFormat: 'H:mm:ss' }
+    for (const Time of ['', 'soon']) {
+      const parsed = parseRowDateAndAmount({ Date: '01/02/2024', Time, Amount: '-4.50' }, timed)
+      expect([parsed?.posted.getDate(), parsed?.posted.getHours()]).toEqual([2, 0])
+    }
+  })
+
   it('skips rows with no date, no amount or an unparseable date', () => {
     expect(parseRowDateAndAmount({ Date: '', Amount: '1.00' }, mapping)).toBeUndefined()
     expect(parseRowDateAndAmount({ Date: '01/02/2024', Amount: ' ' }, mapping)).toBeUndefined()
@@ -176,9 +193,80 @@ describe('buildTransactions', () => {
     )
   })
 
+  it('joins several memo columns in order, skipping blanks', async () => {
+    const joined = { ...mapping, memoColumns: ['Notes', 'Email'] }
+    const transactions = await buildTransactions(
+      [
+        { Date: '01/02/2024', Description: 'Coffee', Amount: '-5.00', Notes: 'latte', Email: ' cafe@example.com ' },
+        { Date: '01/02/2024', Description: 'Tea', Amount: '-3.00', Notes: '', Email: 'tea@example.com' },
+        { Date: '01/02/2024', Description: 'Cake', Amount: '-4.00', Notes: '', Email: '' },
+      ],
+      joined,
+      '7',
+    )
+    expect(transactions.map((transaction) => transaction.memo)).toEqual([
+      'latte · cafe@example.com',
+      'tea@example.com',
+      '',
+    ])
+  })
+
+  it('names a row by its name columns, falling back to whichever has a value', async () => {
+    const joined = { ...mapping, nameColumns: ['Payee', 'Type'] }
+    const transactions = await buildTransactions(
+      [
+        { Date: '01/02/2024', Payee: 'Jane Doe', Type: 'E-Transfer', Amount: '-50.00' },
+        { Date: '01/03/2024', Payee: ' ', Type: 'Interest', Amount: '0.12' },
+      ],
+      joined,
+      '7',
+    )
+    expect(transactions.map((transaction) => transaction.name)).toEqual(['Jane Doe · E-Transfer', 'Interest'])
+  })
+
+  it('reads a single name column untrimmed, so rows keep their ids', async () => {
+    const [transaction] = await buildTransactions(
+      [{ Date: '01/02/2024', Description: ' Coffee ', Amount: '-5.00' }],
+      mapping,
+      '7',
+    )
+    expect(transaction.name).toBe(' Coffee ')
+  })
+
   it('scopes ids to the bank account', async () => {
     const [a] = await buildTransactions(rows, mapping, '7')
     const [b] = await buildTransactions(rows, mapping, '8')
     expect(a.bankTransactionId).not.toBe(b.bankTransactionId)
+  })
+})
+
+describe('describeColumns', () => {
+  const text = [
+    'Account summary',
+    'Date,Description,Amount',
+    '01/02/2024,A very long coffee shop description here,-4.50',
+  ].join('\n')
+
+  it('names numbered columns from a skipped header row', () => {
+    expect(describeColumns(text, { delimiter: ',', hasHeaderRow: false, skipRows: 2 })).toEqual({
+      '0': 'Date',
+      '1': 'Description',
+      '2': 'Amount',
+    })
+  })
+
+  it('falls back to the first value as an example, shortened', () => {
+    const labels = describeColumns(text, { delimiter: ',', hasHeaderRow: false, skipRows: 0 })
+    expect(labels['0']).toBe('e.g. Account summary')
+    const noHeader = describeColumns('01/02/2024,A very long coffee shop description here,-4.50', {
+      delimiter: ',',
+      hasHeaderRow: false,
+      skipRows: 0,
+    })
+    expect(noHeader).toEqual({ '0': 'e.g. 01/02/2024', '1': 'e.g. A very long coffee shop descr…', '2': 'e.g. -4.50' })
+  })
+
+  it('is empty when the file is read with its header', () => {
+    expect(describeColumns(text, { delimiter: ',', hasHeaderRow: true, skipRows: 1 })).toEqual({})
   })
 })

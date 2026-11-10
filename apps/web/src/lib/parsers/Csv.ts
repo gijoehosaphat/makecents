@@ -65,6 +65,44 @@ export function parseHeaders(
   return mapping.hasHeaderRow ? firstRow : firstRow.map((_, index) => String(index))
 }
 
+const MAX_COLUMN_LABEL_LENGTH = 30
+
+/**
+ * Something to show beside each numbered column when the file is read without a header row, so
+ * the column picker reads "0 (transaction_date)" rather than a bare "0". The row just above the
+ * data is used when it looks like a header (it was skipped, e.g. a header the settings don't use);
+ * otherwise the first row's value, as an example. Empty when the file is read with its header.
+ */
+export function describeColumns(
+  text: string,
+  mapping: Pick<CsvColumnMapping, 'delimiter' | 'hasHeaderRow' | 'skipRows'>,
+): Record<string, string> {
+  if (mapping.hasHeaderRow) {
+    return {}
+  }
+  const firstRow = parseHeaders(text, { ...mapping, hasHeaderRow: true })
+  const rowAbove =
+    mapping.skipRows > 0 ? parseHeaders(text, { ...mapping, hasHeaderRow: true, skipRows: mapping.skipRows - 1 }) : []
+  // A blank line above the data parses as the data row itself; a summary line has fewer cells.
+  const isHeader =
+    rowAbove.length > 0 &&
+    Math.abs(rowAbove.length - firstRow.length) <= 1 &&
+    rowAbove.some((cell, index) => cell !== firstRow[index])
+  const truncate = (value: string) =>
+    value.length > MAX_COLUMN_LABEL_LENGTH ? `${value.slice(0, MAX_COLUMN_LABEL_LENGTH - 1)}…` : value
+  const labels: Record<string, string> = {}
+  firstRow.forEach((value, index) => {
+    const header = isHeader ? rowAbove[index]?.trim() : ''
+    const example = value.trim()
+    if (header) {
+      labels[String(index)] = truncate(header)
+    } else if (example) {
+      labels[String(index)] = `e.g. ${truncate(example)}`
+    }
+  })
+  return labels
+}
+
 export function parseAmount(value: string | undefined): number {
   if (!value) {
     return 0
@@ -126,12 +164,25 @@ export function groupRowsByAccountId(
   return groups
 }
 
-export function getMappedColumns(mapping: CsvColumnMapping): string[] {
-  const columns =
-    mapping.amountMode === 'debitCredit'
-      ? [mapping.dateColumn, mapping.descriptionColumn, mapping.memoColumn, mapping.debitColumn, mapping.creditColumn]
-      : [mapping.dateColumn, mapping.descriptionColumn, mapping.memoColumn, mapping.amountColumn]
-  return columns.filter((column): column is string => Boolean(column))
+const JOIN_SEPARATOR = ' · '
+
+function joinColumns(row: Record<string, string>, columns: string[]): string {
+  return columns
+    .map((column) => row[column]?.trim())
+    .filter(Boolean)
+    .join(JOIN_SEPARATOR)
+}
+
+/** The row's name: its name columns' values joined, skipping blanks. */
+export function readName(row: Record<string, string>, mapping: CsvColumnMapping): string {
+  const columns = mapping.nameColumns
+  // A single column is read as is (untrimmed), as names always were, so rows keep their import ids.
+  return columns.length === 1 ? (row[columns[0]] ?? '') : joinColumns(row, columns)
+}
+
+/** The row's memo: its memo columns' values joined, skipping blanks. */
+export function readMemo(row: Record<string, string>, mapping: CsvColumnMapping): string {
+  return joinColumns(row, mapping.memoColumns)
 }
 
 /** Whether the mapping names every column needed to read an amount. */
@@ -171,7 +222,17 @@ async function hashTransactionId(
   return `csv-${hex}`
 }
 
-/** The row's posted date and signed amount in cents, or undefined when it has no usable date. */
+/** Today's date at the time in `value`, or undefined when it doesn't read with `timeFormat`. */
+export function parseTime(value: string, timeFormat: string): Date | undefined {
+  const time = parseDateString(value.trim(), timeFormat, new Date(2000, 0, 1))
+  return isValid(time) ? time : undefined
+}
+
+/**
+ * The row's posted date (with its time of day when the file has a time column) and signed amount
+ * in cents, or undefined when it has no usable date. A missing or unreadable time leaves the date
+ * at midnight rather than dropping the row.
+ */
 export function parseRowDateAndAmount(
   row: Record<string, string>,
   mapping: CsvColumnMapping,
@@ -184,7 +245,15 @@ export function parseRowDateAndAmount(
     return undefined
   }
   const posted = parseDateString(dateValue.trim(), mapping.dateFormat, new Date())
-  return isValid(posted) ? { posted, amount: computeAmount(row, mapping) } : undefined
+  if (!isValid(posted)) {
+    return undefined
+  }
+  const timeValue = mapping.timeColumn ? row[mapping.timeColumn]?.trim() : undefined
+  const time = timeValue && mapping.timeFormat ? parseTime(timeValue, mapping.timeFormat) : undefined
+  if (time) {
+    posted.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), 0)
+  }
+  return { posted, amount: computeAmount(row, mapping) }
 }
 
 export async function buildTransactions(
@@ -200,8 +269,8 @@ export async function buildTransactions(
       continue
     }
     const { posted, amount } = parsed
-    const name = row[mapping.descriptionColumn] ?? ''
-    const memo = (mapping.memoColumn && row[mapping.memoColumn]) || ''
+    const name = readName(row, mapping)
+    const memo = readMemo(row, mapping)
     const key = `${posted.toISOString()}|${amount}|${name}`
     const occurrence = (occurrences.get(key) ?? 0) + 1
     occurrences.set(key, occurrence)
