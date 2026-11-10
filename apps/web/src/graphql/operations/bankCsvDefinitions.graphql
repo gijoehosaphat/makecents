@@ -6,10 +6,22 @@ query GetBankCsvDefinitions($accountId: Int!) {
   }
 }
 
-mutation CreateBankCsvDefinition($accountId: Int!, $name: String!, $mapping: JSON!, $bankAccountId: Int) {
+mutation CreateBankCsvDefinition(
+  $accountId: Int!
+  $name: String!
+  $fingerprint: String!
+  $mapping: JSON!
+  $bankAccountIds: [Int]!
+) {
   createBankCsvDefinition(
     input: {
-      bankCsvDefinition: { accountId: $accountId, name: $name, mapping: $mapping, bankAccountId: $bankAccountId }
+      bankCsvDefinition: {
+        accountId: $accountId
+        name: $name
+        fingerprint: $fingerprint
+        mapping: $mapping
+        bankAccountIds: $bankAccountIds
+      }
     }
   ) {
     bankCsvDefinition {
@@ -18,11 +30,22 @@ mutation CreateBankCsvDefinition($accountId: Int!, $name: String!, $mapping: JSO
   }
 }
 
-mutation UpdateBankCsvDefinition($nodeId: ID!, $name: String, $mapping: JSON, $bankAccountId: Int) {
+mutation UpdateBankCsvDefinition(
+  $nodeId: ID!
+  $name: String
+  $fingerprint: String
+  $mapping: JSON
+  $bankAccountIds: [Int]
+) {
   updateBankCsvDefinition(
     input: {
       nodeId: $nodeId
-      bankCsvDefinitionPatch: { name: $name, mapping: $mapping, bankAccountId: $bankAccountId }
+      bankCsvDefinitionPatch: {
+        name: $name
+        fingerprint: $fingerprint
+        mapping: $mapping
+        bankAccountIds: $bankAccountIds
+      }
     }
   ) {
     bankCsvDefinition {

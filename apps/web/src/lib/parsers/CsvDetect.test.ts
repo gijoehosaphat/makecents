@@ -17,7 +17,7 @@ describe('detectMapping', () => {
       skipRows: 0,
       dateColumn: 'Date',
       dateFormat: 'M/d/yyyy',
-      descriptionColumn: 'Description',
+      nameColumns: ['Description'],
       amountMode: 'single',
       amountColumn: 'Amount',
       amountSign: 'asIs',
@@ -80,7 +80,7 @@ describe('detectMapping', () => {
     expect(isComplete).toBe(true)
     expect(mapping.hasHeaderRow).toBe(false)
     expect(mapping.dateColumn).toBe('0')
-    expect(mapping.descriptionColumn).toBe('1')
+    expect(mapping.nameColumns).toEqual(['1'])
     expect(mapping.amountColumn).toBe('2')
   })
 
@@ -125,5 +125,51 @@ describe('detectMapping', () => {
     const { isComplete, mapping } = detectMapping('just,some,words\nnot,a,statement')
     expect(isComplete).toBe(false)
     expect(mapping.dateColumn).toBe('')
+  })
+
+  it('picks up a separate time column', () => {
+    const { mapping, isComplete } = detectMapping(
+      [
+        'transaction_date\ttransaction_time\taccount_number\taccount_type\ttransaction_type\ttransaction_sub_type\tstatus\tpayee\tpayee_email\tamount\tcurrency\tnotes',
+        '2026-11-01\t14:32:05\t1234\tchecking\tdebit\tpurchase\tposted\tCoffee Shop\t\t-4.50\tUSD\t',
+        '2026-11-02\t09:05:00\t1234\tchecking\tcredit\tdeposit\tposted\tEmployer\tpay@example.com\t1000.00\tUSD\tpayday',
+      ].join('\n'),
+    )
+    expect(isComplete).toBe(true)
+    expect(mapping).toMatchObject({
+      delimiter: '\t',
+      dateColumn: 'transaction_date',
+      dateFormat: 'yyyy-MM-dd',
+      timeColumn: 'transaction_time',
+      timeFormat: 'H:mm:ss',
+      nameColumns: ['payee', 'transaction_type'],
+      memoColumns: ['transaction_sub_type', 'payee_email', 'notes'],
+      accountColumn: 'account_number',
+      amountColumn: 'amount',
+    })
+  })
+
+  it("leaves a plain Type column (Chase's Sale, Payment) out of the name", () => {
+    const { mapping } = detectMapping(
+      [
+        'Transaction Date,Post Date,Description,Category,Type,Amount,Memo',
+        '01/15/2024,01/16/2024,Coffee,Food,Sale,-4.50,',
+      ].join('\n'),
+    )
+    expect(mapping.nameColumns).toEqual(['Description'])
+    expect(mapping.memoColumns).toEqual(['Memo'])
+  })
+
+  it('reads 12-hour times', () => {
+    const { mapping } = detectMapping(
+      ['Date,Time,Description,Amount', '01/15/2024,2:05 PM,Coffee,-4.50', '01/16/2024,9:00 AM,Pay,1000.00'].join('\n'),
+    )
+    expect(mapping).toMatchObject({ timeColumn: 'Time', timeFormat: 'h:mm a' })
+  })
+
+  it('has no time or memo columns when there are none', () => {
+    const { mapping } = detectMapping(['Date,Description,Amount', '01/15/2024,Coffee,-4.50'].join('\n'))
+    expect(mapping.timeColumn).toBeUndefined()
+    expect(mapping.memoColumns).toEqual([])
   })
 })

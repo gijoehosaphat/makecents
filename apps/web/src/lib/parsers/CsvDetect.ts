@@ -1,6 +1,6 @@
 import Papa from 'papaparse'
 import { isValid, parse as parseDateString } from 'date-fns'
-import { computeAmount, hasAmountColumns, normalizeHeader } from './Csv'
+import { computeAmount, findAccountIdColumn, hasAmountColumns, normalizeHeader, parseTime, readName } from './Csv'
 
 // Tried in order, so US month-first wins when a column's dates are ambiguous (all days <= 12).
 const DATE_FORMATS = [
@@ -22,6 +22,9 @@ const DATE_FORMATS = [
   'yyyy-MM-dd HH:mm:ss',
   'M/d/yyyy h:mm:ss a',
 ]
+
+// For a time of day kept in its own column. 12-hour formats first: "2:05 PM" never reads as 24-hour.
+const TIME_FORMATS = ['h:mm:ss a', 'h:mm a', 'H:mm:ss', 'H:mm']
 
 // How many leading lines to search for the header/first transaction (banks like Bank of
 // America put an account summary above the transactions).
@@ -84,6 +87,15 @@ function detectDateFormat(values: string[]): string | undefined {
   return DATE_FORMATS.find((format) => present.every((value) => parsesAsDate(value, format)))
 }
 
+/** The single time-of-day format every non-empty value in the column reads with, if there is one. */
+function detectTimeFormat(values: string[]): string | undefined {
+  const present = values.map((value) => value.trim()).filter(Boolean)
+  if (!present.length) {
+    return undefined
+  }
+  return TIME_FORMATS.find((format) => present.every((value) => !!parseTime(value, format)))
+}
+
 function findHeader(headers: string[], patterns: RegExp[], exclude: Set<string>): string | undefined {
   for (const pattern of patterns) {
     const match = headers.find((header) => !exclude.has(header) && pattern.test(normalizeHeader(header)))
@@ -122,7 +134,8 @@ export function detectMapping(text: string): DetectedMapping {
         skipRows: 0,
         dateColumn: '',
         dateFormat: 'MM/dd/yyyy',
-        descriptionColumn: '',
+        nameColumns: [],
+        memoColumns: [],
         amountMode: 'single',
         amountSign: 'asIs',
       },
@@ -155,6 +168,23 @@ export function detectMapping(text: string): DetectedMapping {
   }
   const dateColumn = dateColumns.sort((a, b) => datePreference(b.header) - datePreference(a.header))[0]
   const used = new Set<string>(dateColumn ? [dateColumn.header] : [])
+
+  // Time: a separate time-of-day column, only needed when the date column carries no time itself.
+  const dateHasTime = !!dateColumn && /[Hh]/.test(dateColumn.format)
+  const timeColumn =
+    dateColumn && !dateHasTime
+      ? headers
+          .filter((header) => !used.has(header))
+          .map((header) => ({ header, format: detectTimeFormat(columnValues(headers.indexOf(header))) }))
+          .filter((column): column is { header: string; format: string } => !!column.format)
+          .sort(
+            (a, b) =>
+              Number(normalizeHeader(b.header).includes('time')) - Number(normalizeHeader(a.header).includes('time')),
+          )[0]
+      : undefined
+  if (timeColumn) {
+    used.add(timeColumn.header)
+  }
 
   const numericHeaders = headers.filter((header, index) => {
     const present = columnValues(index).filter((value) => value.trim())
@@ -202,7 +232,28 @@ export function detectMapping(text: string): DetectedMapping {
   if (descriptionColumn) {
     used.add(descriptionColumn)
   }
+  // A file with a payee and a transaction type (e-transfer, interest, fee) names each row by both,
+  // so rows with no payee are still named by their type. Matched exactly: banks like Chase have a
+  // plain "Type" (Sale, Payment) that would only clutter every name.
+  const typeColumn =
+    hasHeaderRow && descriptionColumn
+      ? headers.find((header) => !used.has(header) && normalizeHeader(header) === 'transactiontype')
+      : undefined
+  if (typeColumn) {
+    used.add(typeColumn)
+  }
+  // The memo collects what else describes the row: a sub-type, a payee's email (PayPal, Venmo,
+  // Interac say more by it than by name), and the bank's own memo or notes.
+  const subTypeColumn = hasHeaderRow ? findHeader(headers, [/subtype/], used) : undefined
+  if (subTypeColumn) {
+    used.add(subTypeColumn)
+  }
+  const emailColumn = hasHeaderRow ? findHeader(headers, [/payeeemail/, /email/], used) : undefined
+  if (emailColumn) {
+    used.add(emailColumn)
+  }
   const memoColumn = hasHeaderRow ? findHeader(textHeaders, [/^memo$/, /memo/, /^notes?$/], used) : undefined
+  const present = (columns: (string | undefined)[]) => columns.filter((column): column is string => !!column)
 
   const mapping: CsvColumnMapping = {
     delimiter,
@@ -210,8 +261,10 @@ export function detectMapping(text: string): DetectedMapping {
     skipRows,
     dateColumn: dateColumn?.header ?? '',
     dateFormat: dateColumn?.format ?? 'MM/dd/yyyy',
-    descriptionColumn: descriptionColumn ?? '',
-    memoColumn,
+    ...(timeColumn ? { timeColumn: timeColumn.header, timeFormat: timeColumn.format } : {}),
+    nameColumns: present([descriptionColumn, typeColumn]),
+    memoColumns: present([subTypeColumn, emailColumn, memoColumn]),
+    ...(hasHeaderRow && findAccountIdColumn(headers) ? { accountColumn: findAccountIdColumn(headers) } : {}),
     amountMode,
     amountColumn,
     debitColumn,
@@ -233,7 +286,7 @@ export function detectMapping(text: string): DetectedMapping {
     const rows = records
       .map((record) => ({
         amount: computeAmount(record, mapping),
-        description: record[mapping.descriptionColumn] ?? '',
+        description: readName(record, mapping),
       }))
       .filter((row) => row.amount !== 0)
     const positiveShare = rows.filter((row) => row.amount > 0).length / Math.max(rows.length, 1)

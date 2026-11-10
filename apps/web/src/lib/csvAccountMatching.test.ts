@@ -98,6 +98,37 @@ describe('matchAccount', () => {
     })
   })
 
+  it('falls back to the only account a template has imported into', () => {
+    expect(matchAccount({ accounts, fileName: 'export.csv', overlapScores: none, templateAccountIds: [2] })).toEqual({
+      accountId: 2,
+      reason: 'template',
+      detail: '',
+    })
+    // Several accounts share the format, or one is gone: no hint.
+    expect(
+      matchAccount({ accounts, fileName: 'export.csv', overlapScores: none, templateAccountIds: [1, 2] }),
+    ).toBeUndefined()
+    expect(
+      matchAccount({ accounts, fileName: 'export.csv', overlapScores: none, templateAccountIds: [99] }),
+    ).toBeUndefined()
+  })
+
+  it('lets the account column, file name and clear overlap outrank a template', () => {
+    expect(
+      matchAccount({
+        accounts,
+        accountColumnValue: '1111',
+        fileName: 'x.csv',
+        overlapScores: none,
+        templateAccountIds: [2],
+      })?.accountId,
+    ).toBe(1)
+    expect(
+      matchAccount({ accounts, fileName: 'export.csv', overlapScores: new Map([[1, 5]]), templateAccountIds: [2] })
+        ?.accountId,
+    ).toBe(1)
+  })
+
   it('uses overlap only when it is a clear winner', () => {
     expect(matchAccount({ accounts, fileName: 'export.csv', overlapScores: new Map([[1, 5]]) })?.accountId).toBe(1)
     expect(matchAccount({ accounts, fileName: 'export.csv', overlapScores: new Map([[1, 2]]) })).toBeUndefined()
