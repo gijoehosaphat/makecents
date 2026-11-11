@@ -62,6 +62,7 @@ import {
   findChangedFormat,
   findTemplatesForFile,
   fingerprintFile,
+  normalizeSavedMapping,
   resolveAccountColumn,
 } from '@/lib/parsers/CsvTemplates'
 import {
@@ -87,7 +88,7 @@ function toTemplate(definition: BankCsvDefinition): CsvTemplate {
     nodeId: definition.nodeId,
     name: definition.name ?? '',
     fingerprint: definition.fingerprint,
-    mapping: definition.mapping as CsvColumnMapping,
+    mapping: normalizeSavedMapping(definition.mapping),
     bankAccountIds: (definition.bankAccountIds ?? []).filter((id): id is number => typeof id === 'number'),
   }
 }

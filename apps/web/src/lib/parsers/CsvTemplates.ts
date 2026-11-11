@@ -11,6 +11,30 @@ export interface CsvTemplate {
   bankAccountIds: number[]
 }
 
+/** A mapping saved before names and memos could join several columns. */
+interface LegacyCsvColumnMapping {
+  descriptionColumn?: string
+  memoColumn?: string
+}
+
+/**
+ * Reads a saved mapping, upgrading one saved in an older shape: a single `descriptionColumn` and
+ * `memoColumn` become one-column `nameColumns` and `memoColumns`.
+ */
+export function normalizeSavedMapping(saved: unknown): CsvColumnMapping {
+  const { descriptionColumn, memoColumn, ...mapping } = (saved ?? {}) as Partial<CsvColumnMapping> &
+    LegacyCsvColumnMapping
+  return {
+    ...(mapping as CsvColumnMapping),
+    nameColumns: Array.isArray(mapping.nameColumns)
+      ? mapping.nameColumns
+      : descriptionColumn
+        ? [descriptionColumn]
+        : [],
+    memoColumns: Array.isArray(mapping.memoColumns) ? mapping.memoColumns : memoColumn ? [memoColumn] : [],
+  }
+}
+
 type Layout = Pick<CsvColumnMapping, 'delimiter' | 'hasHeaderRow' | 'skipRows'>
 
 const HEADERS_PREFIX = 'headers'
