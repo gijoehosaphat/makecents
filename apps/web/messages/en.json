@@ -133,6 +133,16 @@
       "vsLastYear": "vs last year",
       "vsPreviousPeriod": "vs previous period",
       "categorySpendingTitle": "By Category",
+      "spendingTitle": "Spending",
+      "spent": "Spent",
+      "periodTotal": "{period} total",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "thisYear": "This year",
+      "lastYear": "Last year",
+      "thisPeriod": "This period",
+      "previousPeriod": "Previous period",
+      "spendingChartLabel": "Line chart of cumulative spending, excluding transfers, compared with the previous period.",
       "budgetsTitle": "By Budget"
     },
     "categories": {

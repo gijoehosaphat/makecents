@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Collapse, List } from '@mui/material'
-import { ExpandLess, ExpandMore, BarChart, Category, Paid, CurrencyExchange } from '@mui/icons-material'
+import { ExpandLess, ExpandMore, BarChart, Category, Paid, CurrencyExchange, ShowChart } from '@mui/icons-material'
 import { useTranslations } from 'next-intl'
 import { MainMenuItem } from '../shared/MainMenuItem'
 import { useAppContext } from '../context/AppContextProvider'
@@ -36,6 +36,15 @@ export function ReportingList() {
             primary={t('reporting.budgetsTitle')}
             icon={<Paid fontSize={'large'} />}
             selected={pathname?.startsWith(`/${currentAccountId}/dashboard/reporting/budgets`) || false}
+            dense={true}
+          />
+          <MainMenuItem
+            onClick={() => {
+              router.push(`/${currentAccountId}/dashboard/reporting/spending${window.location.search}`)
+            }}
+            primary={t('reporting.spendingTitle')}
+            icon={<ShowChart fontSize={'large'} />}
+            selected={pathname?.startsWith(`/${currentAccountId}/dashboard/reporting/spending`) || false}
             dense={true}
           />
           <MainMenuItem
