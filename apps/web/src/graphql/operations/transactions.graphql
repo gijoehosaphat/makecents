@@ -542,3 +542,14 @@ query GetDeletedTransactions($accountId: Int!) {
     }
   }
 }
+
+# Net amount of the matching transactions, for working a balance back from the current one.
+query GetTransactionsSum($filter: TransactionFilter!) {
+  allTransactions(filter: $filter) {
+    aggregates {
+      sum {
+        amount
+      }
+    }
+  }
+}

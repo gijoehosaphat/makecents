@@ -143,7 +143,14 @@
       "thisPeriod": "This period",
       "previousPeriod": "Previous period",
       "spendingChartLabel": "Line chart of cumulative spending, excluding transfers, compared with the previous period.",
-      "budgetsTitle": "By Budget"
+      "budgetsTitle": "By Budget",
+      "balanceTitle": "Balance",
+      "balanceChartLabel": "Line chart of the selected account's balance at the end of each day in the period.",
+      "currentBalance": "Current balance",
+      "closingBalance": "Closing balance",
+      "openingBalance": "Opening balance {amount}",
+      "lowest": "Lowest",
+      "highest": "Highest"
     },
     "categories": {
       "title": "Categories",

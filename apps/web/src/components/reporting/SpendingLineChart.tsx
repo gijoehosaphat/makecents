@@ -6,7 +6,17 @@ import { skipToken, useSuspenseQuery } from '@apollo/client/react'
 import { Box, Divider, ToggleButton, ToggleButtonGroup, Typography, useTheme } from '@mui/material'
 import { useTranslations } from 'next-intl'
 import { useMemo, useState } from 'react'
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  Area,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import { addDays, differenceInCalendarDays, format, startOfDay, sub } from 'date-fns'
 import { useDateFilterParams } from '@/lib/useDateFilterParams'
 import { useAmountVisibility } from '../context/AmountVisibilityContext'
@@ -258,7 +268,14 @@ export function SpendingLineChart() {
             aria-label={t('reporting.spendingChartLabel')}
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={points} margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
+              <ComposedChart data={points} margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
+                <defs>
+                  {/* Fades from 20% at the line down to transparent at the x-axis. */}
+                  <linearGradient id="spendingCurrentFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={currentColor} stopOpacity={0.2} />
+                    <stop offset="100%" stopColor={currentColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray={'3 3'} stroke={theme.palette.text.primary} strokeOpacity={0.2} />
                 <XAxis
                   dataKey={'index'}
@@ -330,17 +347,18 @@ export function SpendingLineChart() {
                     isAnimationActive={false}
                   />
                 )}
-                <Line
+                <Area
                   type={'monotone'}
                   dataKey={'current'}
                   name={labels.current}
                   stroke={currentColor}
                   strokeWidth={3}
+                  fill={'url(#spendingCurrentFill)'}
                   dot={false}
                   connectNulls={false}
                   isAnimationActive={false}
                 />
-              </LineChart>
+              </ComposedChart>
             </ResponsiveContainer>
           </Box>
         </>
